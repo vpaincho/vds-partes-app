@@ -1,0 +1,421 @@
+{
+  "source": "S2",
+  "sheet": "59_Reglas_Planificacion",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "REGLAS · PLANIFICACIÓN / READINESS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "20 reglas. Vista operativa derivada de 57_Matriz_Maestra_Reglas; la fuente canónica es la matriz maestra.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "Rule ID",
+        "Dominio",
+        "Prec.",
+        "Clase",
+        "Sujeto",
+        "Trigger",
+        "Estado/contexto",
+        "Condición",
+        "Decisión",
+        "Destino",
+        "Side effects",
+        "Fuerza",
+        "Scope"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "RUL-001",
+        "CONFIG / ROUTING",
+        "P4",
+        "ROUTE",
+        "Parte",
+        "BEFORE_CREATE",
+        "—",
+        "Existe perfil operativo + contexto planificado/real suficiente",
+        "DERIVAR tipo_parte_id mediante ruleset; no pedir selector libre como camino normal",
+        "—",
+        "DecisionTrace + tipo_parte_id",
+        "REQUIRED",
+        "Global / TipoParte / servicio"
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "RUL-002",
+        "CONFIG / ROUTING",
+        "P4",
+        "ROUTE_FALLBACK",
+        "Parte",
+        "ROUTING_AMBIGUOUS",
+        "—",
+        "Más de un TipoParte es compatible o faltan datos discriminantes",
+        "PEDIR confirmación mínima o escalar a supervisor; registrar candidatos y motivo",
+        "—",
+        "DecisionTrace",
+        "WARN/BLOCK según riesgo",
+        "Ruleset de ruteo"
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "RUL-003",
+        "CONFIG / IDENTITY",
+        "P4",
+        "IDENTITY",
+        "TP-01",
+        "CHANGE_CONTEXT",
+        "PREPARADO / EN_EJECUCION / SUSPENDIDO",
+        "Mismo work package/objetivo operacional",
+        "MANTENER mismo TP-01 salvo ReglaCorte configurada aplicable",
+        "sin cambio",
+        "EventoOperativo si cambió contexto",
+        "REQUIRED",
+        "TipoParte + ContratoServicio"
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "RUL-004",
+        "CONFIG / IDENTITY",
+        "P4",
+        "CUT",
+        "TP-01",
+        "WORK_PACKAGE_CHANGED",
+        "PREPARADO / EN_EJECUCION / SUSPENDIDO",
+        "El objetivo/work package pasa a ser independiente",
+        "CERRAR/TERMINAR alcance actual según estado y CREAR nuevo TP-01",
+        "según máquina",
+        "Nuevo Parte + VinculoPlanEjecucion si aplica",
+        "REQUIRED",
+        "TipoParte / servicio"
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "RUL-005",
+        "CONFIG / IDENTITY",
+        "P4",
+        "NO_CUT_DEFAULT",
+        "TP-01",
+        "SHIFT_CHANGED",
+        "EN_EJECUCION / SUSPENDIDO",
+        "No existe ReglaCorte específica que obligue split",
+        "MANTENER Parte + generar handover + cerrar/abrir intervalos + revalidar gates",
+        "sin cambio",
+        "EventoHandover / asignaciones temporales / reevaluación PTW",
+        "REQUIRED",
+        "TipoParte / cliente / servicio"
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "RUL-006",
+        "CONFIG / IDENTITY",
+        "P4",
+        "NO_CUT_DEFAULT",
+        "Parte / UE",
+        "RESOURCE_CHANGED",
+        "PREPARADO / EN_EJECUCION / SUSPENDIDO",
+        "El recurso nuevo apoya misma unidad de trabajo",
+        "NO crear nuevo Parte; actualizar AsignacionRecursoEjecucion",
+        "sin cambio",
+        "AsignacionRecursoEjecucion",
+        "REQUIRED",
+        "TipoParte / servicio"
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "RUL-007",
+        "CONFIG / IDENTITY",
+        "P4",
+        "CREATE_CHILD",
+        "UnidadEjecucion",
+        "INDEPENDENT_SUBWORK_DETECTED",
+        "Parte no terminal",
+        "Mismo work package pero existe subtrabajo autónomo/resultado distinguible",
+        "CREAR nueva UnidadEjecucion dentro del mismo Parte",
+        "PENDIENTE",
+        "UnidadEjecucion",
+        "REQUIRED",
+        "TipoParte / servicio"
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "RUL-008",
+        "CONFIG / IDENTITY",
+        "P4",
+        "NO_CUT_DEFAULT",
+        "Parte",
+        "LOCATION_CHANGED",
+        "PREPARADO / EN_EJECUCION / SUSPENDIDO",
+        "TipoParte no define ubicación como driver de corte",
+        "NO cortar automáticamente; registrar ubicación/transición y evaluar regla específica",
+        "sin cambio",
+        "EjecucionUbicacion / TransicionOperativa",
+        "REQUIRED",
+        "TipoParte / servicio"
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "RUL-009",
+        "PLANIFICACIÓN",
+        "P5",
+        "CREATE",
+        "Planificacion",
+        "DEMAND_ACCEPTED",
+        "—",
+        "Demanda válida y no duplicada",
+        "CREAR Planificacion ABIERTA",
+        "ABIERTA",
+        "Planificacion",
+        "REQUIRED",
+        "Global"
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "RUL-010",
+        "PLANIFICACIÓN",
+        "P2",
+        "TRANSITION_GUARD",
+        "PlanificacionVersion",
+        "APPROVE_VERSION",
+        "BORRADOR / EN_VALIDACION",
+        "Asignaciones consistentes + no errores críticos + reglas/catálogos versionados",
+        "PERMITIR APROBADA; congelar snapshot",
+        "APROBADA",
+        "DecisionTrace",
+        "HARD_GATE",
+        "Planificación"
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "RUL-011",
+        "PLANIFICACIÓN",
+        "P5",
+        "DERIVE",
+        "UnidadPlanificada",
+        "BUILD_REQUIREMENTS",
+        "—",
+        "Servicio/actividad/contexto conocidos",
+        "DERIVAR RequerimientoRecurso y RequerimientoCompetencia desde configuración",
+        "—",
+        "Requerimientos",
+        "REQUIRED",
+        "Servicio / TipoParte previsto"
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "RUL-012",
+        "PLANIFICACIÓN",
+        "P5",
+        "MATCH",
+        "AsignacionPlanificada",
+        "NOMINATE",
+        "PROGRAMADA",
+        "Recurso/persona cumple requisitos, disponibilidad y competencias vigentes",
+        "PERMITIR nominación",
+        "PROGRAMADA",
+        "AsignacionPersonaPlanificada / AsignacionRecursoPlanificada",
+        "HARD_GATE",
+        "Plan/servicio"
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "RUL-013",
+        "PLANIFICACIÓN",
+        "P1",
+        "READINESS_BLOCK",
+        "AsignacionPlanificada",
+        "EVALUATE_READINESS",
+        "PROGRAMADA",
+        "Falla requisito Habilita/documental duro",
+        "RESULTADO NO_READY; bloquear READY",
+        "PROGRAMADA",
+        "EvaluacionPlanificacion + causas",
+        "HARD_BLOCK",
+        "Reglas Habilita"
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "RUL-014",
+        "PLANIFICACIÓN",
+        "P5",
+        "READINESS",
+        "AsignacionPlanificada",
+        "EVALUATE_READINESS",
+        "PROGRAMADA",
+        "Contrato/contexto mínimo + alcance + capacidad + documental/Habilita aplicable OK",
+        "RESULTADO READY con evaluado_at y valido_hasta_at",
+        "READY",
+        "EvaluacionPlanificacion",
+        "REQUIRED",
+        "Servicio / riesgo / contexto"
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "RUL-015",
+        "PLANIFICACIÓN",
+        "P5",
+        "INVALIDATE",
+        "AsignacionPlanificada",
+        "DEPENDENCY_CHANGED",
+        "READY / DESPACHADA",
+        "Cambió documento, disponibilidad, alcance, ventana, persona/recurso, contrato/contexto",
+        "INVALIDAR evaluación previa; exigir reevaluación",
+        "PROGRAMADA o flag REEVALUAR",
+        "EventoInvalidacionReadiness",
+        "REQUIRED",
+        "Readiness ruleset"
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "RUL-016",
+        "PLANIFICACIÓN",
+        "P2",
+        "TRANSITION_GUARD",
+        "AsignacionPlanificada",
+        "DISPATCH",
+        "READY",
+        "EvaluacionPlanificacion vigente + contexto/bundle construible",
+        "PERMITIR DESPACHADA",
+        "DESPACHADA",
+        "ExecutionContextBundle + DecisionTrace",
+        "HARD_GATE",
+        "Planificación"
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "RUL-017",
+        "PLANIFICACIÓN",
+        "P5",
+        "PROJECTION",
+        "ExecutionContextBundle",
+        "BUILD_BUNDLE",
+        "Asignacion DESPACHADA",
+        "Existe PlanificacionVersion aprobada y catálogo/reglas suficientes",
+        "GENERAR proyección mínima versionada con context_valid_until_at",
+        "—",
+        "ExecutionContextBundle",
+        "REQUIRED",
+        "Ruleset/version"
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "RUL-018",
+        "PLANIFICACIÓN",
+        "P5",
+        "RESULT",
+        "AsignacionPlanificada",
+        "EXECUTION_CLOSED",
+        "DESPACHADA",
+        "Ejecución vinculada satisface alcance planificado según regla",
+        "MARCAR CUMPLIDA",
+        "CUMPLIDA",
+        "DecisionTrace",
+        "REQUIRED",
+        "Plan/servicio"
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "RUL-019",
+        "PLANIFICACIÓN",
+        "P5",
+        "RESULT",
+        "AsignacionPlanificada",
+        "WINDOW_CLOSED_NO_EXECUTION",
+        "PROGRAMADA / READY / DESPACHADA",
+        "No hay ejecución efectiva que satisfaga asignación",
+        "MARCAR NO_REALIZADA con causa",
+        "NO_REALIZADA",
+        "EventoOperativo / causa",
+        "REQUIRED",
+        "Planificación"
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "RUL-020",
+        "PLANIFICACIÓN",
+        "P3",
+        "CONTROL",
+        "AsignacionPlanificada",
+        "POST_DISPATCH_CHANGE",
+        "DESPACHADA",
+        "Plan cambia después del despacho",
+        "NO mutar snapshot; EMITIR DirectivaOperativa o nueva PlanificacionVersion",
+        "sin cambio",
+        "DirectivaOperativa / nueva versión",
+        "REQUIRED",
+        "Control Plane"
+      ]
+    }
+  ]
+}

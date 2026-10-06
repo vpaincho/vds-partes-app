@@ -1,0 +1,475 @@
+{
+  "source": "S2",
+  "sheet": "44_Modelo_Relacional_Invariantes",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "MODELO RELACIONAL LÓGICO v0.1 · INVARIANTES / CONSTRAINTS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Estas reglas valen aunque cambie la tecnología. Algunas serán constraints físicos; otras máquinas de estado/reglas de dominio.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "ID",
+        "Área",
+        "Invariante",
+        "Entidades",
+        "Tipo de enforcement",
+        "Severidad",
+        "Razón"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "C-001",
+        "Arquitectura",
+        "Planificación registra intención; Ejecución registra realidad; una nunca sobrescribe a la otra.",
+        "PlanificacionVersion, UnidadPlanificada, Parte, UnidadEjecucion",
+        "Dominio + versionado",
+        "CRÍTICA",
+        "Sin esta separación se pierde previsto vs real."
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "C-002",
+        "Historia",
+        "Objetos usados en ejecución/certificación no se hard-delete; se versionan, invalidan o superseden.",
+        "ContratoVersion, PlanificacionVersion, UE, UC, Paquete, Habilita",
+        "Persistencia + dominio",
+        "CRÍTICA",
+        "Auditoría y reconstrucción histórica."
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "C-003",
+        "Contrato",
+        "CentroCosto es dimensión independiente; nunca se usa como sustituto de Contrato.",
+        "Contrato, CentroCosto, ImputacionEjecucion",
+        "FK/regla",
+        "CRÍTICA",
+        "Evita errores de semántica contractual."
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "C-004",
+        "Contrato",
+        "Una ImputacionEjecucion con estado contractual PENDIENTE no puede inventar CC/Item default.",
+        "ImputacionEjecucion",
+        "Dominio",
+        "CRÍTICA",
+        "La incertidumbre debe ser explícita."
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "C-005",
+        "TipoParte",
+        "Todo Parte operativo tiene exactamente un TipoParte resuelto.",
+        "Parte, TipoParte",
+        "FK NOT NULL al iniciar",
+        "CRÍTICA",
+        "Comportamiento consistente."
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "C-006",
+        "TipoParte",
+        "El camino normal no ofrece selector libre de TipoParte; Motor de Ruteo deriva la ruta.",
+        "TipoParte, Perfil, Asignacion",
+        "Aplicación/dominio",
+        "ALTA",
+        "Objetivo <2 min y menor error."
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "C-007",
+        "Identidad",
+        "No existe ReglaCorte universal para ubicación/turno/recurso; se evalúa por TipoParte/contexto.",
+        "ReglaCorteTipoParte",
+        "Dominio/configuración",
+        "CRÍTICA",
+        "Evita fragmentación artificial."
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "C-008",
+        "TP-01",
+        "Default: cambio de turno mantiene TP-01 y genera handover; split solo por regla configurada.",
+        "Parte TP-01, EventoOperativo, Asignaciones temporales",
+        "Dominio",
+        "ALTA",
+        "Work package define identidad."
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "C-009",
+        "Parte",
+        "Un Parte iniciado debe tener al menos una UnidadEjecucion.",
+        "Parte, UnidadEjecucion",
+        "Constraint diferido/máquina estado",
+        "CRÍTICA",
+        "UE es grano operacional."
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "C-010",
+        "UE",
+        "Recurso/persona adicional no crea Parte por sí solo.",
+        "UE, AsignacionPersonaEjecucion, AsignacionRecursoEjecucion",
+        "Dominio",
+        "ALTA",
+        "Separar participación de identidad."
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "C-011",
+        "Temporalidad",
+        "Asignaciones de persona/recurso conservan intervalos; reemplazos cierran/abren intervalos, no editan el pasado.",
+        "Asignaciones ejecución",
+        "Dominio",
+        "CRÍTICA",
+        "Horas y responsabilidad trazables."
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "C-012",
+        "Temporalidad",
+        "Solapamientos incompatibles se detectan; solo reglas explícitas permiten excepciones.",
+        "ConflictoTemporal, Asignaciones",
+        "Regla + warning/block",
+        "ALTA",
+        "Evita doble uso inconsistente."
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "C-013",
+        "Tiempo",
+        "Todo tiempo relevante entre dos work packages puede representarse mediante TransicionOperativa.",
+        "TransicionOperativa, UE",
+        "Dominio",
+        "ALTA",
+        "Evita tiempo huérfano."
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "C-014",
+        "Medición",
+        "EjecucionMedicion conserva magnitud operacional; cantidad_certificable es derivada downstream.",
+        "EjecucionMedicion, UnidadComercial",
+        "Dominio",
+        "CRÍTICA",
+        "No deformar realidad para cobrar."
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "C-015",
+        "Readiness",
+        "READY tiene evaluado_at/valido_hasta; un cambio de dependencia puede invalidarlo sin borrar evaluación previa.",
+        "EvaluacionPlanificacion, EventoInvalidacionReadiness",
+        "Dominio",
+        "ALTA",
+        "Ready no es checkbox eterno."
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "C-016",
+        "Offline",
+        "ExecutionContextBundle es proyección/cache; nunca fuente maestra.",
+        "ExecutionContextBundle",
+        "Arquitectura",
+        "CRÍTICA",
+        "Evita divergencia offline."
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "C-017",
+        "Control Plane",
+        "Directiva emitida, recibida y aplicada son estados distintos.",
+        "DirectivaOperativa",
+        "Máquina estado",
+        "CRÍTICA",
+        "Offline/ACK auditable."
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "C-018",
+        "Habilita",
+        "Hard block documental/Habilita no se convierte en override implícito.",
+        "EvaluacionHabilitacion, OverrideGate",
+        "Dominio",
+        "CRÍTICA",
+        "Responsabilidad y seguridad."
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "C-019",
+        "Habilita",
+        "PermisoTrabajo es independiente del Parte; PTW distinto no crea TP-01 automáticamente.",
+        "PermisoTrabajo, UE, Parte",
+        "Dominio",
+        "CRÍTICA",
+        "Work control ≠ registro operativo."
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "C-020",
+        "Habilita",
+        "PTW puede cubrir N UE y una UE puede requerir N PTW.",
+        "PermisoTrabajoUnidadEjecucion",
+        "Cardinalidad N:M",
+        "ALTA",
+        "Permisos secuenciales/simultáneos."
+      ]
+    },
+    {
+      "source_row": 25,
+      "cells": [
+        "C-021",
+        "Habilita",
+        "Timeout nunca autocierra PTW; solo alerta/escalamiento/cierre autorizado.",
+        "PermisoTrabajo",
+        "Dominio",
+        "CRÍTICA",
+        "No declarar seguridad por reloj."
+      ]
+    },
+    {
+      "source_row": 26,
+      "cells": [
+        "C-022",
+        "Emergente",
+        "Trabajo emergente puede existir sin contexto contractual resuelto si ReglaInicioEmergente lo permite; gates de Habilita siguen completos.",
+        "ReglaInicioEmergente, ImputacionEjecucion",
+        "Dominio",
+        "CRÍTICA",
+        "Continuidad operativa sin falsificar comercio."
+      ]
+    },
+    {
+      "source_row": 27,
+      "cells": [
+        "C-023",
+        "Plan↔Real",
+        "VinculoPlanEjecucion soporta 0..N↔0..N; nunca asumir 1 UnidadPlanificada = 1 UE.",
+        "VinculoPlanEjecucion",
+        "Cardinalidad",
+        "CRÍTICA",
+        "Split/merge y no realizado."
+      ]
+    },
+    {
+      "source_row": 28,
+      "cells": [
+        "C-024",
+        "Evidencia",
+        "Evidencia es entidad independiente; sus targets deben tener integridad referencial tipada.",
+        "Evidencia, EvidenciaVinculo",
+        "Relacional",
+        "ALTA",
+        "Evitar FK polimórfico opaco."
+      ]
+    },
+    {
+      "source_row": 29,
+      "cells": [
+        "C-025",
+        "Habilita",
+        "EventoHabilita no es TipoParte y puede existir sin ejecución activa.",
+        "EventoHabilita, Parte",
+        "Dominio",
+        "CRÍTICA",
+        "Habilita respond & learn transversal."
+      ]
+    },
+    {
+      "source_row": 30,
+      "cells": [
+        "C-026",
+        "Habilita",
+        "EventoHabilita puede vincular N UE/personas/recursos/PTW sin cambiar su identidad.",
+        "Bridges EventoHabilita",
+        "Cardinalidad",
+        "ALTA",
+        "Choques/eventos multioperación."
+      ]
+    },
+    {
+      "source_row": 31,
+      "cells": [
+        "C-027",
+        "Habilita",
+        "EvaluacionEscalamientoHabilita guarda regla/versión e inputs; outputs reutilizan Control/HABILITA Plane.",
+        "EvaluacionEscalamientoHabilita, Directiva, PTW, Caso, Notificacion",
+        "Dominio",
+        "ALTA",
+        "No duplicar buses."
+      ]
+    },
+    {
+      "source_row": 32,
+      "cells": [
+        "C-028",
+        "Habilita",
+        "Investigación, CasoHabilita y AccionCorrectivaHabilita tienen lifecycles separados.",
+        "CasoHabilita, AccionCorrectivaHabilita",
+        "Máquinas estado",
+        "ALTA",
+        "Investigación puede terminar con acciones abiertas."
+      ]
+    },
+    {
+      "source_row": 33,
+      "cells": [
+        "C-029",
+        "Certificación",
+        "UnidadComercial no tiene una única fuente escalar: fuentes son N:M mediante UnidadComercialFuenteEjecucion.",
+        "UC, UE, bridge",
+        "Cardinalidad N:M",
+        "CRÍTICA",
+        "Mensualizado/agrupación/splits."
+      ]
+    },
+    {
+      "source_row": 34,
+      "cells": [
+        "C-030",
+        "Certificación",
+        "Cada vínculo fuente de UC conserva la versión exacta de ejecución usada.",
+        "UnidadComercialFuenteEjecucion",
+        "Lineage",
+        "CRÍTICA",
+        "Enmiendas detectan derivados obsoletos."
+      ]
+    },
+    {
+      "source_row": 35,
+      "cells": [
+        "C-031",
+        "Certificación",
+        "Certificación nunca modifica silenciosamente Parte/UE para hacer cerrar cantidades.",
+        "UC, Observacion, Ajuste, Enmienda",
+        "Dominio",
+        "CRÍTICA",
+        "Verdad operativa inmutable."
+      ]
+    },
+    {
+      "source_row": 36,
+      "cells": [
+        "C-032",
+        "Certificación",
+        "PaqueteCertificacion↔UnidadComercial se versiona por puente; no mover/borrar UC histórica.",
+        "PaqueteCertificacionUnidadComercial",
+        "Cardinalidad/versionado",
+        "ALTA",
+        "Rearmado/reenvío auditable."
+      ]
+    },
+    {
+      "source_row": 37,
+      "cells": [
+        "C-033",
+        "Correcciones",
+        "EnmiendaOperativa corrige realidad; AjusteCertificacion corrige acuerdo comercial.",
+        "EnmiendaOperativa, AjusteCertificacion",
+        "Dominio",
+        "CRÍTICA",
+        "Dos verdades diferentes."
+      ]
+    },
+    {
+      "source_row": 38,
+      "cells": [
+        "C-034",
+        "Supersession",
+        "Una UC nueva puede sustituir otra; la cadena de supersession debe ser acíclica y la anterior permanece histórica.",
+        "UnidadComercial",
+        "Constraint + dominio",
+        "CRÍTICA",
+        "Corrección post-cert."
+      ]
+    },
+    {
+      "source_row": 39,
+      "cells": [
+        "C-035",
+        "Facturación",
+        "LoteFacturacion es distinto de PaqueteCertificacion.",
+        "PaqueteCertificacion, LoteFacturacion",
+        "Dominio",
+        "ALTA",
+        "Cadencias/granos distintos."
+      ]
+    },
+    {
+      "source_row": 40,
+      "cells": [
+        "C-036",
+        "Facturación",
+        "Factura/ERP consume líneas aceptadas; no vuelve a evidencia cruda de campo.",
+        "LineaFacturable, LoteFacturacion",
+        "Contrato funcional",
+        "CRÍTICA",
+        "Evita segunda interpretación."
+      ]
+    }
+  ]
+}

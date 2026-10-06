@@ -1,0 +1,1187 @@
+{
+  "source": "S2",
+  "sheet": "70_Golden_Scenarios_Master",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "GOLDEN SCENARIOS / ACCEPTANCE TESTS · BASELINE FUNCIONAL 1.0",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Objetivo: romper el modelo antes del freeze. PASS significa que el comportamiento puede resolverse con entidades, estados, reglas y configuración ya existentes, sin inventar una nueva arquitectura.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "Scenario",
+        "Dominio",
+        "Clase",
+        "Nombre",
+        "GIVEN",
+        "WHEN",
+        "THEN esperado",
+        "No debe ocurrir",
+        "Reglas clave",
+        "Objetos/relaciones",
+        "State transitions",
+        "UX / tiempo",
+        "Resultado",
+        "Tipo resolución",
+        "Patch estructural"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "GS-001",
+        "PLANIFICACIÓN",
+        "HAPPY PATH",
+        "Plan aprobado y despachado",
+        "Demanda válida; PlanificacionVersion en validación; asignación consistente y sujetos elegibles.",
+        "Planificación aprueba versión y ejecuta readiness.",
+        "Versión APROBADA; Asignacion PROGRAMADA→READY→DESPACHADA; ExecutionContextBundle versionado.",
+        "No crear Parte todavía ni confundir DESPACHADA con EN_EJECUCION.",
+        "RUL-010,RUL-013,RUL-014,RUL-016,RUL-017",
+        "PlanificacionVersion, AsignacionPlanificada, EvaluacionPlanificacion, Bundle",
+        "BORRADOR→APROBADA / PROGRAMADA→READY→DESPACHADA",
+        "0 s campo",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "GS-002",
+        "PLANIFICACIÓN",
+        "ADVERSARIAL",
+        "Readiness invalidado después de READY",
+        "Asignación READY con recurso/persona/documental vigente.",
+        "Vence un requisito o cambia recurso/ventana antes del inicio.",
+        "EventoInvalidacionReadiness; READY deja de habilitar despacho/inicio hasta reevaluación.",
+        "No mantener READY como checkbox eterno.",
+        "RUL-015,RUL-013,RUL-014",
+        "EvaluacionPlanificacion, EventoInvalidacionReadiness",
+        "READY→PROGRAMADA/REEVALUAR",
+        "0 s campo",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "GS-003",
+        "PLANIFICACIÓN",
+        "OFFLINE",
+        "Cambio post-despacho con campo desconectado",
+        "Asignación DESPACHADA; tablet conserva snapshot válido; planificación cambia prioridad/alcance.",
+        "Se aprueba una nueva versión mientras campo está offline.",
+        "Snapshot original no se muta; se emite DirectivaOperativa / nueva versión; aplicación espera recepción.",
+        "No cambiar retroactivamente lo que el dispositivo ya recibió.",
+        "RUL-020,RUL-054,RUL-055",
+        "PlanificacionVersion, DirectivaOperativa, Bundle",
+        "Directiva —→EMITIDA (hasta recepción)",
+        "0 s campo inmediato",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "GS-004",
+        "PLANIFICACIÓN",
+        "ADVERSARIAL",
+        "Cancelar plan con ejecución ya iniciada",
+        "Plan ACTIVO y una UE real EN_EJECUCION.",
+        "Alguien intenta CANCELAR_PLAN_COMPLETO.",
+        "Bloquear cancelación destructiva; usar DirectivaOperativa y resolver ejecuciones/asignaciones.",
+        "No convertir ejecución real en inexistente.",
+        "P0/P2 + State Machine Planificacion + RUL-054",
+        "Planificacion, Parte, UE, Directiva",
+        "ACTIVA permanece; UE se resuelve por Control Plane",
+        "0 s campo",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "GS-005",
+        "ROUTING",
+        "HAPPY PATH",
+        "TipoParte derivado por perfil/contexto",
+        "Persona autenticada, perfil operativo vigente, asignación y servicio conocidos.",
+        "Se prepara inicio de trabajo.",
+        "Motor deriva TipoParte correcto y crea Parte/UE idempotentes.",
+        "No mostrar selector libre como camino normal.",
+        "RUL-001,RUL-021,RUL-074",
+        "PersonaPerfilOperativo, TipoParte, Parte, UE, DecisionTrace",
+        "—→PREPARADO / —→PENDIENTE",
+        "UX-01 ≈5 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "GS-006",
+        "ROUTING",
+        "ADVERSARIAL",
+        "Ruteo ambiguo",
+        "Dos TipoParte resultan compatibles con el contexto.",
+        "El motor no puede discriminar confiablemente.",
+        "Pedir confirmación mínima o escalar; registrar candidatos y decisión.",
+        "No elegir silenciosamente por orden de catálogo.",
+        "RUL-002,RUL-074",
+        "TipoParte, DecisionTrace",
+        "sin transición hasta resolución",
+        "≤20 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "GS-007",
+        "TP-01",
+        "HAPPY PATH",
+        "Intervención planificada normal",
+        "TP-01 PREPARADO, UE PENDIENTE, Habilita/doc OK, PTW VIGENTE.",
+        "Operario confirma ubicación e inicia.",
+        "Parte/UE pasan EN_EJECUCION; persona/recurso/timestamps/contexto se derivan.",
+        "No recapturar cliente, tipo de parte, roster, recursos ni reglas.",
+        "RUL-022,RUL-023,RUL-024,RUL-031",
+        "Parte, UE, asignaciones, ubicación, PTW",
+        "PREPARADO→EN_EJECUCION / PENDIENTE→EN_EJECUCION",
+        "UX-01 ≈5 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "GS-008",
+        "TP-01",
+        "TEMPORAL",
+        "Cambio de turno sin cambio de work package",
+        "TP-01 EN_EJECUCION con turno A y PTW aplicable.",
+        "Ingresa turno B.",
+        "Mismo TP-01; handover; cerrar/abrir intervalos; revalidar Habilita/PTW.",
+        "No crear Parte nuevo solo por turno.",
+        "RUL-005,RUL-025,RUL-044",
+        "Parte, AsignacionPersonaEjecucion, EventoOperativo/Handover, PTW",
+        "Parte permanece EN_EJECUCION",
+        "UX-03 ≈26 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "GS-009",
+        "TP-01",
+        "TEMPORAL",
+        "Reemplazo de operario",
+        "UE EN_EJECUCION con persona A.",
+        "Persona A sale y persona B elegible la reemplaza.",
+        "Cerrar intervalo A; abrir intervalo B; mantener Parte/UE.",
+        "No editar persona original ni crear Parte nuevo.",
+        "RUL-025,RUL-039",
+        "AsignacionPersonaEjecucion, EvaluacionHabilitacion",
+        "UE permanece EN_EJECUCION",
+        "UX-04 ≈12 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "GS-010",
+        "TP-01",
+        "TEMPORAL",
+        "Reemplazo por persona no habilitada",
+        "UE activa; candidato B disponible pero falla requisito crítico Habilita.",
+        "Supervisor intenta seleccionarlo.",
+        "Hard block; reemplazo no se materializa.",
+        "No permitir por necesidad operativa ni por override comercial.",
+        "RUL-039,RUL-041,RUL-027",
+        "Persona, CumplimientoHabilitacion, ConflictoTemporal",
+        "sin cambio",
+        "UX-04 bloqueado",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "GS-011",
+        "TP-01",
+        "IDENTIDAD",
+        "Recurso adicional como apoyo",
+        "UE activa con retro A; llega equipo B para apoyar la misma unidad de trabajo.",
+        "Se incorpora B.",
+        "Nueva AsignacionRecursoEjecucion dentro de misma UE/Parte.",
+        "No crear UE ni TP-01 por el mero recurso adicional.",
+        "RUL-006,RUL-026",
+        "UE, AsignacionRecursoEjecucion",
+        "UE permanece EN_EJECUCION",
+        "UX-04 ≈12 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "GS-012",
+        "TP-01",
+        "IDENTIDAD",
+        "Subtrabajo autónomo dentro del mismo work package",
+        "TP-01 activo; aparece subtrabajo con resultado/tiempo propio pero mismo objetivo de intervención.",
+        "Comienza subtrabajo.",
+        "Crear nueva UE dentro del mismo TP-01.",
+        "No fragmentar en otro Parte.",
+        "RUL-007,RUL-003",
+        "Parte, UE",
+        "—→PENDIENTE→EN_EJECUCION",
+        "micro ≤20 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "GS-013",
+        "TP-01",
+        "IDENTIDAD",
+        "Cambio real de work package",
+        "TP-01 activo.",
+        "La cuadrilla termina objetivo A y comienza objetivo B independiente.",
+        "Resolver/cerrar alcance anterior y crear nuevo TP-01.",
+        "No mezclar dos work packages bajo la misma identidad.",
+        "RUL-004,RUL-034",
+        "Parte, UE, VinculoPlanEjecucion",
+        "Parte A→CERRADO_OPERATIVAMENTE; Parte B→PREPARADO",
+        "≤20 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "GS-014",
+        "TP-01",
+        "IDENTIDAD",
+        "Cambio de ubicación sin regla de corte",
+        "TP-01 activo y TipoParte/servicio no usa ubicación como driver de corte.",
+        "Trabajo se desplaza a otra ubicación.",
+        "Mismo Parte; registrar nueva ubicación/transición.",
+        "No crear Parte por default.",
+        "RUL-008,RUL-031,RUL-030",
+        "EjecucionUbicacion, TransicionOperativa",
+        "Parte permanece",
+        "UX-05 ≈4 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "GS-015",
+        "TP-01",
+        "CONFIGURABLE",
+        "Cliente exige corte por ubicación",
+        "Mismo caso anterior pero existe ReglaCorte específica vigente.",
+        "Se cambia ubicación según contexto configurado.",
+        "Regla específica P4 gana al default; cerrar/split según configuración.",
+        "No ignorar configuración específica.",
+        "RUL-003,RUL-008 + precedencia/especificidad",
+        "ReglaCorteTipoParte, Parte",
+        "según regla específica",
+        "configurable",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "GS-016",
+        "EJECUCIÓN",
+        "TEMPORAL",
+        "Cambio de categoría de tiempo",
+        "UE EN_EJECUCION con intervalo ejecución abierto.",
+        "Comienza espera/standby/traslado.",
+        "Cerrar intervalo previo y abrir nueva categoría sin gaps/solapes.",
+        "No reescribir horas al cierre.",
+        "RUL-028,RUL-029",
+        "EventoTiempo",
+        "UE sin cambio",
+        "UX-06 ≈7 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "GS-017",
+        "EJECUCIÓN",
+        "ADVERSARIAL",
+        "Solapamiento incompatible de recurso",
+        "Recurso exclusivo ya asignado en intervalo activo.",
+        "Otra UE intenta asignarlo simultáneamente.",
+        "ConflictoTemporal; bloquear o warning solo según ReglaSolapamiento.",
+        "No permitir doble uso silencioso.",
+        "RUL-027",
+        "Disponibilidad/AsignacionRecurso, ConflictoTemporal",
+        "sin cambio",
+        "excepción",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "GS-018",
+        "EJECUCIÓN",
+        "CLOSE",
+        "Cierre UE con medición requerida faltante",
+        "UE activa cuyo componente exige una medición.",
+        "Operario intenta cerrar sin valor.",
+        "Cierre bloqueado y UI pide solo la medición faltante.",
+        "No pedir un formulario completo ni cerrar incompleta.",
+        "RUL-032,RUL-033",
+        "UE, EjecucionMedicion",
+        "permanece EN_EJECUCION/SUSPENDIDA",
+        "UX-08 condicional",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "GS-019",
+        "EJECUCIÓN",
+        "CLOSE",
+        "Cierre operativo con contrato pendiente",
+        "UE ejecutada; contexto contractual=PENDIENTE.",
+        "Operario cierra trabajo real.",
+        "UE/Parte pueden cerrar operacionalmente; derivación comercial queda bloqueada.",
+        "No obligar al campo a inventar CC/Item para cerrar.",
+        "RUL-033,RUL-034,RUL-038",
+        "UE, Parte, ImputacionEjecucion",
+        "UE→CERRADA; Parte→CERRADO_OPERATIVAMENTE",
+        "UX-08≈10 s / UX-09≈2 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "GS-020",
+        "EJECUCIÓN",
+        "CORRECCIÓN",
+        "Error descubierto después del cierre",
+        "UE CERRADA registra 80 h, realidad era 8 h.",
+        "Supervisor descubre error.",
+        "Bloquear edición directa; crear EnmiendaOperativa/nueva versión efectiva.",
+        "No reabrir UE y sobrescribir 80.",
+        "RUL-035,RUL-073",
+        "UE, EnmiendaOperativa",
+        "UE histórica sigue CERRADA",
+        "back office",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 25,
+      "cells": [
+        "GS-021",
+        "EMERGENTE",
+        "OFFLINE",
+        "Emergente con contrato desconocido autorizado",
+        "Trabajo urgente offline; persona/recurso/ubicación conocidos; contrato/CC/Item no resueltos; Habilita OK.",
+        "ReglaInicioEmergente permite con autorización válida.",
+        "Crear UE/Parte; estado contractual=PENDIENTE; iniciar; trazabilidad de autorización; commercial downstream bloqueado.",
+        "No inventar CC/Item ni bloquear la realidad por falta comercial.",
+        "RUL-036,RUL-037,RUL-038,RUL-074",
+        "UE, ImputacionEjecucion, DecisionTrace",
+        "PENDIENTE→EN_EJECUCION",
+        "UX-02 ≈48 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 26,
+      "cells": [
+        "GS-022",
+        "EMERGENTE",
+        "ADVERSARIAL",
+        "Emergente con hard block Habilita",
+        "Trabajo urgente y supervisor dispuesto a autorizar; PTW requerido no vigente/requisito crítico falla.",
+        "Se intenta iniciar.",
+        "P1 Habilita BLOCK domina sobre autorización emergente/comercial.",
+        "No usar modo contingencia como bypass de Habilita.",
+        "RUL-022,RUL-039,RUL-042 + precedencia P1>P6/P7",
+        "PTW, EvalHabilitacion, DecisionTrace",
+        "sin Start Work",
+        "bloqueado",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 27,
+      "cells": [
+        "GS-023",
+        "EMERGENTE",
+        "ADVERSARIAL",
+        "Emergente sin autoridad válida",
+        "Contrato pendiente; Habilita OK; regla requiere PERMITIR_AUTORIZADO.",
+        "Operario intenta iniciar sin aprobación de rol autorizado.",
+        "Bloquear Start Work.",
+        "No convertir warning o necesidad en autorización.",
+        "RUL-037,RUL-041",
+        "ReglaInicioEmergente, DecisionTrace",
+        "sin cambio",
+        "bloqueado",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 28,
+      "cells": [
+        "GS-024",
+        "OFFLINE",
+        "ADVERSARIAL",
+        "Bundle vencido antes de Start Work",
+        "Dispositivo offline con ExecutionContextBundle cuyo valid_until_at ya expiró.",
+        "Operario intenta iniciar.",
+        "No asumir contexto válido; reevaluar si existe política offline válida o bloquear/escalar.",
+        "No usar cache vieja como fuente maestra.",
+        "RUL-017 + invariant Bundle projection + P1/P2",
+        "ExecutionContextBundle, DecisionTrace",
+        "sin Start Work salvo regla explícita",
+        "bloqueado/config",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 29,
+      "cells": [
+        "GS-025",
+        "OFFLINE",
+        "IDEMPOTENCIA",
+        "Retry duplica evento de inicio",
+        "Tablet envió START_WORK; servidor lo procesó, ACK se perdió.",
+        "Tablet reenvía mismo event/correlation key.",
+        "Misma decisión/side effect; no crear segundo Parte/UE ni segundo intervalo.",
+        "No duplicar hechos por retry.",
+        "RUL-074 + contrato idempotencia",
+        "DecisionTrace, Parte, UE",
+        "permanece EN_EJECUCION",
+        "0 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 30,
+      "cells": [
+        "GS-026",
+        "CONTROL",
+        "OFFLINE",
+        "Directiva emitida todavía no recibida",
+        "Campo offline, Parte activo; supervisión emite SUSPENDER.",
+        "Directiva queda EMITIDA sin receipt.",
+        "No afirmar que trabajo ya está suspendido; mantener diferencia entre emitida/recibida/aplicada.",
+        "No marcar APLICADA por emisión.",
+        "RUL-054,RUL-055,RUL-057",
+        "DirectivaOperativa",
+        "—→EMITIDA",
+        "0 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 31,
+      "cells": [
+        "GS-027",
+        "CONTROL",
+        "ADVERSARIAL",
+        "Directiva expirada llega tarde",
+        "Directiva EMITIDA/RECIBIDA supera valid_until antes de aplicarse.",
+        "Dispositivo intenta aplicarla.",
+        "Marcar EXPIRADA; bloquear efecto; requerir nueva directiva.",
+        "No ejecutar orden obsoleta.",
+        "RUL-058",
+        "DirectivaOperativa, DecisionTrace",
+        "EMITIDA/RECIBIDA→EXPIRADA",
+        "0 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 32,
+      "cells": [
+        "GS-028",
+        "HABILITA",
+        "HAPPY PATH",
+        "PTW completo y activado",
+        "Permiso BORRADOR con requisitos y mediciones completas.",
+        "Se aprueba y contexto real coincide.",
+        "PENDIENTE_APROBACION→APROBADO→VIGENTE; Start Work queda habilitable.",
+        "No asumir APROBADO=VIGENTE.",
+        "RUL-042,RUL-043",
+        "PermisoTrabajo, EvalHabilitacion",
+        "BORRADOR→PENDIENTE→APROBADO→VIGENTE",
+        "UX-13 ≤120 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 33,
+      "cells": [
+        "GS-029",
+        "HABILITA",
+        "ADVERSARIAL",
+        "PTW vence durante el trabajo",
+        "UE activa cubierta por PTW VIGENTE.",
+        "Se alcanza valid_until.",
+        "PTW→VENCIDO; bloquear nuevos Start/Restart; disparar alerta/suspensión según regla.",
+        "No autocerrar PTW ni seguir como si siguiera vigente.",
+        "RUL-045,RUL-044",
+        "PermisoTrabajo, DirectivaOperativa",
+        "VIGENTE→VENCIDO; UE puede suspender",
+        "automático",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 34,
+      "cells": [
+        "GS-030",
+        "HABILITA",
+        "ADVERSARIAL",
+        "Timeout de PTW no es cierre",
+        "PTW VENCIDO no cerrado formalmente.",
+        "Sistema procesa job de timeout.",
+        "Permanece VENCIDO hasta cierre autorizado/administrativo.",
+        "No pasar a CERRADO por reloj.",
+        "RUL-045,RUL-046",
+        "PermisoTrabajo",
+        "VENCIDO permanece",
+        "0 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 35,
+      "cells": [
+        "GS-031",
+        "HABILITA",
+        "HAPPY PATH",
+        "Flash Report controlado sin caso",
+        "Evento reportable, situación controlada, contexto activo disponible.",
+        "Operario reporta categoría + descripción breve + controlada=Sí.",
+        "Evento REPORTADO→EN_TRIAGE→CLASIFICADO→CERRADO_SIN_CASO si regla no exige caso.",
+        "No pedir causa raíz al operario.",
+        "RUL-047,RUL-048,RUL-049,RUL-050",
+        "EventoHabilita, EvalEscalamiento",
+        "REPORTADO→EN_TRIAGE→CLASIFICADO→CERRADO_SIN_CASO",
+        "UX-12 ≈54 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 36,
+      "cells": [
+        "GS-032",
+        "HABILITA",
+        "ADVERSARIAL",
+        "Evento no controlado",
+        "Flash Report con situación_controlada=NO.",
+        "Se registra reporte.",
+        "Default conservador: suspender trabajo afectado/escalar triage; crear Caso si regla lo exige.",
+        "No seguir happy path por defecto.",
+        "RUL-051,RUL-050,RUL-052",
+        "EventoHabilita, Directiva, CasoHabilita",
+        "REPORTADO→...→ESCALADO_A_CASO",
+        "≤120 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 37,
+      "cells": [
+        "GS-033",
+        "HABILITA",
+        "BOUNDARY",
+        "Evento standalone sin Parte",
+        "Se detecta condición/evento fuera de ejecución activa.",
+        "Persona genera Flash Report.",
+        "Crear EventoHabilita válido sin Parte/UE; contexto opcional.",
+        "No forzar Parte ficticio para registrar Habilita.",
+        "RUL-047 + ERD EventoHabilita standalone",
+        "EventoHabilita",
+        "—→REPORTADO",
+        "≤120 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 38,
+      "cells": [
+        "GS-034",
+        "HABILITA",
+        "RELACIONAL",
+        "Evento afecta múltiples UE",
+        "Un hecho impacta dos operaciones/UE simultáneamente.",
+        "Habilita vincula ambas.",
+        "Un EventoHabilita con N vínculos UE; identidad del evento única.",
+        "No duplicar evento por cada UE.",
+        "ERD R-052 + Habilita core",
+        "EventoHabilitaUnidadEjecucion",
+        "sin cambio de lifecycle",
+        "back office",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 39,
+      "cells": [
+        "GS-035",
+        "HABILITA",
+        "LIFECYCLE",
+        "Investigación finaliza con acciones abiertas",
+        "Caso EN_INVESTIGACION; investigación terminada; se definieron acciones.",
+        "Habilita finaliza investigación.",
+        "Caso→SEGUIMIENTO_ACCIONES; acciones continúan su lifecycle independiente.",
+        "No cerrar todas las acciones por cerrar investigación.",
+        "State Machine CasoHabilita + RUL-053",
+        "CasoHabilita, AccionCorrectivaHabilita",
+        "EN_INVESTIGACION→SEGUIMIENTO_ACCIONES",
+        "back office",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 40,
+      "cells": [
+        "GS-036",
+        "HABILITA",
+        "ADVERSARIAL",
+        "Acción crítica bloquea cierre de Caso",
+        "Caso en seguimiento; una acción marcada bloqueante aún no verificada.",
+        "Se intenta cerrar caso.",
+        "Cierre bloqueado hasta verificación o cambio autorizado de política.",
+        "No cerrar por conveniencia administrativa.",
+        "RUL-053",
+        "CasoHabilita, AccionCorrectivaHabilita",
+        "permanece SEGUIMIENTO_ACCIONES",
+        "back office",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 41,
+      "cells": [
+        "GS-037",
+        "HABILITA",
+        "IDEMPOTENCIA",
+        "Reporte duplicado por retry/offline",
+        "Mismo Flash Report se reenvía tras perder ACK.",
+        "Servidor recibe correlation key repetida.",
+        "No crear segundo EventoHabilita; reutilizar/relacionar DecisionTrace.",
+        "No duplicar incidentes por sincronización.",
+        "RUL-074 + idempotencia",
+        "EventoHabilita, DecisionTrace",
+        "sin duplicado",
+        "0 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 42,
+      "cells": [
+        "GS-038",
+        "TP-02",
+        "HAPPY PATH",
+        "Movimiento planificado",
+        "TP-02 con origen/destino/recurso/chofer/carga prevista.",
+        "Operario confirma contexto y realiza movimiento.",
+        "Registrar movimiento/UE, timestamps, ubicaciones, carga real; cierre rápido.",
+        "No recargar identidad/cliente/recurso desde cero.",
+        "RUL-023,RUL-024,RUL-031,RUL-032,RUL-033",
+        "Parte TP-02, UE, Ubicacion, Medicion",
+        "PENDIENTE→EN_EJECUCION→CERRADA",
+        "UX-10 ≈17 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 43,
+      "cells": [
+        "GS-039",
+        "TP-02",
+        "DEVIATION",
+        "Destino real difiere del plan",
+        "Movimiento activo con destino previsto A.",
+        "Por directiva/operación termina en B.",
+        "Registrar ubicación B como realidad + EventoOperativo/Directiva si aplica; plan permanece histórico.",
+        "No editar destino planificado para que coincida.",
+        "RUL-020,RUL-031,RUL-054",
+        "UnidadPlanificada, UE, EjecucionUbicacion",
+        "UE cierra con realidad B",
+        "≤45 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 44,
+      "cells": [
+        "GS-040",
+        "TP-03",
+        "HAPPY PATH",
+        "Cierre diario de cuadrilla",
+        "Durante turno se acumularon UE, personas, recursos y EventosTiempo.",
+        "Supervisor/operario cierra TP-03.",
+        "Roster/horas/trabajos se derivan; humano solo confirma/novedad excepcional.",
+        "No reconstruir el día manualmente.",
+        "RUL-025,RUL-026,RUL-028,RUL-034",
+        "Parte TP-03, UE, asignaciones, tiempos",
+        "Parte→CERRADO_OPERATIVAMENTE",
+        "UX-11 ≈23 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 45,
+      "cells": [
+        "GS-041",
+        "CERTIFICACIÓN",
+        "LINEAGE",
+        "N ejecuciones consolidan 1 UC",
+        "Varias UE cerradas pertenecen al mismo grano comercial mensual/período.",
+        "Motor aplica ReglaGranoUC.",
+        "Crear una UC con N UnidadComercialFuenteEjecucion y versiones exactas.",
+        "No perder qué ejecuciones alimentaron la UC.",
+        "RUL-059,RUL-074",
+        "UC, UnidadComercialFuenteEjecucion",
+        "—→INCOMPLETA/ELEGIBLE",
+        "0 s campo",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 46,
+      "cells": [
+        "GS-042",
+        "CERTIFICACIÓN",
+        "LINEAGE",
+        "Una UE genera múltiples UC",
+        "Una UE contiene imputaciones/items distintos válidos.",
+        "Motor aplica grano/item.",
+        "Crear múltiples UC con lineage a la misma UE/imputaciones correspondientes.",
+        "No forzar 1 UE=1 UC.",
+        "RUL-059,RUL-061",
+        "UE, ImputacionEjecucion, UC source bridge",
+        "varias UC creadas",
+        "0 s campo",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 47,
+      "cells": [
+        "GS-043",
+        "CERTIFICACIÓN",
+        "CONTRATO",
+        "Standby registrado pero no certificable",
+        "EventoTiempo STANDBY existe en ejecución.",
+        "ReglaTratamientoTiempo indica no certificable o mapea a otro item.",
+        "Mantener standby operacional intacto; derivar cantidad comercial según regla.",
+        "No borrar/cambiar categoría de tiempo para cobrar.",
+        "RUL-060",
+        "EventoTiempo, ReglaTratamientoTiempo, UC",
+        "sin cambio ejecución",
+        "0 s campo",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 48,
+      "cells": [
+        "GS-044",
+        "CERTIFICACIÓN",
+        "OBSERVATION",
+        "Cliente observa UC",
+        "UC EN_REVISION.",
+        "Cliente/certificador observa evidencia/cantidad comercial.",
+        "UC→OBSERVADA + ObservacionCertificacion; ejecución permanece intacta.",
+        "No editar Parte/UE para hacer coincidir criterio comercial.",
+        "RUL-063,RUL-064",
+        "UC, ObservacionCertificacion, AjusteCertificacion",
+        "EN_REVISION→OBSERVADA",
+        "0 s campo",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 49,
+      "cells": [
+        "GS-045",
+        "CERTIFICACIÓN",
+        "PARTIAL",
+        "Aceptación parcial permitida",
+        "Paquete EN_REVISION y ReglaParcialidad permite subset.",
+        "Cliente acepta algunas UC.",
+        "Paquete→ACEPTADO_PARCIAL con subset explícito/versionado.",
+        "No asumir aceptación de todas las UC.",
+        "RUL-068",
+        "PaqueteCertificacion, bridge UC, Conformidad",
+        "EN_REVISION→ACEPTADO_PARCIAL",
+        "0 s campo",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 50,
+      "cells": [
+        "GS-046",
+        "CERTIFICACIÓN",
+        "ADVERSARIAL",
+        "Aceptación parcial no permitida",
+        "Paquete EN_REVISION; contrato no permite parcialidad.",
+        "Cliente/usuario intenta aceptar subset.",
+        "Bloquear transición parcial; exigir resolución compatible con regla.",
+        "No saltarse configuración contractual.",
+        "RUL-068 + P6 hard gate",
+        "PaqueteCertificacion",
+        "permanece EN_REVISION",
+        "0 s campo",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 51,
+      "cells": [
+        "GS-047",
+        "CERTIFICACIÓN",
+        "CORRECCIÓN",
+        "Enmienda después de aceptación, antes de factura",
+        "UC v1 ACEPTADA deriva de ejecución v1; EnmiendaOperativa crea ejecución v2.",
+        "Motor detecta fuente superada.",
+        "UC v1 supersession→REQUIERE_RECALCULO; nueva UC v2 sustituye v1; requiere nueva revisión según flujo.",
+        "No borrar aceptación histórica ni actualizar v1 en sitio.",
+        "RUL-065,RUL-066,RUL-073",
+        "Enmienda, UC source, supersession",
+        "UC v1 histórica + UC v2 nueva",
+        "0 s campo",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 52,
+      "cells": [
+        "GS-048",
+        "FACTURACIÓN",
+        "CORRECCIÓN",
+        "Enmienda después de factura/ERP",
+        "UC/línea ya cruzó boundary ERP.",
+        "Se descubre error operacional.",
+        "Preservar documento original; generar nueva verdad + supersession + necesidad de ajuste/reversión administrativa downstream.",
+        "No editar factura/documento histórico desde el sistema de Partes.",
+        "RUL-065,RUL-066,RUL-070,RUL-072,RUL-073",
+        "UC, LineaFacturable, Lote, ERP boundary",
+        "nuevo flujo compensatorio",
+        "0 s campo",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 53,
+      "cells": [
+        "GS-049",
+        "FACTURACIÓN",
+        "ADVERSARIAL",
+        "Intento de facturar UC sustituida",
+        "UC ACEPTADA históricamente pero supersession=SUSTITUIDA/INVALIDADA.",
+        "Motor intenta construir línea.",
+        "Bloquear; solo UC vigente puede producir línea facturable nueva.",
+        "No usar aceptación histórica como vigencia actual.",
+        "RUL-065,RUL-070",
+        "UC, LineaFacturable",
+        "sin línea nueva",
+        "0 s campo",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 54,
+      "cells": [
+        "GS-050",
+        "FACTURACIÓN",
+        "HAPPY PATH",
+        "UC aceptada vigente a ERP",
+        "UC ACEPTADA, vigente, reglas completas.",
+        "Se agrupan líneas y se envía lote.",
+        "LineaFacturable→Lote BORRADOR→VALIDADO→ENVIADO_ERP→ACEPTADO_ERP.",
+        "No volver a preguntarle nada al operario.",
+        "RUL-070,RUL-071,RUL-072",
+        "UC, Linea, Lote, ERP boundary",
+        "Lote lifecycle completo",
+        "0 s campo",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 55,
+      "cells": [
+        "GS-051",
+        "TRACE",
+        "RELACIONAL",
+        "Una evidencia valida múltiples scopes",
+        "Foto/documento aplica a UE y EventoHabilita o PTW.",
+        "Sistema vincula evidencia a más de un objeto.",
+        "Una Evidencia con múltiples EvidenciaVinculo tipados.",
+        "No duplicar archivo innecesariamente ni usar FK polimórfica opaca.",
+        "ERD R-048 + invariant evidencia",
+        "Evidencia, EvidenciaVinculo",
+        "sin state transition",
+        "0 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 56,
+      "cells": [
+        "GS-052",
+        "TRACE",
+        "AUDIT",
+        "Explicar decisión histórica con reglas antiguas",
+        "Una decisión fue tomada con ruleset v1; hoy existe v2.",
+        "Auditor consulta por qué se permitió/bloqueó.",
+        "DecisionTrace referencia ruleset efectivo v1 y reproduce lógica histórica.",
+        "No recalcular pasado con configuración actual.",
+        "RUL-074 + precedencia temporal",
+        "DecisionTrace",
+        "inmutable",
+        "0 s",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 57,
+      "cells": [
+        "GS-053",
+        "TRACE",
+        "ADVERSARIAL",
+        "Commercial rule contradice Habilita",
+        "Contrato permitiría ejecutar/cobrar; PTW requerido no vigente.",
+        "Motor evalúa ambas reglas.",
+        "P1 BLOCK gana sobre P6 ALLOW; DecisionTrace registra conflicto/resolución.",
+        "No permitir por prioridad comercial.",
+        "precedencia P1>P6 + RUL-022,RUL-042",
+        "DecisionTrace, PTW",
+        "sin Start Work",
+        "bloqueado",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 58,
+      "cells": [
+        "GS-054",
+        "TRACE",
+        "ADVERSARIAL",
+        "Dos reglas iguales se contradicen",
+        "Dos reglas de misma precedencia, vigencia y especificidad producen ALLOW/BLOCK.",
+        "Motor intenta resolver.",
+        "FAIL CLOSED: bloquear/escalar y registrar conflicto.",
+        "No elegir arbitrariamente.",
+        "58_Prioridad_Conflictos_Reglas",
+        "DecisionTrace",
+        "sin transición",
+        "bloqueado",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 59,
+      "cells": [
+        "GS-055",
+        "CHANGE CONTROL",
+        "BOUNDARY",
+        "Contrato futuro introduce nueva regla comercial",
+        "Llega contrato real con tratamiento de tiempos/grano/agrupación no conocido hoy.",
+        "Se parametriza configuración.",
+        "Nueva versión de reglas P6 sin cambiar Parte/UE/Habilita/Interfaces si el patrón existente alcanza.",
+        "No reabrir arquitectura por cada nuevo valor contractual.",
+        "P6 configuration + baseline contract-agnostic",
+        "ContratoVersion, ContratoServicio, reglas",
+        "sin cambio core",
+        "CONFIGURABLE",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    },
+    {
+      "source_row": 60,
+      "cells": [
+        "GS-056",
+        "CHANGE CONTROL",
+        "STRUCTURAL TEST",
+        "Contrato futuro parece requerir cuarto TipoParte",
+        "Nueva evidencia contractual/operativa no encaja en TP-01/02/03 incluso mediante componentes/reglas.",
+        "Equipo evalúa el caso.",
+        "NO auto-extender baseline: abrir Change Control arquitectónico y demostrar nuevo patrón operacional.",
+        "No inventar TP-04 por presión de formulario.",
+        "Baseline governance / Freeze rule",
+        "TipoParte, Change Control",
+        "baseline se reabre solo si evidencia lo exige",
+        "EXCEPCIÓN",
+        "PASS",
+        "ESTRUCTURAL",
+        "NO"
+      ]
+    }
+  ]
+}

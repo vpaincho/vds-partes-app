@@ -1,0 +1,595 @@
+{
+  "source": "S2",
+  "sheet": "50_SM_Ejecucion",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "STATE MACHINES · EJECUCIÓN",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Las transiciones describen comportamiento funcional. El modelo físico podrá implementar constraints, eventos o workflows, pero no cambiar su semántica sin reabrir la baseline.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "EJECUCIÓN · Parte",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "Contenedor operativo resuelto por TipoParte. Cierre operativo ≠ completitud documental ≠ certificación.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "Estado",
+        "Tipo",
+        "Semántica",
+        "Terminal",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "PREPARADO",
+        "Inicial",
+        "Identidad resuelta; aún no inició ejecución.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "EN_EJECUCION",
+        "Operativa",
+        "Al menos una UE está en ejecución.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "SUSPENDIDO",
+        "Operativa",
+        "La ejecución del Parte está detenida temporalmente por control/operación/Habilita.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "CERRADO_OPERATIVAMENTE",
+        "Terminal operacional",
+        "Todas las UE terminales y no queda trabajo activo.",
+        "Sí operacional",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "ANULADO",
+        "Terminal",
+        "Parte creado por error/duplicado antes de ejecución real.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "ID",
+        "Desde",
+        "Evento",
+        "Hacia",
+        "Gate / condición",
+        "Actor",
+        "Efecto",
+        "Tipo",
+        "Nota"
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "T-PA01",
+        "—",
+        "CREAR_PARTE",
+        "PREPARADO",
+        "TipoParte resuelto + contexto mínimo",
+        "Motor/Sistema",
+        "Crear Parte sin pedir selector manual.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "T-PA02",
+        "PREPARADO",
+        "START_WORK",
+        "EN_EJECUCION",
+        "Gates Habilita/PTW/documental aplicables satisfechos + UE iniciable",
+        "Campo/Sistema",
+        "Comenzar realidad.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "T-PA03",
+        "EN_EJECUCION",
+        "SUSPENDER",
+        "SUSPENDIDO",
+        "DirectivaOperativa/PTW/Habilita/causa operacional",
+        "Sistema",
+        "Detener ejecución sin cerrar.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "T-PA04",
+        "SUSPENDIDO",
+        "REANUDAR",
+        "EN_EJECUCION",
+        "Gates de reinicio satisfechos",
+        "Campo/Supervisión",
+        "Continuar mismo Parte si identidad se conserva.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "T-PA05",
+        "EN_EJECUCION/SUSPENDIDO",
+        "CERRAR_OPERATIVAMENTE",
+        "CERRADO_OPERATIVAMENTE",
+        "Todas las UE terminales + tiempos cerrados + causa de no realizados",
+        "Supervisor/Sistema",
+        "Cerrar verdad operacional.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "T-PA06",
+        "PREPARADO",
+        "ANULAR_DUPLICADO_ERROR",
+        "ANULADO",
+        "No hubo Start Work ni evidencia de ejecución real",
+        "Rol autorizado",
+        "Eliminar uso, no identidad histórica.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 25,
+      "cells": [
+        "Desde",
+        "Hacia",
+        "Transición prohibida",
+        "Qué hacer en cambio",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 26,
+      "cells": [
+        "CERRADO_OPERATIVAMENTE",
+        "EN_EJECUCION",
+        "Reabrir y editar Parte cerrado",
+        "Corrección mediante EnmiendaOperativa/nueva ejecución.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 27,
+      "cells": [
+        "ANULADO",
+        "EN_EJECUCION",
+        "Ejecutar Parte anulado",
+        "Crear Parte válido nuevo.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 28,
+      "cells": [
+        "PREPARADO",
+        "CERRADO_OPERATIVAMENTE",
+        "Cerrar sin resolver UE",
+        "UE deben quedar cerradas/no realizadas/anuladas explícitamente.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 31,
+      "cells": [
+        "EJECUCIÓN · UnidadEjecucion",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 32,
+      "cells": [
+        "Grano operativo distinguible. Personas, recursos, ubicación, medición y tiempos se relacionan con la UE sin redefinir el Parte automáticamente.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 35,
+      "cells": [
+        "Estado",
+        "Tipo",
+        "Semántica",
+        "Terminal",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 36,
+      "cells": [
+        "PENDIENTE",
+        "Inicial",
+        "UE creada dentro del Parte; aún no comenzó.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 37,
+      "cells": [
+        "EN_EJECUCION",
+        "Operativa",
+        "Trabajo real activo.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 38,
+      "cells": [
+        "SUSPENDIDA",
+        "Operativa",
+        "Trabajo detenido temporalmente.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 39,
+      "cells": [
+        "CERRADA",
+        "Terminal operacional",
+        "Trabajo completado/cerrado con resultado real.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 40,
+      "cells": [
+        "NO_REALIZADA",
+        "Terminal",
+        "La unidad prevista/creada no se ejecutó, con causa.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 41,
+      "cells": [
+        "ANULADA",
+        "Terminal",
+        "UE creada por error antes de ejecución.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 44,
+      "cells": [
+        "ID",
+        "Desde",
+        "Evento",
+        "Hacia",
+        "Gate / condición",
+        "Actor",
+        "Efecto",
+        "Tipo",
+        "Nota"
+      ]
+    },
+    {
+      "source_row": 45,
+      "cells": [
+        "T-UE01",
+        "—",
+        "CREAR_UE",
+        "PENDIENTE",
+        "Parte válido + regla de composición",
+        "Sistema/Campo",
+        "Crear unidad de trabajo.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 46,
+      "cells": [
+        "T-UE02",
+        "PENDIENTE",
+        "INICIAR",
+        "EN_EJECUCION",
+        "Gates contextuales satisfechos",
+        "Campo/Sistema",
+        "Abrir timestamps/asignaciones.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 47,
+      "cells": [
+        "T-UE03",
+        "EN_EJECUCION",
+        "SUSPENDER",
+        "SUSPENDIDA",
+        "Causa estructurada / directiva / PTW",
+        "Sistema",
+        "Cerrar intervalo activo.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 48,
+      "cells": [
+        "T-UE04",
+        "SUSPENDIDA",
+        "REANUDAR",
+        "EN_EJECUCION",
+        "Revalidación aplicable",
+        "Campo/Supervisión",
+        "Abrir nuevo intervalo.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 49,
+      "cells": [
+        "T-UE05",
+        "EN_EJECUCION/SUSPENDIDA",
+        "CERRAR",
+        "CERRADA",
+        "Resultado + tiempos consistentes; mediciones obligatorias si aplica",
+        "Campo/Supervisión",
+        "Cerrar UE.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 50,
+      "cells": [
+        "T-UE06",
+        "PENDIENTE",
+        "MARCAR_NO_REALIZADA",
+        "NO_REALIZADA",
+        "Causa estructurada",
+        "Campo/Supervisión",
+        "Preservar intento/no ejecución.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 51,
+      "cells": [
+        "T-UE07",
+        "PENDIENTE",
+        "ANULAR_ERROR",
+        "ANULADA",
+        "No hubo trabajo real",
+        "Rol autorizado",
+        "Corregir creación errónea.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 54,
+      "cells": [
+        "Desde",
+        "Hacia",
+        "Transición prohibida",
+        "Qué hacer en cambio",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 55,
+      "cells": [
+        "CERRADA",
+        "EN_EJECUCION",
+        "Reabrir UE para editar realidad",
+        "Usar EnmiendaOperativa o nueva UE.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 56,
+      "cells": [
+        "NO_REALIZADA",
+        "CERRADA",
+        "Inventar ejecución después",
+        "Nueva evidencia requiere revisión/new UE.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 57,
+      "cells": [
+        "ANULADA",
+        "EN_EJECUCION",
+        "Ejecutar UE anulada",
+        "Crear nueva UE válida.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  ]
+}

@@ -1,0 +1,403 @@
+{
+  "source": "S2",
+  "sheet": "72_Freeze_Gate_FINAL",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "FREEZE GATE FINAL · BASELINE FUNCIONAL 1.0",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "El freeze cubre comportamiento funcional, semántica, relaciones, estados, reglas, interfaces y guardrails. No congela UI, stack técnico, DB física, APIs ni ERP.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "Gate",
+        "Criterio",
+        "Resultado",
+        "Evidencia",
+        "Qué queda configurable",
+        "Bloquea",
+        "Estado"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "FZ-01",
+        "Arquitectura por dominios consistente",
+        "PASS",
+        "Configuration / Planificación / Ejecución / Habilita / Certificación-Facturación / Control / Trace permanecen separados.",
+        "Parámetros por cliente/servicio.",
+        "Sí",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "FZ-02",
+        "Identidad Parte / UnidadEjecucion estable",
+        "PASS",
+        "56 scenarios no requieren cambiar la regla work package→Parte y subtrabajo→UE.",
+        "ReglaCorte específica.",
+        "Sí",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "FZ-03",
+        "Catálogo TipoParte suficiente",
+        "PASS",
+        "TP-01/TP-02/TP-03 absorben scenarios actuales; no aparece cuarto patrón operativo.",
+        "Componentes y routing.",
+        "Sí",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "FZ-04",
+        "Planificación ≠ Ejecución preservado",
+        "PASS",
+        "VinculoPlanEjecucion soporta split/merge/emergente/no realizado; Golden Pack pasa.",
+        "Readiness y matching.",
+        "Sí",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "FZ-05",
+        "Habilita transversal consistente",
+        "PASS",
+        "PTW, documental, EventoHabilita, CasoHabilita y acciones conservan lifecycles propios.",
+        "Matrices, thresholds, roles.",
+        "Sí",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "FZ-06",
+        "Offline / Control Plane consistente",
+        "PASS",
+        "Bundle es proyección; directivas distinguen emitida/recibida/aplicada; retry idempotente.",
+        "TTL, canales, sync técnico.",
+        "Sí",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "FZ-07",
+        "Temporalidad / trazabilidad consistente",
+        "PASS",
+        "Intervalos persona/recurso, tiempos, transiciones, handover y conflictos se representan sin reescribir historia.",
+        "Catálogos de causas/tiempos.",
+        "Sí",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "FZ-08",
+        "Contrato-agnostic soportado",
+        "PASS",
+        "Ejecución cierra aun con contexto contractual pendiente; commercial fail-closed hasta reconciliación.",
+        "Items, UM, reglas comerciales reales.",
+        "Sí",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "FZ-09",
+        "Lineage certificación/facturación consistente",
+        "PASS",
+        "UC↔UE N:M, supersession, paquetes versionados y ERP boundary pasan scenarios.",
+        "Agrupación/parcialidad/facturación.",
+        "Sí",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "FZ-10",
+        "State Machines completas",
+        "PASS",
+        "Transiciones y prohibiciones cubren objetos core; scenarios no exigen bypass.",
+        "Estados específicos futuros solo por Change Control.",
+        "Sí",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "FZ-11",
+        "Rule Engine determinista",
+        "PASS",
+        "Precedencia P0-P8 + fail closed + DecisionTrace resuelven conflictos Golden.",
+        "Rulesets/versiones reales.",
+        "Sí",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "FZ-12",
+        "Objetivo campo ≤2 min",
+        "PASS",
+        "15 interacciones presupuestadas; 0 >120s; Cert/Fact=0s campo.",
+        "UI/UX exacta y dispositivos.",
+        "Sí",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "FZ-13",
+        "Golden Scenarios",
+        "PASS",
+        "56/56 PASS; 0 patches estructurales.",
+        "Nuevos casos reales pueden ampliar suite.",
+        "Sí",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "STATUS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "BASELINE FUNCIONAL 1.0 · FROZEN\n\nFecha lógica de freeze: versión v3.0 del paquete funcional.\n\nA partir de este punto, contratos reales, clientes, roles, thresholds, catálogos, UX y tecnología se incorporan por configuración/diseño de implementación. La arquitectura solo se reabre mediante Change Control cuando una evidencia demuestre que el patrón congelado no puede representar correctamente la realidad.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 30,
+      "cells": [
+        "NO REABRE EL FREEZE",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 31,
+      "cells": [
+        "NF-01",
+        "Nuevo ItemContrato/UM",
+        null,
+        "Se agrega configuración contractual; no cambia ejecución.",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 32,
+      "cells": [
+        "NF-02",
+        "Nuevo CentroCosto",
+        null,
+        "Se agrega maestro/bridge vigente.",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 33,
+      "cells": [
+        "NF-03",
+        "Cliente exige corte particular",
+        null,
+        "Nueva ReglaCorte versionada dentro de TipoParte existente.",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 34,
+      "cells": [
+        "NF-04",
+        "Nueva matriz/threshold Habilita",
+        null,
+        "Configura ReglaEscalamientoHabilita.",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 35,
+      "cells": [
+        "NF-05",
+        "Nueva UI/tablet/stack",
+        null,
+        "Implementa contratos funcionales; no altera semántica.",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 36,
+      "cells": [
+        "NF-06",
+        "Nuevo ERP/canal",
+        null,
+        "Nuevo adapter/boundary.",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 37,
+      "cells": [
+        "NF-07",
+        "Más automatización/IoT",
+        null,
+        "Cambia ModoCaptura de humano→derivado; objeto canónico permanece.",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 40,
+      "cells": [
+        "SÍ REABRE EL FREEZE",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 41,
+      "cells": [
+        "RF-01",
+        "Nuevo patrón operativo imposible de expresar con TP-01/02/03",
+        null,
+        "Debe demostrarse antes de crear TP-04.",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 42,
+      "cells": [
+        "RF-02",
+        "Nueva realidad exige cardinalidad incompatible con ERD",
+        null,
+        "Ej.: relación actualmente 1:1 que en realidad necesita N:M y no tiene bridge.",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 43,
+      "cells": [
+        "RF-03",
+        "Regulación exige cambiar ownership/fuente de verdad",
+        null,
+        "No confundir nuevo campo con cambio de arquitectura.",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 44,
+      "cells": [
+        "RF-04",
+        "Golden Scenario real produce contradicción irresoluble",
+        null,
+        "No parchear en UI; reabrir modelo.",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 45,
+      "cells": [
+        "RF-05",
+        "Nuevo proceso rompe Interfaces A/B o separación de dominios",
+        null,
+        "Requiere revisión arquitectónica explícita.",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 46,
+      "cells": [
+        "RF-06",
+        "Cambio de definición de Parte/UE/UC/Habilita",
+        null,
+        "Es cambio semántico mayor.",
+        null,
+        null,
+        null
+      ]
+    }
+  ]
+}

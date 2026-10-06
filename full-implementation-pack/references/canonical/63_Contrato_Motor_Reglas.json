@@ -1,0 +1,355 @@
+{
+  "source": "S2",
+  "sheet": "63_Contrato_Motor_Reglas",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "CONTRATO FUNCIONAL · MASTER RULE ENGINE",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "No es una API técnica. Define qué debe saber el motor, en qué orden decide y qué debe devolver para que cualquier futura implementación conserve la lógica.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "Etapa",
+        "Nombre",
+        "Input mínimo",
+        "Responsabilidad",
+        "Output",
+        "Precedencia",
+        "Regla"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "S0",
+        "NORMALIZAR CONTEXTO",
+        "evento/trigger; timestamp; actor; subject; estado actual; plan/contexto; conectividad",
+        "Resolver referencias canónicas y timestamp efectivo de decisión.",
+        "Contexto normalizado",
+        "—",
+        "No inferir datos ambiguos como hechos."
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "S1",
+        "RESOLVER RULESET VIGENTE",
+        "timestamp + cliente/contrato/servicio/TipoParte/riesgo",
+        "Seleccionar versiones de reglas/catálogos efectivas al momento del hecho.",
+        "ruleset_version_ref + reglas candidatas",
+        "—",
+        "Nunca usar reglas actuales para explicar pasado."
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "S2",
+        "PROTEGER INVARIANTES",
+        "subject + estado/version/history",
+        "Evaluar P0: historia, lineage, no-delete, no-reopen, fuente vigente.",
+        "block/allow + restricciones",
+        "P0",
+        "Si falla P0, no continuar con side effects incompatibles."
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "S3",
+        "EVALUAR HABILITA",
+        "personas/recursos/documental/PTW/contexto + reglas Habilita",
+        "Evaluar P1 hard gates, warnings y overrides autorizados.",
+        "hard_block / warnings / gates satisfechos",
+        "P1",
+        "Comercial y UX no pueden habilitar lo bloqueado aquí."
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "S4",
+        "VALIDAR TRANSICIÓN",
+        "estado actual + trigger + state machine",
+        "Comprobar que el evento puede producir transición desde ese estado.",
+        "target_state permitido o block",
+        "P2",
+        "Estado terminal se respeta."
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "S5",
+        "APLICAR CONTROL PLANE",
+        "directivas activas aplicables + ACK/vigencia",
+        "Incorporar órdenes post-despacho válidas.",
+        "suspender/cancelar/reprogramar/etc.",
+        "P3",
+        "Directiva obsoleta/expirada no aplica."
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "S6",
+        "RESOLVER IDENTIDAD / ROUTING",
+        "perfil + work package + TipoParte + contexto",
+        "Determinar TipoParte, continuidad, split, nueva UE/Parte.",
+        "route/identity decision",
+        "P4",
+        "No usar cambio turno/recurso/PTW como corte universal."
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "S7",
+        "APLICAR OPERACIÓN",
+        "estado + tiempos + disponibilidad + readiness + eventos",
+        "Derivar/validar hechos operativos, temporalidad y side effects.",
+        "eventos/intervalos/ready/confirmaciones",
+        "P5",
+        "Registrar realidad completa aunque no sea certificable."
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "S8",
+        "APLICAR CONTRATO",
+        "ejecución cerrada + contexto contractual + items/reglas",
+        "Transformar realidad en UC/cantidades/paquetes sin editar campo.",
+        "commercial decision / UC / blocks",
+        "P6",
+        "Si contexto contractual no está resuelto, fail closed comercial."
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "S9",
+        "APLICAR UX / AUTOMATIZACIÓN",
+        "contexto derivable + confianza/origen",
+        "Definir qué autocompletar, precargar, confirmar o pedir.",
+        "fields/confirmations",
+        "P7",
+        "Nunca crear verdad incierta silenciosamente."
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "S10",
+        "COMPONER DECISIÓN",
+        "resultados S2–S9",
+        "Resolver conflictos determinísticamente y producir un único envelope.",
+        "DecisionEnvelope",
+        "—",
+        "Aplicar precedencia + especificidad + fail closed en empate."
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "S11",
+        "PERSISTIR TRACE / SIDE EFFECTS",
+        "DecisionEnvelope + correlation/idempotency key",
+        "Persistir DecisionTrace y emitir side effects exactamente una vez.",
+        "decision_trace_id + objetos/eventos creados",
+        "P0",
+        "Reintentos no deben duplicar Parte, UC, Directiva, Caso, etc."
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "DECISION ENVELOPE · SALIDA FUNCIONAL",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "Campo",
+        "Obligatorio",
+        "Semántica",
+        "Ejemplo",
+        "Persistir en trace",
+        "Consumidor",
+        "Nota"
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "decision",
+        "Sí",
+        "ALLOW / BLOCK / WARN / REQUIRE_CONFIRMATION / NO_OP",
+        "BLOCK",
+        "Sí",
+        "App/servicio",
+        "No usar booleano único si existen warnings/confirmaciones."
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "subject_ref",
+        "Sí",
+        "Objeto sobre el que se decide",
+        "UE-123",
+        "Sí",
+        "Todos",
+        "Target tipado."
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "trigger",
+        "Sí",
+        "Evento que disparó evaluación",
+        "START_WORK",
+        "Sí",
+        "Trace",
+        "Evento semántico, no click UI."
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "current_state",
+        "Condicional",
+        "Estado antes de decisión",
+        "PENDIENTE",
+        "Sí",
+        "State machine",
+        "—"
+      ]
+    },
+    {
+      "source_row": 25,
+      "cells": [
+        "target_state",
+        "Condicional",
+        "Estado permitido/resultante",
+        "EN_EJECUCION",
+        "Sí",
+        "Workflow",
+        "Vacío si no hay transición."
+      ]
+    },
+    {
+      "source_row": 26,
+      "cells": [
+        "blocks",
+        "Sí",
+        "Lista de blockers con rule_id/causa",
+        "RUL-022",
+        "Sí",
+        "UI/alertas",
+        "Puede haber N."
+      ]
+    },
+    {
+      "source_row": 27,
+      "cells": [
+        "warnings",
+        "Sí",
+        "Warnings no bloqueantes",
+        "doc vence en 2 días",
+        "Sí",
+        "UI",
+        "No son autorización."
+      ]
+    },
+    {
+      "source_row": 28,
+      "cells": [
+        "confirmations_required",
+        "Sí",
+        "Datos que requieren confirmación humana",
+        "ubicación",
+        "Sí",
+        "UI",
+        "Clave para matriz ≤2min."
+      ]
+    },
+    {
+      "source_row": 29,
+      "cells": [
+        "side_effects",
+        "Sí",
+        "Objetos/eventos a crear/cerrar/versionar",
+        "crear Directiva",
+        "Sí",
+        "Orquestador",
+        "Idempotentes."
+      ]
+    },
+    {
+      "source_row": 30,
+      "cells": [
+        "rules_applied",
+        "Sí",
+        "Reglas ganadoras + candidatas relevantes",
+        "RUL-022,RUL-037",
+        "Sí",
+        "Audit",
+        "Incluir reglas descartadas por precedencia cuando expliquen conflicto."
+      ]
+    },
+    {
+      "source_row": 33,
+      "cells": [
+        "IDEMPOTENCIA / REINTENTOS · REQUISITO FUNCIONAL",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 34,
+      "cells": [
+        "La futura app será offline/intermitente, por lo que el mismo evento puede llegar más de una vez. Toda decisión con side effects debe poder correlacionarse con un event/correlation key estable. Reprocesar el mismo evento bajo el mismo contexto NO debe crear dos Partes, dos UE, dos UC, dos CasosHabilita o dos Directivas. Si cambió el contexto/ruleset, el sistema genera una NUEVA DecisionTrace relacionada con la anterior en vez de sobrescribirla.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  ]
+}

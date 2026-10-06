@@ -1,0 +1,1447 @@
+{
+  "source": "S2",
+  "sheet": "42_Modelo_Relacional_Entidades",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "MODELO RELACIONAL LÓGICO v0.1 · ENTIDADES Y OWNERSHIP",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "PK/FK son lógicas: definen identidad y dependencia, no tipos de datos ni tecnología física. PROJECTION/DERIVED no son nuevas fuentes de verdad.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "#",
+        "Dominio",
+        "Entidad",
+        "Clase",
+        "PK lógica",
+        "FK / dependencias principales",
+        "Grano / responsabilidad",
+        "Temporalidad",
+        "Owner",
+        "Baseline",
+        "Notas"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "01",
+        "CONFIG",
+        "Cliente",
+        "MASTER",
+        "cliente_id",
+        "—",
+        "Contraparte comercial / cliente del trabajo",
+        "Versionado maestro si cambia identidad",
+        "Maestro comercial",
+        "FROZEN",
+        "Separado de Operadora."
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "02",
+        "CONFIG",
+        "Contrato",
+        "MASTER",
+        "contrato_id",
+        "cliente_id; tipo_contrato_id",
+        "Acuerdo comercial estable",
+        "Vigencia vía ContratoVersion",
+        "Gestión contractual",
+        "FROZEN",
+        "CentroCosto NO es Contrato."
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "03",
+        "CONFIG",
+        "ContratoVersion",
+        "VERSION",
+        "contrato_version_id",
+        "contrato_id",
+        "Reglas válidas de un contrato en una vigencia",
+        "vigente_desde/hasta; inmutable histórica",
+        "Gestión contractual",
+        "FROZEN",
+        "Adendas generan nueva versión."
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "04",
+        "CONFIG",
+        "Servicio",
+        "MASTER",
+        "servicio_id",
+        "—",
+        "Servicio VDS reusable entre contratos",
+        "Maestro versionable",
+        "Operaciones",
+        "FROZEN",
+        "No equivale a ItemContrato."
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "05",
+        "CONFIG",
+        "Actividad",
+        "MASTER",
+        "actividad_id",
+        "servicio_id",
+        "Actividad operativa dentro de un Servicio",
+        "Maestro/versionable",
+        "Operaciones",
+        "CONFIG",
+        "Eliminar si no agrega discriminación."
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "06",
+        "CONFIG",
+        "ContratoServicio",
+        "CONFIG",
+        "contrato_servicio_id",
+        "contrato_version_id; servicio_id",
+        "Nodo configurador contrato×servicio",
+        "vigencia heredada + versión propia opcional",
+        "Contrato/Operaciones",
+        "FROZEN",
+        "Concentra reglas operativas/comerciales."
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "07",
+        "CONFIG",
+        "CentroCosto",
+        "MASTER",
+        "centro_costo_id",
+        "—",
+        "Dimensión económica/administrativa independiente",
+        "Vigencia desde ERP",
+        "ERP/Administración",
+        "FROZEN",
+        "CC26/27/80 son códigos, no contratos."
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "08",
+        "CONFIG",
+        "ContratoServicioCentroCosto",
+        "BRIDGE",
+        "contrato_servicio_centro_costo_id",
+        "contrato_servicio_id; centro_costo_id",
+        "CC habilitado para un contexto contrato-servicio",
+        "vigente_desde/hasta",
+        "Contrato/ERP",
+        "CONFIG",
+        "N:M; espera maestro real."
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "09",
+        "CONFIG",
+        "UnidadMedida",
+        "MASTER",
+        "unidad_medida_id",
+        "—",
+        "Unidad semántica de medición/comercial",
+        "Maestro",
+        "Contrato/Catálogos",
+        "FROZEN",
+        "Hora, m3, viaje, etc."
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "10",
+        "CONFIG",
+        "ItemContrato",
+        "CONFIG",
+        "item_contrato_id",
+        "contrato_servicio_id; unidad_medida_id; regla_medicion_item_id",
+        "Posición contractual medible/certificable",
+        "vigencia por versión contrato",
+        "Contrato",
+        "FROZEN",
+        "No fuerza split de Parte."
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "11",
+        "CONFIG",
+        "ReglaMedicionItem",
+        "RULE",
+        "regla_medicion_item_id",
+        "item_contrato_id / metrica_id",
+        "Cómo derivar cantidad comercial y evidencia requerida",
+        "Versionada",
+        "Contrato/Certificación",
+        "CONFIG",
+        "Valores pendientes contratos."
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "12",
+        "CONFIG",
+        "TipoParte",
+        "MASTER/RULE",
+        "tipo_parte_id",
+        "—",
+        "Familia de comportamiento de ejecución",
+        "Versionada",
+        "Arquitectura",
+        "FROZEN",
+        "TP-01/02/03."
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "13",
+        "CONFIG",
+        "TipoParteComponente",
+        "BRIDGE/RULE",
+        "tipo_parte_componente_id",
+        "tipo_parte_id; componente_parte_id",
+        "Componentes activos por TipoParte",
+        "Versionada",
+        "Arquitectura",
+        "FROZEN",
+        "Compone captura sin Parte universal."
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "14",
+        "CONFIG",
+        "ReglaCorteTipoParte",
+        "RULE",
+        "regla_corte_tipo_parte_id",
+        "tipo_parte_id; contrato_servicio_id?",
+        "Qué cambios mantienen o rompen identidad del Parte",
+        "Versionada",
+        "Operaciones/Arquitectura",
+        "CONFIG",
+        "Default TP-01: handover no corta."
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "15",
+        "CONFIG",
+        "PerfilOperativo",
+        "MASTER",
+        "perfil_operativo_id",
+        "—",
+        "Capacidad/ruta operativa de una persona",
+        "Vigencias/configuración",
+        "RRHH/Seguridad",
+        "FROZEN",
+        "No equivale solo a cargo."
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "16",
+        "CONFIG",
+        "Persona",
+        "MASTER",
+        "persona_id",
+        "—",
+        "Persona VDS/externa identificable",
+        "Maestro temporal",
+        "RRHH",
+        "FROZEN",
+        "Nombre no es identidad."
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "17",
+        "CONFIG",
+        "PersonaPerfilOperativo",
+        "BRIDGE",
+        "persona_perfil_operativo_id",
+        "persona_id; perfil_operativo_id",
+        "Perfiles habilitados para una persona",
+        "desde/hasta",
+        "RRHH/Seguridad",
+        "FROZEN",
+        "N:M temporal."
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "18",
+        "CONFIG",
+        "TipoRecurso",
+        "MASTER",
+        "tipo_recurso_id",
+        "—",
+        "Clase física/funcional de recurso",
+        "Maestro",
+        "Flota",
+        "FROZEN",
+        "Camión, retro, acoplado, etc."
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "19",
+        "CONFIG",
+        "Recurso",
+        "MASTER",
+        "recurso_id",
+        "tipo_recurso_id",
+        "Recurso físico VDS",
+        "Maestro + estado temporal separado",
+        "Flota",
+        "FROZEN",
+        "Interno/patente son atributos."
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "20",
+        "CONFIG",
+        "UbicacionTecnica",
+        "MASTER",
+        "ubicacion_tecnica_id",
+        "ubicacion_padre_id?; area_id?",
+        "Nodo del árbol técnico/geográfico",
+        "Vigencias catálogo",
+        "Operaciones/Cliente",
+        "FROZEN",
+        "Pozo/batería/planta/etc."
+      ]
+    },
+    {
+      "source_row": 25,
+      "cells": [
+        "21",
+        "CONFIG",
+        "ActivoCliente",
+        "MASTER",
+        "activo_intervenido_id",
+        "ubicacion_tecnica_id?",
+        "Activo técnico intervenido cuando no equivale a ubicación",
+        "Maestro",
+        "Cliente/Operaciones",
+        "CONFIG",
+        "No confundir con Recurso VDS."
+      ]
+    },
+    {
+      "source_row": 26,
+      "cells": [
+        "22",
+        "CONFIG",
+        "Cuadrilla",
+        "MASTER/CONFIG",
+        "cuadrilla_id",
+        "—",
+        "Identidad de grupo si existe valor operativo estable",
+        "Puede ser temporal",
+        "Planificación",
+        "CONFIG",
+        "Si solo es composición temporal, no usar como maestro rígido."
+      ]
+    },
+    {
+      "source_row": 27,
+      "cells": [
+        "23",
+        "CONFIG",
+        "RequisitoHabilitacion",
+        "RULE",
+        "requisito_habilitacion_id",
+        "tipo_requisito_habilitacion_id",
+        "Condición que debe cumplir un sujeto/contexto",
+        "Versionada",
+        "Habilita/Documental",
+        "FROZEN",
+        "Persona/recurso/empresa/contexto."
+      ]
+    },
+    {
+      "source_row": 28,
+      "cells": [
+        "24",
+        "CONFIG",
+        "DocumentoHabilitante",
+        "DOCUMENT",
+        "documento_habilitante_id",
+        "—",
+        "Documento/evidencia concreta con vigencia",
+        "vigente_desde/hasta",
+        "Gestión documental",
+        "FROZEN",
+        "No se recarga en cada Parte."
+      ]
+    },
+    {
+      "source_row": 29,
+      "cells": [
+        "25",
+        "CONFIG",
+        "CumplimientoHabilitacion",
+        "BRIDGE/EVENT",
+        "cumplimiento_habilitacion_id",
+        "requisito_habilitacion_id; documento_habilitante_id; sujeto_ref",
+        "Cumplimiento concreto de un requisito por un sujeto",
+        "Temporal",
+        "Gestión documental",
+        "FROZEN",
+        "Sujeto debe implementarse con asociaciones tipadas."
+      ]
+    },
+    {
+      "source_row": 30,
+      "cells": [
+        "26",
+        "CONFIG",
+        "ReglaTratamientoTiempo",
+        "RULE",
+        "regla_tratamiento_tiempo_id",
+        "contrato_servicio_id; item_contrato_id?",
+        "Cómo trata comercialmente cada categoría de tiempo",
+        "Versionada",
+        "Contrato/Certificación",
+        "CONFIG",
+        "No altera tiempo operacional real."
+      ]
+    },
+    {
+      "source_row": 31,
+      "cells": [
+        "27",
+        "CONFIG",
+        "ReglaGranoUnidadComercial",
+        "RULE",
+        "regla_grano_unidad_comercial_id",
+        "contrato_servicio_id; item_contrato_id?",
+        "Grano de creación de UC",
+        "Versionada",
+        "Contrato/Certificación",
+        "CONFIG",
+        "UE/movimiento/intervención/día/período."
+      ]
+    },
+    {
+      "source_row": 32,
+      "cells": [
+        "28",
+        "CONFIG",
+        "ReglaAgrupacionCertificacion",
+        "RULE",
+        "regla_agrupacion_certificacion_id",
+        "contrato_servicio_id",
+        "Cómo agrupar UC en paquetes",
+        "Versionada",
+        "Contrato/Certificación",
+        "CONFIG",
+        "Pozo/período/ítem/CC/etc."
+      ]
+    },
+    {
+      "source_row": 33,
+      "cells": [
+        "29",
+        "CONFIG",
+        "ReglaParcialidadCertificacion",
+        "RULE",
+        "regla_parcialidad_certificacion_id",
+        "contrato_servicio_id",
+        "Si un paquete puede avanzar parcialmente",
+        "Versionada",
+        "Contrato/Certificación",
+        "CONFIG",
+        "Pendiente contratos."
+      ]
+    },
+    {
+      "source_row": 34,
+      "cells": [
+        "30",
+        "CONFIG",
+        "ReglaFacturacion",
+        "RULE",
+        "regla_facturacion_id",
+        "contrato_servicio_id",
+        "Cuándo líneas aceptadas forman lote/factura",
+        "Versionada",
+        "Administración",
+        "CONFIG",
+        "ERP/fiscal fuera del freeze."
+      ]
+    },
+    {
+      "source_row": 35,
+      "cells": [
+        "31",
+        "CONFIG",
+        "ReglaInicioEmergente",
+        "RULE",
+        "regla_inicio_emergente_id",
+        "contrato_servicio_id?; tipo_parte_id?",
+        "Bloqueo vs inicio autorizado con contexto contractual incompleto",
+        "Versionada",
+        "Operaciones/Habilita",
+        "CONFIG",
+        "gates de Habilita jamás se omiten."
+      ]
+    },
+    {
+      "source_row": 36,
+      "cells": [
+        "32",
+        "CONFIG",
+        "ReglaEscalamientoHabilita",
+        "RULE",
+        "regla_escalamiento_habilita_id",
+        "tipo_evento_habilita_id?",
+        "Mapea evento/severidad/contexto a acciones Habilita",
+        "Versionada",
+        "Habilita",
+        "CONFIG",
+        "Matriz real pendiente."
+      ]
+    },
+    {
+      "source_row": 37,
+      "cells": [
+        "33",
+        "PLAN",
+        "DemandaOperativa",
+        "TRANSACTION",
+        "demanda_operativa_id",
+        "cliente_id?; contrato_servicio_id?; servicio_id?",
+        "Necesidad antes de programar recursos",
+        "Máquina de estados",
+        "Operaciones/Cliente",
+        "FROZEN",
+        "Puede descartarse o convertirse."
+      ]
+    },
+    {
+      "source_row": 38,
+      "cells": [
+        "34",
+        "PLAN",
+        "Planificacion",
+        "AGGREGATE",
+        "planificacion_id",
+        "—",
+        "Contenedor de planificación operativa que agrupa asignaciones de una o más demandas",
+        "Versionada por PlanificacionVersion",
+        "Planificación",
+        "FROZEN",
+        "Puede alimentar 0..N Partes."
+      ]
+    },
+    {
+      "source_row": 39,
+      "cells": [
+        "35",
+        "PLAN",
+        "PlanificacionVersion",
+        "VERSION",
+        "planificacion_version_id",
+        "planificacion_id",
+        "Snapshot lógico aprobado de intención",
+        "Inmutable por versión",
+        "Planificación",
+        "FROZEN",
+        "Fuente de Interface A."
+      ]
+    },
+    {
+      "source_row": 40,
+      "cells": [
+        "36",
+        "PLAN",
+        "AsignacionPlanificada",
+        "TRANSACTION",
+        "asignacion_planificada_id",
+        "planificacion_version_id; prioridad_operativa_id; tipo_parte_previsto_id?",
+        "Unidad despachable con ventana/contexto",
+        "Temporal",
+        "Planificación",
+        "FROZEN",
+        "No es Parte."
+      ]
+    },
+    {
+      "source_row": 41,
+      "cells": [
+        "37",
+        "PLAN",
+        "UnidadPlanificada",
+        "TRANSACTION",
+        "unidad_planificada_id",
+        "asignacion_planificada_id; demanda_operativa_id; servicio_id; ubicacion_tecnica_id?; activo_intervenido_id?",
+        "Trabajo previsto comparable con ejecución",
+        "Temporal/versionada por plan",
+        "Planificación",
+        "FROZEN",
+        "Una Demanda puede dividirse en N unidades; no asumir 1 demanda = 1 planificación."
+      ]
+    },
+    {
+      "source_row": 42,
+      "cells": [
+        "38",
+        "PLAN",
+        "RequerimientoRecurso",
+        "CHILD",
+        "requerimiento_recurso_id",
+        "unidad_planificada_id; tipo_recurso_id",
+        "Capacidad requerida sin nominar recurso",
+        "Temporal",
+        "Planificación",
+        "FROZEN",
+        "Cantidad/rol/atributos."
+      ]
+    },
+    {
+      "source_row": 43,
+      "cells": [
+        "39",
+        "PLAN",
+        "RequerimientoCompetencia",
+        "CHILD",
+        "requerimiento_competencia_id",
+        "unidad_planificada_id; perfil/competencia_ref",
+        "Competencia requerida antes de nominar persona",
+        "Temporal",
+        "Planificación/Habilita",
+        "FROZEN",
+        "No hardcodear persona."
+      ]
+    },
+    {
+      "source_row": 44,
+      "cells": [
+        "40",
+        "PLAN",
+        "AsignacionPersonaPlanificada",
+        "BRIDGE",
+        "asignacion_persona_planificada_id",
+        "asignacion_planificada_id o unidad_planificada_id; persona_id",
+        "Persona nominal prevista",
+        "desde/hasta",
+        "Planificación",
+        "FROZEN",
+        "Opcional si planifica solo capacidad."
+      ]
+    },
+    {
+      "source_row": 45,
+      "cells": [
+        "41",
+        "PLAN",
+        "AsignacionRecursoPlanificada",
+        "BRIDGE",
+        "asignacion_recurso_planificada_id",
+        "asignacion_planificada_id o unidad_planificada_id; recurso_id",
+        "Recurso nominal previsto",
+        "desde/hasta",
+        "Planificación",
+        "FROZEN",
+        "Opcional."
+      ]
+    },
+    {
+      "source_row": 46,
+      "cells": [
+        "42",
+        "PLAN",
+        "EvaluacionPlanificacion",
+        "EVENT/SNAPSHOT",
+        "evaluacion_planificacion_id",
+        "asignacion_planificada_id; planificacion_version_id",
+        "Resultado readiness con causas",
+        "evaluado_at/valido_hasta_at",
+        "Sistema",
+        "FROZEN",
+        "READY es temporal."
+      ]
+    },
+    {
+      "source_row": 47,
+      "cells": [
+        "43",
+        "PLAN",
+        "EventoInvalidacionReadiness",
+        "EVENT",
+        "evento_invalidacion_readiness_id",
+        "evaluacion_planificacion_id",
+        "Hecho que invalida evaluación previa",
+        "Append-only",
+        "Sistema",
+        "FROZEN",
+        "Dispara reevaluación."
+      ]
+    },
+    {
+      "source_row": 48,
+      "cells": [
+        "44",
+        "PLAN",
+        "VinculoPlanEjecucion",
+        "BRIDGE",
+        "vinculo_plan_ejecucion_id",
+        "unidad_planificada_id?; asignacion_planificada_id?; parte_id?; unidad_ejecucion_id?",
+        "Mapeo previsto↔real",
+        "Append-only",
+        "Sistema",
+        "FROZEN",
+        "0..N ↔ 0..N; nunca asumir 1:1."
+      ]
+    },
+    {
+      "source_row": 49,
+      "cells": [
+        "45",
+        "PLAN",
+        "DirectivaOperativa",
+        "EVENT",
+        "directiva_operativa_id",
+        "tipo_directiva_operativa_id",
+        "Instrucción posterior al despacho",
+        "emitida/recibida/ack/aplicada",
+        "Planificación/Supervisión/Habilita",
+        "FROZEN",
+        "No muta snapshot."
+      ]
+    },
+    {
+      "source_row": 50,
+      "cells": [
+        "46",
+        "PLAN",
+        "DirectivaOperativaObjetivo",
+        "BRIDGE",
+        "directiva_operativa_objetivo_id",
+        "directiva_operativa_id; target_ref",
+        "Scope de una directiva sobre plan/Parte/UE",
+        "Append-only",
+        "Sistema",
+        "FROZEN",
+        "Implementación física debe tipar target."
+      ]
+    },
+    {
+      "source_row": 51,
+      "cells": [
+        "47",
+        "PLAN",
+        "ExecutionContextBundle",
+        "PROJECTION",
+        "execution_context_bundle_id",
+        "planificacion_version_id; persona/perfil scope",
+        "Cache/proyección offline mínima",
+        "versionado + valid_until",
+        "Backend",
+        "NOT SOT",
+        "No es nueva verdad de negocio."
+      ]
+    },
+    {
+      "source_row": 52,
+      "cells": [
+        "48",
+        "EXEC",
+        "Parte",
+        "AGGREGATE",
+        "parte_id",
+        "tipo_parte_id; cliente_id/contexto; asignacion_planificada_id?",
+        "Contenedor operativo según TipoParte",
+        "Máquina de estados",
+        "Ejecución",
+        "FROZEN",
+        "Work package/turno/asignación según TP."
+      ]
+    },
+    {
+      "source_row": 53,
+      "cells": [
+        "49",
+        "EXEC",
+        "UnidadEjecucion",
+        "TRANSACTION",
+        "unidad_ejecucion_id",
+        "parte_id; servicio_id; actividad_id?; activo_intervenido_id?",
+        "Grano operativo distinguible dentro del Parte",
+        "inicio/fin + estado",
+        "Ejecución",
+        "FROZEN",
+        "1 Parte → 1..N UE."
+      ]
+    },
+    {
+      "source_row": 54,
+      "cells": [
+        "50",
+        "EXEC",
+        "AsignacionPersonaEjecucion",
+        "BRIDGE/TEMPORAL",
+        "asignacion_persona_ejecucion_id",
+        "parte_id; unidad_ejecucion_id?; persona_id; rol_persona_ejecucion_id",
+        "Participación real de persona",
+        "desde/hasta",
+        "Ejecución",
+        "FROZEN",
+        "Handover/reemplazo."
+      ]
+    },
+    {
+      "source_row": 55,
+      "cells": [
+        "51",
+        "EXEC",
+        "AsignacionRecursoEjecucion",
+        "BRIDGE/TEMPORAL",
+        "asignacion_recurso_ejecucion_id",
+        "parte_id; unidad_ejecucion_id?; recurso_id; rol_recurso_ejecucion_id",
+        "Participación real de recurso",
+        "desde/hasta",
+        "Ejecución",
+        "FROZEN",
+        "Apoyo vs principal."
+      ]
+    },
+    {
+      "source_row": 56,
+      "cells": [
+        "52",
+        "EXEC",
+        "EjecucionUbicacion",
+        "BRIDGE",
+        "ejecucion_ubicacion_id",
+        "unidad_ejecucion_id; ubicacion_tecnica_id; rol_ubicacion",
+        "Ubicaciones/roles de una UE",
+        "Temporal opcional",
+        "Ejecución",
+        "FROZEN",
+        "Principal/origen/destino/carga/descarga."
+      ]
+    },
+    {
+      "source_row": 57,
+      "cells": [
+        "53",
+        "EXEC",
+        "EjecucionMedicion",
+        "CHILD",
+        "ejecucion_medicion_id",
+        "unidad_ejecucion_id; metrica_id; unidad_medida_id?",
+        "Medición operacional base",
+        "Timestamp/período",
+        "Ejecución",
+        "FROZEN",
+        "No es cantidad certificada."
+      ]
+    },
+    {
+      "source_row": 58,
+      "cells": [
+        "54",
+        "EXEC",
+        "EventoTiempo",
+        "EVENT",
+        "evento_tiempo_id",
+        "parte_id; unidad_ejecucion_id?; tipo_evento_tiempo_id",
+        "Intervalo temporal dentro de una ejecución",
+        "inicio/fin",
+        "Ejecución",
+        "FROZEN",
+        "Traslado/standby/espera/etc."
+      ]
+    },
+    {
+      "source_row": 59,
+      "cells": [
+        "55",
+        "EXEC",
+        "EventoOperativo",
+        "EVENT",
+        "evento_operativo_id",
+        "parte_id; unidad_ejecucion_id?; tipo_evento_operativo_id",
+        "Desvío/cambio operacional estructurado",
+        "evento_at",
+        "Ejecución",
+        "FROZEN",
+        "Puede disparar regla de corte."
+      ]
+    },
+    {
+      "source_row": 60,
+      "cells": [
+        "56",
+        "EXEC",
+        "TransicionOperativa",
+        "EVENT/BRIDGE",
+        "transicion_operativa_id",
+        "origen_unidad_ejecucion_id?; destino_unidad_ejecucion_id?",
+        "Tiempo/continuidad entre ejecuciones/work packages",
+        "inicio/fin",
+        "Ejecución",
+        "FROZEN",
+        "Evita tiempo huérfano."
+      ]
+    },
+    {
+      "source_row": 61,
+      "cells": [
+        "57",
+        "EXEC",
+        "ImputacionEjecucion",
+        "CHILD",
+        "imputacion_ejecucion_id",
+        "unidad_ejecucion_id; contrato_servicio_id?; centro_costo_id?; item_contrato_id?",
+        "Contexto de imputación de una UE",
+        "Temporal/versionada si cambia",
+        "Ejecución/Motor contractual",
+        "FROZEN",
+        "Puede quedar contractual PENDIENTE."
+      ]
+    },
+    {
+      "source_row": 62,
+      "cells": [
+        "58",
+        "EXEC",
+        "DisponibilidadRecurso",
+        "EVENT/TEMPORAL",
+        "disponibilidad_recurso_id",
+        "recurso_id; estado_disponibilidad_recurso_id",
+        "Estado operativo/técnico del recurso",
+        "desde/hasta",
+        "Flota",
+        "FROZEN",
+        "No reemplaza documental."
+      ]
+    },
+    {
+      "source_row": 63,
+      "cells": [
+        "59",
+        "EXEC",
+        "ConflictoTemporal",
+        "DERIVED/EVENT",
+        "conflicto_temporal_id",
+        "persona_id?; recurso_id?; assignments refs",
+        "Solapamiento detectado",
+        "Calculado al evento/ventana",
+        "Sistema",
+        "DERIVED",
+        "Puede block/warn/override."
+      ]
+    },
+    {
+      "source_row": 64,
+      "cells": [
+        "60",
+        "EXEC",
+        "Evidencia",
+        "DOCUMENT/EVENT",
+        "evidencia_id",
+        "actor_evidencia_id?; tipo_evidencia_id",
+        "Contenido verificable independiente",
+        "evidencia_at",
+        "Campo/Sistema",
+        "FROZEN",
+        "Firma/foto/archivo/hash."
+      ]
+    },
+    {
+      "source_row": 65,
+      "cells": [
+        "61",
+        "EXEC",
+        "EvidenciaVinculo",
+        "BRIDGE",
+        "evidencia_vinculo_id",
+        "evidencia_id; target_ref",
+        "Objeto/scope validado por evidencia",
+        "Append-only",
+        "Sistema",
+        "FROZEN LOGIC",
+        "Implementar con asociaciones tipadas."
+      ]
+    },
+    {
+      "source_row": 66,
+      "cells": [
+        "62",
+        "HABILITA",
+        "EvaluacionHabilitacion",
+        "SNAPSHOT",
+        "evaluacion_habilitacion_id",
+        "requisito/cumplimiento refs; plan/parte/UE scope",
+        "Resultado habilita/advierte/bloquea",
+        "Timestamp",
+        "Sistema",
+        "FROZEN",
+        "Precheck e inicio real."
+      ]
+    },
+    {
+      "source_row": 67,
+      "cells": [
+        "63",
+        "HABILITA",
+        "OverrideGate",
+        "EVENT",
+        "override_gate_id",
+        "evaluacion_habilitacion_id?; gate_ref; actor_autorizador_id",
+        "Decisión explícita de continuar ante warning overrideable",
+        "Append-only",
+        "Rol autorizado",
+        "FROZEN",
+        "Hard block no override por default."
+      ]
+    },
+    {
+      "source_row": 68,
+      "cells": [
+        "64",
+        "HABILITA",
+        "PermisoTrabajo",
+        "TRANSACTION",
+        "permiso_trabajo_id",
+        "tipo_permiso_id; ubicacion/alcance refs",
+        "Autorización Habilita formal independiente",
+        "vigencia/apertura/suspensión/cierre",
+        "Habilita/Supervisión",
+        "FROZEN",
+        "0..N por intervención."
+      ]
+    },
+    {
+      "source_row": 69,
+      "cells": [
+        "65",
+        "HABILITA",
+        "PermisoTrabajoUnidadEjecucion",
+        "BRIDGE",
+        "permiso_trabajo_unidad_ejecucion_id",
+        "permiso_trabajo_id; unidad_ejecucion_id",
+        "Cobertura de PTW sobre UE",
+        "Temporal/alcance",
+        "Habilita",
+        "FROZEN",
+        "N:M."
+      ]
+    },
+    {
+      "source_row": 70,
+      "cells": [
+        "66",
+        "EXEC",
+        "EnmiendaOperativa",
+        "EVENT/VERSION",
+        "enmienda_operativa_id",
+        "target operativo/version anterior; actor/aprobador",
+        "Corrección de error real sin borrar historia",
+        "Append-only",
+        "Supervisión",
+        "FROZEN",
+        "Genera nueva verdad/version."
+      ]
+    },
+    {
+      "source_row": 71,
+      "cells": [
+        "67",
+        "HABILITA",
+        "EventoHabilita",
+        "EVENT",
+        "evento_habilita_id",
+        "ubicacion_habilita_id?; tipo_evento_habilita_id",
+        "Ocurrencia Habilita independiente",
+        "ocurrido/detectado/reportado",
+        "Campo/Habilita",
+        "FROZEN",
+        "Puede existir standalone."
+      ]
+    },
+    {
+      "source_row": 72,
+      "cells": [
+        "68",
+        "HABILITA",
+        "EventoHabilitaUnidadEjecucion",
+        "BRIDGE",
+        "evento_habilita_unidad_ejecucion_id",
+        "evento_habilita_id; unidad_ejecucion_id",
+        "UE vinculada/origen/afectada",
+        "Append-only",
+        "Habilita",
+        "FROZEN",
+        "N:M."
+      ]
+    },
+    {
+      "source_row": 73,
+      "cells": [
+        "69",
+        "HABILITA",
+        "EventoHabilitaPersona",
+        "BRIDGE",
+        "evento_habilita_persona_id",
+        "evento_habilita_id; persona_id; rol",
+        "Persona afectada/involucrada/testigo",
+        "Append-only",
+        "Habilita",
+        "FROZEN",
+        "N:M."
+      ]
+    },
+    {
+      "source_row": 74,
+      "cells": [
+        "70",
+        "HABILITA",
+        "EventoHabilitaRecurso",
+        "BRIDGE",
+        "evento_habilita_recurso_id",
+        "evento_habilita_id; recurso_id; rol",
+        "Recurso vinculado",
+        "Append-only",
+        "Habilita",
+        "FROZEN",
+        "N:M."
+      ]
+    },
+    {
+      "source_row": 75,
+      "cells": [
+        "71",
+        "HABILITA",
+        "EventoHabilitaPermiso",
+        "BRIDGE",
+        "evento_habilita_permiso_trabajo_id",
+        "evento_habilita_id; permiso_trabajo_id",
+        "PTW relacionado al evento",
+        "Append-only",
+        "Habilita",
+        "FROZEN",
+        "N:M."
+      ]
+    },
+    {
+      "source_row": 76,
+      "cells": [
+        "72",
+        "HABILITA",
+        "EvaluacionEscalamientoHabilita",
+        "SNAPSHOT",
+        "evaluacion_escalamiento_habilita_id",
+        "evento_habilita_id; regla_escalamiento_habilita_id",
+        "Resultado auditable del motor Habilita",
+        "Timestamp/versionada",
+        "Motor Habilita",
+        "FROZEN",
+        "Outputs a Control/Habilita."
+      ]
+    },
+    {
+      "source_row": 77,
+      "cells": [
+        "73",
+        "HABILITA",
+        "CasoHabilita",
+        "TRANSACTION",
+        "caso_habilita_id",
+        "evento_habilita_id UNIQUE",
+        "Workflow de triage/investigación/aprendizaje",
+        "Lifecycle propio",
+        "Habilita",
+        "FROZEN",
+        "0..1 por EventoHabilita baseline."
+      ]
+    },
+    {
+      "source_row": 78,
+      "cells": [
+        "74",
+        "HABILITA",
+        "MedicionEventoHabilita",
+        "CHILD/VERSION",
+        "medicion_evento_habilita_id",
+        "evento_habilita_id; metrica/unidad refs",
+        "Medición Habilita refinable (ej. spill)",
+        "Timestamp/versiones",
+        "Habilita",
+        "FROZEN",
+        "Estimado y confirmado coexisten."
+      ]
+    },
+    {
+      "source_row": 79,
+      "cells": [
+        "75",
+        "HABILITA",
+        "NotificacionHabilita",
+        "TRANSACTION",
+        "notificacion_habilita_id",
+        "evento_habilita_id; caso_habilita_id?; evaluacion_escalamiento_habilita_id?",
+        "Obligación/comunicación Habilita",
+        "deadline/envio/confirmación",
+        "Habilita",
+        "FROZEN",
+        "Canal técnico fuera del modelo."
+      ]
+    },
+    {
+      "source_row": 80,
+      "cells": [
+        "76",
+        "HABILITA",
+        "AccionCorrectivaHabilita",
+        "TRANSACTION",
+        "accion_correctiva_habilita_id",
+        "caso_habilita_id; responsable_id",
+        "Acción correctiva/preventiva independiente",
+        "due/status/verificación",
+        "Habilita/Responsable",
+        "FROZEN",
+        "Puede bloquear cierre según configuración."
+      ]
+    },
+    {
+      "source_row": 81,
+      "cells": [
+        "77",
+        "CERT",
+        "UnidadComercial",
+        "DERIVED/WORKFLOW",
+        "unidad_comercial_id",
+        "contrato_servicio_id; item_contrato_id; unidad_medida_id",
+        "Grano mínimo de aceptación comercial",
+        "Workflow + versionado/supersession",
+        "Certificación",
+        "FROZEN",
+        "No equivale a Parte."
+      ]
+    },
+    {
+      "source_row": 82,
+      "cells": [
+        "78",
+        "CERT",
+        "UnidadComercialFuenteEjecucion",
+        "BRIDGE/LINEAGE",
+        "unidad_comercial_fuente_ejecucion_id",
+        "unidad_comercial_id; unidad_ejecucion_id; imputacion_ejecucion_id?; fuente_version",
+        "Fuente N:M de una UC",
+        "Inmutable por versión",
+        "Sistema",
+        "FROZEN",
+        "Hallazgo relacional clave v2.0."
+      ]
+    },
+    {
+      "source_row": 83,
+      "cells": [
+        "79",
+        "CERT",
+        "ConformidadCliente",
+        "EVENT",
+        "conformidad_cliente_id",
+        "scope target + actor/cliente",
+        "Aceptación/rechazo/observación del cliente",
+        "Timestamp",
+        "Cliente/Integración",
+        "FROZEN",
+        "Scope Parte/UC/Paquete configurable."
+      ]
+    },
+    {
+      "source_row": 84,
+      "cells": [
+        "80",
+        "CERT",
+        "ObservacionCertificacion",
+        "EVENT",
+        "observacion_certificacion_id",
+        "unidad_comercial_id?; paquete_certificacion_id?",
+        "Incidencia que bloquea/condiciona certificación",
+        "Append-only",
+        "Certificaciones",
+        "FROZEN",
+        "No modifica campo."
+      ]
+    },
+    {
+      "source_row": 85,
+      "cells": [
+        "81",
+        "CERT",
+        "AjusteCertificacion",
+        "EVENT",
+        "ajuste_certificacion_id",
+        "unidad_comercial_id?; paquete_certificacion_id?; actor_autorizador_id",
+        "Corrección comercial autorizada",
+        "Append-only",
+        "Certificaciones",
+        "FROZEN",
+        "No corrige verdad operativa."
+      ]
+    },
+    {
+      "source_row": 86,
+      "cells": [
+        "82",
+        "CERT",
+        "PaqueteCertificacion",
+        "AGGREGATE",
+        "paquete_certificacion_id",
+        "contrato_servicio_id; regla_agrupacion_certificacion_id",
+        "Contenedor de UC para conformidad/certificación",
+        "Versionable/lifecycle",
+        "Certificación",
+        "FROZEN",
+        "Puede cruzar Partes."
+      ]
+    },
+    {
+      "source_row": 87,
+      "cells": [
+        "83",
+        "CERT",
+        "PaqueteCertificacionUnidadComercial",
+        "BRIDGE/VERSION",
+        "paquete_certificacion_unidad_comercial_id",
+        "paquete_certificacion_id; unidad_comercial_id",
+        "Inclusión de UC en paquete",
+        "Vigencia/versión inclusión",
+        "Sistema",
+        "FROZEN",
+        "Permite rearmado sin borrar historia."
+      ]
+    },
+    {
+      "source_row": 88,
+      "cells": [
+        "84",
+        "BILLING",
+        "LineaFacturable",
+        "DERIVED",
+        "linea_facturable_id",
+        "unidad_comercial_id; ajuste_certificacion_id?",
+        "UC aceptada traducida a línea interna facturable",
+        "Versionada",
+        "Facturación",
+        "FROZEN",
+        "Consume aceptación, no campo."
+      ]
+    },
+    {
+      "source_row": 89,
+      "cells": [
+        "85",
+        "BILLING",
+        "LoteFacturacion",
+        "AGGREGATE",
+        "lote_facturacion_id",
+        "contrato_id/cliente_id; regla_facturacion_id",
+        "Agrupación administrativa de líneas",
+        "Lifecycle",
+        "Facturación",
+        "FROZEN",
+        "Separado de PaqueteCertificacion."
+      ]
+    },
+    {
+      "source_row": 90,
+      "cells": [
+        "86",
+        "BILLING",
+        "Factura / Documento ERP",
+        "BOUNDARY",
+        "external_document_id",
+        "lote_facturacion_id",
+        "Documento emitido en sistema administrativo externo",
+        "Externo/versionado ERP",
+        "ERP",
+        "OUT OF CORE",
+        "Modelo interno termina en boundary adaptable."
+      ]
+    },
+    {
+      "source_row": 91,
+      "cells": [
+        "87",
+        "TRACE",
+        "DecisionTrace",
+        "EVENT/AUDIT",
+        "decision_trace_id",
+        "subject_ref; ruleset_version_ref; actor_id?; parent_trace_id?",
+        "Explicación append-only de una evaluación relevante del Rule Engine",
+        "decision_at; inmutable",
+        "Motor de reglas",
+        "FROZEN",
+        "Inputs/resultados pueden almacenarse normalizados o como snapshot estructurado; nunca reemplaza entidades de negocio."
+      ]
+    }
+  ]
+}

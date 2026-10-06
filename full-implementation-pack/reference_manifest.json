@@ -1,0 +1,90 @@
+{
+  "pack_version": "v1",
+  "date": "2026-10-06",
+  "product_repo_commit": "0c117aacc6f04a745b3499b0479a938d36821502",
+  "product_online": "https://vds-partes-app.vercel.app/",
+  "functional_online": "https://vds-system-blueprint.vercel.app/#/home",
+  "online_evidence": "See supplied audit addendum; binary equivalence with deployment not asserted.",
+  "sources": [
+    {
+      "path": "references/Diccionario_Canonico_v3.0_BASELINE_FUNCIONAL_1.0_FROZEN_VDS.xlsx",
+      "sha256": "44591d41d15f9b1413334a73aca572fcf4130e1afe038c245fc89cb63c88cedb",
+      "bytes": 559313
+    },
+    {
+      "path": "references/mission_usuario.txt",
+      "sha256": "35e9e76b03059cab2e56a44f10ea8dc849360b107c2a0996288c26625472017c",
+      "bytes": 20652
+    },
+    {
+      "path": "references/product/index.html",
+      "sha256": "bfbc2756e92e850e92bb21ab77955bb5e5df657c159b7479d9f73b95fb236697",
+      "bytes": 190179
+    },
+    {
+      "path": "references/product/README.md",
+      "sha256": "246058ad64b160d1821745dac29bb36fb4fd9ff676d54fc283fca377b26694e4",
+      "bytes": 3395
+    },
+    {
+      "path": "references/VDS_Partes_Auditoria_Producto_Arquitectura_2026-10-06.md",
+      "sha256": "072a69b2fc7ddb5b8d8882a2987f441559271516f46e013eac727dcd4b15bf50",
+      "bytes": 56027
+    },
+    {
+      "path": "references/VDS_Partes_Adenda_Validacion_Online_2026-10-06.md",
+      "sha256": "6385be98f6f7ff8a4fea0c835c13336803eb7eff636f0abebdcd40c130af6008",
+      "bytes": 8736
+    },
+    {
+      "path": "references/VDS_Arquitectura_Funcional_1.0.html",
+      "sha256": "97b3558b380403f9a5067d273d3acae5fcee2bff02b2a386d53523545aeb4748",
+      "bytes": 94129
+    }
+  ],
+  "canonical_counts": {
+    "entities": 87,
+    "relationships": 75,
+    "invariants": 36,
+    "rules": 74,
+    "golden_scenarios": 56,
+    "capture_flows": 13
+  },
+  "extracted_sheets": [
+    "36_Contratos_Funcionales_REV_E",
+    "39_Gates_REV_E_Final",
+    "41_REV_E_Final_Baseline",
+    "42_Modelo_Relacional_Entidades",
+    "43_Modelo_Relacional_Relaciones",
+    "44_Modelo_Relacional_Invariantes",
+    "45_Hallazgos_Modelo_Relacional",
+    "46_ERD_Logico_Core",
+    "47_Nomenclatura_Habilita",
+    "48_Maquinas_Estado_Master",
+    "49_SM_Planificacion",
+    "50_SM_Ejecucion",
+    "51_SM_Habilita_PTW",
+    "52_SM_Directiva_Operativa",
+    "53_SM_Habilita_Eventos",
+    "54_SM_Certificacion",
+    "55_SM_Facturacion",
+    "56_Transiciones_Prohibidas",
+    "57_Matriz_Maestra_Reglas",
+    "58_Prioridad_Conflictos_Reglas",
+    "59_Reglas_Planificacion",
+    "60_Reglas_Ejecucion",
+    "61_Reglas_Habilita_Control",
+    "62_Reglas_Cert_Fact",
+    "63_Contrato_Motor_Reglas",
+    "65_Matriz_Automatizacion_Campo",
+    "66_Presupuesto_UX_2min",
+    "67_Gap_Input_Humano",
+    "68_Contratos_Captura_Flujos",
+    "70_Golden_Scenarios_Master",
+    "71_Golden_Coverage",
+    "72_Freeze_Gate_FINAL",
+    "73_Change_Control_Baseline",
+    "74_Arquitectura_FINAL_FROZEN"
+  ],
+  "extraction_caveat": "data_only values with source row; workbook byte-for-byte copied; workbook authoritative for validation/formulas/styles."
+}

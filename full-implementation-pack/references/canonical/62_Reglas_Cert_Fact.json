@@ -1,0 +1,349 @@
+{
+  "source": "S2",
+  "sheet": "62_Reglas_Cert_Fact",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "REGLAS · CERTIFICACIÓN / FACTURACIÓN / CORRECCIONES",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "16 reglas. Vista operativa derivada de 57_Matriz_Maestra_Reglas; la fuente canónica es la matriz maestra.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "Rule ID",
+        "Dominio",
+        "Prec.",
+        "Clase",
+        "Sujeto",
+        "Trigger",
+        "Estado/contexto",
+        "Condición",
+        "Decisión",
+        "Destino",
+        "Side effects",
+        "Fuerza",
+        "Scope"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "RUL-059",
+        "CERTIFICACIÓN",
+        "P6",
+        "DERIVE",
+        "UnidadComercial",
+        "EXECUTION_AVAILABLE",
+        "UE CERRADA",
+        "Contexto contractual RESUELTO + ReglaGranoUnidadComercial aplicable",
+        "DERIVAR una o más UC y crear lineage N:M",
+        "INCOMPLETA",
+        "UnidadComercial + UnidadComercialFuenteEjecucion",
+        "REQUIRED",
+        "ContratoServicio / Item"
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "RUL-060",
+        "CERTIFICACIÓN",
+        "P6",
+        "TIME_TREATMENT",
+        "UnidadComercial",
+        "DERIVE_QUANTITY",
+        "INCOMPLETA",
+        "Existen EventosTiempo/Transiciones aplicables",
+        "APLICAR ReglaTratamientoTiempo para mapear tiempo real a certificable/no certificable/otro item",
+        "INCOMPLETA",
+        "componentes de cantidad + DecisionTrace",
+        "REQUIRED",
+        "ContratoServicio / Item"
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "RUL-061",
+        "CERTIFICACIÓN",
+        "P6",
+        "MEASUREMENT_TREATMENT",
+        "UnidadComercial",
+        "DERIVE_QUANTITY",
+        "INCOMPLETA",
+        "Item usa medición operacional",
+        "APLICAR ReglaMedicionItem sobre EjecucionMedicion/otras fuentes autorizadas",
+        "INCOMPLETA",
+        "cantidad derivada",
+        "REQUIRED",
+        "ItemContrato"
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "RUL-062",
+        "CERTIFICACIÓN",
+        "P6",
+        "ELIGIBILITY",
+        "UnidadComercial",
+        "CHECK_COMPLETENESS",
+        "INCOMPLETA",
+        "Lineage, item, UM, cantidad y evidencia requerida completos",
+        "MARCAR ELEGIBLE",
+        "ELEGIBLE",
+        "DecisionTrace",
+        "HARD_GATE comercial",
+        "ContratoServicio / Item"
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "RUL-063",
+        "CERTIFICACIÓN",
+        "P6",
+        "OBSERVE",
+        "UnidadComercial",
+        "CLIENT_OBSERVATION",
+        "EN_REVISION",
+        "Cliente/certificador detecta incidencia comercial/documental",
+        "MARCAR OBSERVADA + crear ObservacionCertificacion",
+        "OBSERVADA",
+        "ObservacionCertificacion",
+        "REQUIRED",
+        "Certificación"
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "RUL-064",
+        "CERTIFICACIÓN",
+        "P6",
+        "ADJUST",
+        "AjusteCertificacion",
+        "COMMERCIAL_DIFFERENCE",
+        "UC/Paquete en revisión/observado",
+        "Diferencia es comercial, no error en realidad operacional",
+        "CREAR AjusteCertificacion autorizado; mantener UE intacta",
+        "—",
+        "AjusteCertificacion",
+        "HARD_GATE",
+        "Contrato/cliente"
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "RUL-065",
+        "CERTIFICACIÓN",
+        "P0",
+        "LINEAGE_INVALIDATE",
+        "UnidadComercial",
+        "SOURCE_EXECUTION_AMENDED",
+        "cualquier estado no invalidado",
+        "Alguna fuente_ejecucion_version queda superada por EnmiendaOperativa",
+        "MARCAR supersession=REQUIERE_RECALCULO; bloquear nueva facturación",
+        "estado certificación histórico sin reescribir",
+        "DecisionTrace",
+        "HARD_BLOCK",
+        "Global"
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "RUL-066",
+        "CERTIFICACIÓN",
+        "P6",
+        "SUPERSEDE",
+        "UnidadComercial",
+        "RECALCULATE_AFTER_AMENDMENT",
+        "REQUIERE_RECALCULO / EN_REVISION supersession",
+        "Nueva derivación válida disponible",
+        "CREAR UC nueva que sustituye_a UC previa",
+        "INCOMPLETA/ELEGIBLE",
+        "Nueva UC + lineage + self-reference",
+        "REQUIRED",
+        "ContratoServicio"
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "RUL-067",
+        "CERTIFICACIÓN",
+        "P6",
+        "PACKAGE",
+        "PaqueteCertificacion",
+        "GROUP_ELIGIBLE_UC",
+        "—",
+        "ReglaAgrupacionCertificacion agrupa UC elegibles/vigentes",
+        "CREAR/ACTUALIZAR versión de Paquete mediante bridge versionado",
+        "BORRADOR",
+        "Paquete + inclusiones",
+        "REQUIRED",
+        "ContratoServicio"
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "RUL-068",
+        "CERTIFICACIÓN",
+        "P6",
+        "PARTIALITY",
+        "PaqueteCertificacion",
+        "CLIENT_PARTIAL_ACCEPT",
+        "EN_REVISION",
+        "ReglaParcialidadCertificacion permite parcialidad",
+        "PERMITIR ACEPTADO_PARCIAL y registrar subset explícito",
+        "ACEPTADO_PARCIAL",
+        "ConformidadCliente / inclusiones efectivas",
+        "HARD_GATE comercial",
+        "ContratoServicio / cliente"
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "RUL-069",
+        "CERTIFICACIÓN",
+        "P6",
+        "ACCEPT",
+        "UnidadComercial / Paquete",
+        "ACCEPT",
+        "EN_REVISION",
+        "Conformidad/requisitos aplicables satisfechos",
+        "MARCAR ACEPTADA/ACEPTADO",
+        "ACEPTADA / ACEPTADO",
+        "ConformidadCliente",
+        "HARD_GATE comercial",
+        "Cliente/contrato"
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "RUL-070",
+        "FACTURACIÓN",
+        "P6",
+        "BILLABLE",
+        "LineaFacturable",
+        "BUILD_LINE",
+        "UC ACEPTADA",
+        "UC vigente (no sustituida/inválida) + reglas de facturación satisfechas",
+        "CREAR LineaFacturable",
+        "—",
+        "LineaFacturable",
+        "REQUIRED",
+        "ReglaFacturacion"
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "RUL-071",
+        "FACTURACIÓN",
+        "P6",
+        "LOT",
+        "LoteFacturacion",
+        "GROUP_LINES",
+        "—",
+        "Líneas vigentes compatibles según ReglaFacturacion",
+        "CREAR LoteFacturacion BORRADOR",
+        "BORRADOR",
+        "LoteFacturacion",
+        "REQUIRED",
+        "ReglaFacturacion"
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "RUL-072",
+        "FACTURACIÓN",
+        "P2",
+        "ERP_BOUNDARY",
+        "LoteFacturacion",
+        "SEND_ERP",
+        "VALIDADO",
+        "Adapter disponible + payload válido + líneas siguen vigentes",
+        "PERMITIR ENVIADO_ERP; registrar referencia/idempotency",
+        "ENVIADO_ERP",
+        "DecisionTrace",
+        "HARD_GATE",
+        "Adapter/ERP"
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "RUL-073",
+        "TRACE / CORRECCIÓN",
+        "P0",
+        "AMEND",
+        "Objeto operacional",
+        "REAL_ERROR_DISCOVERED",
+        "objeto cerrado/versionado",
+        "Error afecta verdad operacional real",
+        "CREAR EnmiendaOperativa con old/new/motivo/evidencia/actor; nunca editar silenciosamente",
+        "sin cambio del original",
+        "EnmiendaOperativa + nueva versión efectiva",
+        "HARD_RULE",
+        "Global"
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "RUL-074",
+        "TRACE / AUDIT",
+        "P0",
+        "AUDIT",
+        "Rule Engine",
+        "ANY_DECISION",
+        "cualquier",
+        "Regla produce block/warn/transition/create/derive/override relevante",
+        "PERSISTIR DecisionTrace con inputs normalizados, ruleset/version, reglas evaluadas/aplicadas, resultado, override y actor",
+        "—",
+        "DecisionTrace",
+        "REQUIRED",
+        "Global"
+      ]
+    }
+  ]
+}

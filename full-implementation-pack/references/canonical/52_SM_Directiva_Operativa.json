@@ -1,0 +1,343 @@
+{
+  "source": "S2",
+  "sheet": "52_SM_Directiva_Operativa",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "STATE MACHINE · CONTROL PLANE / DIRECTIVA OPERATIVA",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Las transiciones describen comportamiento funcional. El modelo físico podrá implementar constraints, eventos o workflows, pero no cambiar su semántica sin reabrir la baseline.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "CONTROL PLANE · DirectivaOperativa",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "Instrucción post-despacho append-only. Emitida ≠ recibida ≠ reconocida ≠ aplicada.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "Estado",
+        "Tipo",
+        "Semántica",
+        "Terminal",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "EMITIDA",
+        "Inicial",
+        "Creada en origen; puede estar pendiente de recepción offline.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "RECIBIDA",
+        "Tránsito",
+        "El receptor/dispositivo confirmó recepción técnica.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "RECONOCIDA",
+        "Tránsito",
+        "Actor/sistema emitió ACK semántico.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "APLICADA",
+        "Terminal",
+        "La directiva fue ejecutada y su efecto quedó registrado.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "RECHAZADA",
+        "Terminal",
+        "No pudo/debió aplicarse; causa obligatoria.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "CANCELADA",
+        "Terminal",
+        "Emisor retiró directiva antes de aplicación.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "EXPIRADA",
+        "Terminal",
+        "Perdió vigencia antes de aplicación.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "ID",
+        "Desde",
+        "Evento",
+        "Hacia",
+        "Gate / condición",
+        "Actor",
+        "Efecto",
+        "Tipo",
+        "Nota"
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "T-D01",
+        "—",
+        "EMITIR",
+        "EMITIDA",
+        "Tipo + target + motivo + versión/contexto",
+        "Planificación/Supervisión/Habilita",
+        "Publicar hecho.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "T-D02",
+        "EMITIDA",
+        "RECIBIR",
+        "RECIBIDA",
+        "Entrega técnica confirmada",
+        "Sistema/dispositivo",
+        "Registrar received_at.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "T-D03",
+        "RECIBIDA",
+        "ACK",
+        "RECONOCIDA",
+        "Receptor comprende/acepta procesar",
+        "Actor/Sistema",
+        "Registrar ack_at.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "T-D04",
+        "RECIBIDA/RECONOCIDA",
+        "APLICAR",
+        "APLICADA",
+        "Efecto realizado y trazado",
+        "Campo/Sistema",
+        "Cerrar lifecycle positivo.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "T-D05",
+        "RECIBIDA/RECONOCIDA",
+        "RECHAZAR",
+        "RECHAZADA",
+        "Causa estructurada",
+        "Campo/Sistema",
+        "Cerrar sin aplicación.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "T-D06",
+        "EMITIDA/RECIBIDA",
+        "CANCELAR",
+        "CANCELADA",
+        "Aún no aplicada",
+        "Emisor autorizado",
+        "Retirar instrucción.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 25,
+      "cells": [
+        "T-D07",
+        "EMITIDA/RECIBIDA/RECONOCIDA",
+        "EXPIRAR",
+        "EXPIRADA",
+        "valid_until superado",
+        "Sistema",
+        "Evitar aplicar orden obsoleta.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 28,
+      "cells": [
+        "Desde",
+        "Hacia",
+        "Transición prohibida",
+        "Qué hacer en cambio",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 29,
+      "cells": [
+        "EMITIDA",
+        "APLICADA",
+        "Marcar aplicada sin trazabilidad de recepción/efecto",
+        "Debe existir evidencia de recepción/aplicación; ACK puede ser implícito solo si regla lo permite.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 30,
+      "cells": [
+        "APLICADA",
+        "CANCELADA",
+        "Cancelar retroactivamente",
+        "Emitir nueva directiva compensatoria.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 31,
+      "cells": [
+        "RECHAZADA",
+        "APLICADA",
+        "Aplicar la misma directiva rechazada",
+        "Emitir nueva versión/directiva.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  ]
+}

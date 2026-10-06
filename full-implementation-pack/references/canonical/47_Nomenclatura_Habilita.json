@@ -1,0 +1,167 @@
+{
+  "source": "S2",
+  "sheet": "47_Nomenclatura_Habilita",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "CORRECCIÓN DE NOMENCLATURA · HABILITA",
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Desde v2.1, HABILITA es el nombre oficial del dominio completo que en iteraciones previas se denominó HSE/Safety. La lógica no cambia: cambia la nomenclatura.",
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "ID",
+        "Término legacy",
+        "Término oficial",
+        "Alcance",
+        "Estado"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "N-01",
+        "HSE / Safety Plane",
+        "HABILITA",
+        "Dominio transversal completo: prevención, habilitación, PTW, eventos, investigación, acciones y notificaciones.",
+        "OFICIAL"
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "N-02",
+        "EventoHSE",
+        "EventoHabilita",
+        "Ocurrencia/condición reportable dentro del dominio Habilita.",
+        "OFICIAL"
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "N-03",
+        "CasoHSE",
+        "CasoHabilita",
+        "Workflow de triage, investigación, seguimiento y cierre.",
+        "OFICIAL"
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "N-04",
+        "ReglaEscalamientoHSE",
+        "ReglaEscalamientoHabilita",
+        "Regla que decide respuestas del dominio Habilita.",
+        "OFICIAL"
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "N-05",
+        "EvaluacionEscalamientoHSE",
+        "EvaluacionEscalamientoHabilita",
+        "Snapshot auditable de la regla aplicada.",
+        "OFICIAL"
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "N-06",
+        "NotificacionHSE",
+        "NotificacionHabilita",
+        "Registro de obligación/comunicación del dominio.",
+        "OFICIAL"
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "N-07",
+        "AccionCorrectivaHSE",
+        "AccionCorrectivaHabilita",
+        "Acciones correctivas/preventivas posteriores.",
+        "OFICIAL"
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "N-08",
+        "MedicionEventoHSE",
+        "MedicionEventoHabilita",
+        "Mediciones refinables asociadas al evento.",
+        "OFICIAL"
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "N-09",
+        "HSE-01",
+        "HABILITA-01",
+        "Identificador histórico del módulo transversal de eventos.",
+        "OFICIAL"
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "N-10",
+        "Safety PREVENT",
+        "Habilita PREVENT",
+        "Subcapa preventiva: readiness, documental, PTW y Start Work.",
+        "OFICIAL"
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "N-11",
+        "Safety/Control Plane",
+        "Habilita/Control Plane",
+        "Interacción entre Habilita y DirectivaOperativa.",
+        "OFICIAL"
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "NOTA SOBRE FUENTES EXTERNAS",
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "Las referencias externas cuyo nombre propio contiene HSE/Safety se conservan tal cual. Ejemplos: UK HSE, HSG250, IOGP Health & Safety y URLs de hse.gov.uk. Esas expresiones son nombres de fuentes/estándares externos, no nomenclatura interna de VDS.\n\nAlgunas pestañas históricas pueden conservar 'HSE' en el nombre de la hoja para trazabilidad de versiones anteriores; su contenido y toda la baseline vigente usan Habilita.",
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  ]
+}

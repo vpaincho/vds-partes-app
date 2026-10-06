@@ -1,0 +1,267 @@
+{
+  "source": "S2",
+  "sheet": "67_Gap_Input_Humano",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "INPUT HUMANO QUE QUEDA · JUSTIFICACIÓN Y FUTURA AUTOMATIZACIÓN",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Si un dato está acá, es porque hoy expresa realidad que el sistema no puede conocer de forma confiable por relaciones existentes. Si una fuente futura aparece, cambia el modo de captura, no el modelo canónico.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "ID",
+        "Input humano",
+        "Cuándo aparece",
+        "Por qué no puede autoderivarse hoy",
+        "Cómo minimizamos interacción",
+        "Fuente futura posible",
+        "¿Cambia modelo?",
+        "Estado"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "IH-01",
+        "Confirmar/corregir ubicación",
+        "Inicio/cambio/evento Habilita",
+        "GPS/plan indican candidato, pero la ubicación operacional real debe poder corregirse.",
+        "1 tap sobre candidato; mostrar cercanas, no catálogo completo.",
+        "Geofencing / telemática / beacons",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "IH-02",
+        "Descripción de tarea emergente",
+        "Trabajo no planificado",
+        "El hecho nuevo todavía no existe en Planificación.",
+        "Voz o texto corto; contexto autoderivado alrededor.",
+        "Orden remota integrada / despacho digital",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "IH-03",
+        "Motivo de emergencia/desvío/no realizado",
+        "Excepción operacional",
+        "La causa pertenece al hecho observado por campo.",
+        "Catálogo corto + OTRO con voz breve.",
+        "Clasificación asistida posterior",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "IH-04",
+        "Autorizar inicio contingente",
+        "Emergente con contrato pendiente",
+        "Es una decisión de autoridad, no un dato inferible.",
+        "Aprobar/rechazar con contexto precargado y motivo corto.",
+        "Workflow corporativo integrado",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "IH-05",
+        "Elegir reemplazo real",
+        "Cambio persona/recurso",
+        "El sistema puede filtrar elegibles, pero no siempre saber quién efectivamente tomó el rol.",
+        "Mostrar solo candidatos elegibles/disponibles.",
+        "Telemática/login/NFC futuro",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "IH-06",
+        "Categoría/motivo de espera cuando no es inferible",
+        "Cambio de tiempo",
+        "El sistema ve ausencia de ejecución pero no siempre la causa operacional.",
+        "1 selección contextual; no pedir comentario obligatorio.",
+        "Sensores/dispatch/eventos integrados",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "IH-07",
+        "Valor de medición física",
+        "Servicios con medición",
+        "La realidad medida puede requerir lectura/instrumento humano.",
+        "Mostrar únicamente métrica + UM aplicables; teclado numérico/scan.",
+        "IoT / instrumento conectado",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "IH-08",
+        "Foto/video/voz como evidencia",
+        "Cuando regla/evidencia lo exige",
+        "La evidencia debe capturar una condición real del momento.",
+        "Acceso directo cámara; metadata automática.",
+        "Captura automática / sistemas cliente",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "IH-09",
+        "Resultado/cause de cierre excepcional",
+        "Cierre UE",
+        "El sistema conoce eventos, pero debe confirmar si el trabajo quedó completado/no realizado y por qué cuando hay ambigüedad.",
+        "1 selector; causa aparece solo si corresponde.",
+        "Inferencia asistida de eventos, siempre confirmable",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "IH-10",
+        "Diferencia real de carga/cantidad TP-02",
+        "Movimiento de cargas",
+        "Plan puede contener cantidad prevista, pero campo confirma la real.",
+        "Precargar previsto; pedir solo delta/corrección.",
+        "Báscula/telemetría/documento digital cliente",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "IH-11",
+        "Categoría inicial EventoHabilita",
+        "Flash Report",
+        "El sistema no debe inferir agresivamente la naturaleza de un evento sensible.",
+        "Catálogo corto contextual; Habilita puede reclasificar después.",
+        "Clasificador asistido no vinculante",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "IH-12",
+        "Descripción breve EventoHabilita",
+        "Flash Report",
+        "Solo quien presenció/detectó conoce inicialmente qué ocurrió.",
+        "Voz primero; texto opcional; no pedir causa raíz.",
+        "Speech-to-text / extracción posterior",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "IH-13",
+        "¿Situación controlada?",
+        "Flash Report",
+        "Es una evaluación inmediata del reportante que cambia la respuesta.",
+        "Sí/No, un tap.",
+        "Sensores pueden complementar, no reemplazar juicio",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "IH-14",
+        "Controles/mediciones reales de PTW",
+        "Permiso de trabajo",
+        "Son verificaciones físicas/contextuales necesarias antes del trabajo.",
+        "Precargar checklist aplicable; completar solo valores/controles reales.",
+        "Instrumentos conectados / formularios Habilita integrados",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "IH-15",
+        "Aprobación/firma PTW",
+        "Permiso de trabajo",
+        "Es acto de autoridad/responsabilidad.",
+        "Tap/firma sobre permiso ya armado.",
+        "Firma corporativa integrada",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "IH-16",
+        "Conformidad/firma cliente",
+        "Validación cliente",
+        "Es una decisión de tercero, no de VDS.",
+        "Mostrar resumen y aceptar/rechazar; observación solo si aplica.",
+        "Sistema cliente/API",
+        "NO",
+        "ACEPTADO"
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "IH-17",
+        "Novedad excepcional no modelada",
+        "Cualquier flujo",
+        "Debe existir escape hatch para hechos reales no previstos.",
+        "Voz/texto opcional con categoría OTRO; revisar después para decidir si merece nueva variable.",
+        "Clasificación asistida / mejora continua",
+        "POTENCIAL si se repite",
+        "MONITOREAR"
+      ]
+    }
+  ]
+}

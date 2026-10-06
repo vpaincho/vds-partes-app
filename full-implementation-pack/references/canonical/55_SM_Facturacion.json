@@ -1,0 +1,329 @@
+{
+  "source": "S2",
+  "sheet": "55_SM_Facturacion",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "STATE MACHINE · FACTURACIÓN / LOTE",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Las transiciones describen comportamiento funcional. El modelo físico podrá implementar constraints, eventos o workflows, pero no cambiar su semántica sin reabrir la baseline.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "FACTURACIÓN · LoteFacturacion",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "Agrupación administrativa interna. El modelo funcional termina en el boundary ERP; no inventa estados fiscales específicos.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "Estado",
+        "Tipo",
+        "Semántica",
+        "Terminal",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "BORRADOR",
+        "Inicial",
+        "Líneas facturables seleccionadas.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "VALIDADO",
+        "Pre-ERP",
+        "Lote cumple reglas internas y no contiene líneas inválidas/sustituidas.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "ENVIADO_ERP",
+        "Boundary",
+        "Solicitud/documento enviado al sistema administrativo.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "ACEPTADO_ERP",
+        "Terminal interno",
+        "ERP confirmó recepción/emisión válida.",
+        "Sí interno",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "ERROR_ERP",
+        "Excepción",
+        "ERP rechazó/observó payload.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "CANCELADO",
+        "Terminal",
+        "Lote cancelado antes de aceptación ERP.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "ID",
+        "Desde",
+        "Evento",
+        "Hacia",
+        "Gate / condición",
+        "Actor",
+        "Efecto",
+        "Tipo",
+        "Nota"
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "T-LF01",
+        "—",
+        "CREAR_LOTE",
+        "BORRADOR",
+        "ReglaFacturacion + LineasFacturables vigentes",
+        "Facturación",
+        "Crear lote.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "T-LF02",
+        "BORRADOR",
+        "VALIDAR",
+        "VALIDADO",
+        "Checks de completitud/duplicidad/vigencia",
+        "Sistema/Facturación",
+        "Preparar boundary.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "T-LF03",
+        "VALIDADO",
+        "ENVIAR_ERP",
+        "ENVIADO_ERP",
+        "Adapter disponible + payload válido",
+        "Sistema",
+        "Entregar al ERP.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "T-LF04",
+        "ENVIADO_ERP",
+        "ERP_ACEPTA",
+        "ACEPTADO_ERP",
+        "Referencia externa devuelta",
+        "ERP/Adapter",
+        "Cerrar lifecycle interno exitoso.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "T-LF05",
+        "ENVIADO_ERP",
+        "ERP_ERROR",
+        "ERROR_ERP",
+        "Error/rechazo estructurado",
+        "ERP/Adapter",
+        "Conservar error.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "T-LF06",
+        "ERROR_ERP",
+        "CORREGIR_REENVIAR",
+        "ENVIADO_ERP",
+        "Corrección administrativa permitida",
+        "Facturación",
+        "Reintentar con trazabilidad.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "T-LF07",
+        "BORRADOR/VALIDADO",
+        "CANCELAR",
+        "CANCELADO",
+        "Aún no aceptado por ERP",
+        "Facturación",
+        "Cancelar lote.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 27,
+      "cells": [
+        "Desde",
+        "Hacia",
+        "Transición prohibida",
+        "Qué hacer en cambio",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 28,
+      "cells": [
+        "ACEPTADO_ERP",
+        "BORRADOR",
+        "Editar/reusar lote aceptado",
+        "Crear ajuste/reversión mediante proceso administrativo externo.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 29,
+      "cells": [
+        "ENVIADO_ERP",
+        "CANCELADO",
+        "Cancelar unilateralmente después de aceptación potencial",
+        "Esperar respuesta/usar operación compensatoria.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 30,
+      "cells": [
+        "BORRADOR",
+        "ACEPTADO_ERP",
+        "Saltar validación/envío",
+        "Debe cruzar boundary explícitamente.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  ]
+}

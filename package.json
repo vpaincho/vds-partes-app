@@ -1,0 +1,28 @@
+{
+  "name": "vds-partes",
+  "private": true,
+  "version": "0.0.0",
+  "description": "VDS Partes — Target Application (modular monolith: web + api + worker)",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "verify:baseline": "node scripts/verify-baseline.mjs",
+    "verify:sources": "node scripts/verify-baseline.mjs --all",
+    "legacy": "node scripts/serve-legacy.mjs",
+    "typecheck": "tsc --build --verbose",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "arch:check": "node scripts/arch-check.mjs"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vitest": "5.0.3"
+  }
+}

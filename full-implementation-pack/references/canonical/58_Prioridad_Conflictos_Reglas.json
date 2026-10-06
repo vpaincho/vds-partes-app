@@ -1,0 +1,343 @@
+{
+  "source": "S2",
+  "sheet": "58_Prioridad_Conflictos_Reglas",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "PRECEDENCIA Y RESOLUCIÓN DE CONFLICTOS · RULE ENGINE",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "La precedencia evita que una regla comercial, de UX o de conveniencia contradiga seguridad, historia o una máquina de estado. Menor número = mayor autoridad lógica.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "Nivel",
+        "Familia",
+        "Qué protege",
+        "Ejemplos",
+        "Puede ser overrideada",
+        "Quién/configuración",
+        "Estado"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "P0",
+        "INVARIANTES / HISTORIA / LINEAGE",
+        "Identidad histórica, append-only, supersession, separación de verdades.",
+        "No editar Parte cerrado; invalidar UC si cambia fuente; DecisionTrace.",
+        "NO mediante regla inferior.",
+        "Arquitectura / baseline",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "P1",
+        "HABILITA / HARD GATES",
+        "Seguridad, habilitación documental, PTW y emergencias no controladas.",
+        "Hard block; PTW vigente; override solo si la propia regla lo permite.",
+        "Solo si la misma regla define excepción + autoridad.",
+        "Habilita / procedimiento",
+        "FROZEN estructura"
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "P2",
+        "MÁQUINAS DE ESTADO",
+        "Transiciones válidas y estados terminales.",
+        "No reabrir UE cerrada; validar cierre; ERP boundary.",
+        "NO por conveniencia.",
+        "State machine baseline",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "P3",
+        "CONTROL PLANE",
+        "Instrucciones explícitas post-despacho.",
+        "Suspender/cancelar/reprogramar mediante DirectivaOperativa.",
+        "Puede ser sustituida por nueva directiva válida, no por regla inferior.",
+        "Planificación/Supervisión/Habilita",
+        "FROZEN"
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "P4",
+        "IDENTIDAD / ROUTING",
+        "Qué objeto existe y cuándo se corta/continúa.",
+        "TipoParte; work package; nueva UE vs nuevo Parte.",
+        "Configurable dentro del mismo nivel.",
+        "TipoParte / servicio / cliente",
+        "FROZEN estructura"
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "P5",
+        "OPERACIÓN / TEMPORAL / READINESS",
+        "Cómo se registra la realidad y la preparación.",
+        "Readiness, tiempos, ubicación, asignaciones, triage operativo.",
+        "Sí mediante configuración más específica del mismo nivel.",
+        "Operaciones",
+        "FROZEN estructura"
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "P6",
+        "CONTRATO / CERTIFICACIÓN / FACTURACIÓN",
+        "Cómo se interpreta comercialmente la realidad.",
+        "Grano UC, tratamiento tiempo, parcialidad, facturación.",
+        "Sí por contrato/version/configuración específica.",
+        "ContratoServicio / Item / cliente",
+        "CONFIGURABLE"
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "P7",
+        "UX / AUTOMATIZACIÓN",
+        "Qué se autoderiva, precarga o confirma.",
+        "Flash Report, datos precargados, defaults de captura.",
+        "Sí; nunca puede romper P0-P6.",
+        "Producto / ruleset de UX",
+        "CONFIGURABLE"
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "P8",
+        "ADVISORY / ANALYTICS",
+        "Recomendaciones que no cambian verdad ni estado por sí solas.",
+        "Alertas, sugerencias, scoring futuro.",
+        "Sí / ignorables.",
+        "Analítica / IA futura",
+        "FUERA DEL CORE"
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "ALGORITMO DETERMINISTA CUANDO DOS REGLAS APLICAN",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "1",
+        "PRECEDENCIA",
+        "Gana el menor P. Una regla P6 jamás habilita algo bloqueado por P1.",
+        "Obligatorio",
+        "—",
+        "—",
+        null
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "2",
+        "VIGENCIA TEMPORAL",
+        "Usar la versión efectiva al timestamp del hecho/decisión, no la configuración actual.",
+        "Obligatorio",
+        "—",
+        "—",
+        null
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "3",
+        "ESPECIFICIDAD DE SCOPE",
+        "A igual precedencia: Item/ContratoServicio/cliente específico > servicio/TipoParte > global.",
+        "Obligatorio",
+        "—",
+        "—",
+        null
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "4",
+        "MATCH DE CONTEXTO",
+        "Regla con estado/trigger/contexto exacto > regla broad/default.",
+        "Obligatorio",
+        "—",
+        "—",
+        null
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "5",
+        "CONFIGURACIÓN EXPLÍCITA",
+        "Regla configurada/validada > default contract-agnostic, si ambas están permitidas por la misma precedencia.",
+        "Obligatorio",
+        "—",
+        "—",
+        null
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "6",
+        "DENY VS ALLOW EN MISMO NIVEL",
+        "Si dos reglas igualmente específicas producen decisiones incompatibles y no hay prioridad explícita: FAIL CLOSED / BLOQUEAR Y ESCALAR.",
+        "Obligatorio",
+        "—",
+        "—",
+        null
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "7",
+        "OVERRIDE",
+        "Un override no 'vence' una regla superior: solo satisface una excepción que esa misma regla declaró overrideable.",
+        "Obligatorio",
+        "—",
+        "—",
+        null
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "8",
+        "TRACE",
+        "Persistir reglas candidatas, descartadas por precedencia, regla ganadora, resultado y actor.",
+        "Obligatorio",
+        "DecisionTrace",
+        "—",
+        null
+      ]
+    },
+    {
+      "source_row": 27,
+      "cells": [
+        "ANTIPATRONES QUE EL MOTOR DEBE IMPEDIR",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 28,
+      "cells": [
+        "AP-01",
+        "Commercial overrides Habilita",
+        "“El contrato paga, entonces dejá iniciar sin PTW.”",
+        "PROHIBIDO",
+        "P1 domina P6",
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 29,
+      "cells": [
+        "AP-02",
+        "Current rules rewrite history",
+        "Recalcular una decisión de ayer con reglas de hoy y reemplazar el resultado histórico.",
+        "PROHIBIDO",
+        "Usar versión efectiva + nueva decisión",
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 30,
+      "cells": [
+        "AP-03",
+        "UI default creates truth",
+        "Un campo precargado no confirmado se vuelve realidad aunque contexto sea ambiguo.",
+        "PROHIBIDO",
+        "Derivado debe tener confianza/origen/confirmación según regla",
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 31,
+      "cells": [
+        "AP-04",
+        "Warning = permission",
+        "Mostrar warning y continuar automáticamente.",
+        "PROHIBIDO",
+        "OverrideGate si la regla lo admite",
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 32,
+      "cells": [
+        "AP-05",
+        "One giant rule",
+        "Una regla mezcla ruteo, safety, corte y comercial en una condición enorme.",
+        "PROHIBIDO",
+        "Separar por dominio/precedencia y dejar trace causal",
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 33,
+      "cells": [
+        "AP-06",
+        "Silent fallback",
+        "Si falta contrato/CC/Item, usar códigos comodín.",
+        "PROHIBIDO",
+        "estado_contexto_contractual=PENDIENTE/AMBIGUO",
+        null,
+        null
+      ]
+    }
+  ]
+}

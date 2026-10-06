@@ -1,0 +1,33 @@
+# Line endings are normalised to LF in the index AND in the working tree.
+#
+# Why eol=lf and not the default autocrlf behaviour: `reference_manifest.json`
+# pins byte hashes for the fixed sources (S1 product baseline, S2 workbook).
+# With core.autocrlf=true the checked-out index.html carried CRLF and hashed
+# ffc57d96… while the committed blob hashed bfbc2756… — the manifest value.
+# Same content, 1736 extra CR bytes. Pinning eol=lf makes the working tree
+# match the manifest byte for byte, so hash verification is reproducible on
+# any machine and CI diffs stay stable.
+* text=auto eol=lf
+
+# Received sources are byte-pinned by reference_manifest.json: NEVER normalise them.
+# `* text=auto eol=lf` above would rewrite line endings on checkout, and some of these
+# files were hashed with CRLF (mission_usuario.txt is one), so normalising them silently
+# breaks `npm run verify:sources`. -text means "store and check out exactly these bytes".
+full-implementation-pack/references/** -text
+legacy/baseline/** -text
+legacy/baseline/index.html -linguist-detectable
+
+# Binary sources: never touch.
+*.xlsx binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ico binary
+
+# package-lock.json stays a normal diffable text file on purpose: a lockfile diff is
+# exactly what a reviewer needs in order to audit a dependency change.

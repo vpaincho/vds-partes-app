@@ -1,0 +1,421 @@
+{
+  "source": "S2",
+  "sheet": "61_Reglas_Habilita_Control",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "REGLAS · HABILITA / PTW / CONTROL PLANE",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "20 reglas. Vista operativa derivada de 57_Matriz_Maestra_Reglas; la fuente canónica es la matriz maestra.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "Rule ID",
+        "Dominio",
+        "Prec.",
+        "Clase",
+        "Sujeto",
+        "Trigger",
+        "Estado/contexto",
+        "Condición",
+        "Decisión",
+        "Destino",
+        "Side effects",
+        "Fuerza",
+        "Scope"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "RUL-039",
+        "HABILITA",
+        "P1",
+        "HARD_BLOCK",
+        "EvaluacionHabilitacion",
+        "EVALUATE",
+        "—",
+        "Falta requisito crítico/no overrideable aplicable a persona/recurso/contexto",
+        "RESULTADO BLOQUEA",
+        "—",
+        "EvaluacionHabilitacion",
+        "HARD_BLOCK",
+        "RequisitoHabilitacion"
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "RUL-040",
+        "HABILITA",
+        "P1",
+        "WARNING",
+        "EvaluacionHabilitacion",
+        "EVALUATE",
+        "—",
+        "Requisito genera advertencia overrideable",
+        "RESULTADO ADVIERTE; no continuar sin OverrideGate válido",
+        "—",
+        "EvaluacionHabilitacion",
+        "WARN",
+        "RequisitoHabilitacion"
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "RUL-041",
+        "HABILITA",
+        "P1",
+        "OVERRIDE_GUARD",
+        "OverrideGate",
+        "AUTHORIZE_OVERRIDE",
+        "—",
+        "Gate está explícitamente marcado overrideable + actor tiene autoridad + motivo/evidencia",
+        "PERMITIR override y registrar evento append-only",
+        "—",
+        "OverrideGate",
+        "HARD_GATE",
+        "Regla de gate"
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "RUL-042",
+        "HABILITA",
+        "P1",
+        "PTW_REQUIRED",
+        "PermisoTrabajo",
+        "PRE_START_CHECK",
+        "Parte/UE PREPARADO/PENDIENTE",
+        "Tipo de trabajo/contexto requiere PTW",
+        "EXIGIR ≥1 PTW aplicable VIGENTE antes de Start Work",
+        "—",
+        "DecisionTrace",
+        "HARD_BLOCK",
+        "TipoTrabajo / ubicación / riesgo"
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "RUL-043",
+        "HABILITA",
+        "P1",
+        "PTW_ACTIVATE",
+        "PermisoTrabajo",
+        "ACTIVATE",
+        "APROBADO",
+        "Ventana/contexto real coincide + controles previos válidos",
+        "PERMITIR VIGENTE",
+        "VIGENTE",
+        "DecisionTrace",
+        "HARD_GATE",
+        "PTW ruleset"
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "RUL-044",
+        "HABILITA",
+        "P1",
+        "PTW_SUSPEND",
+        "PermisoTrabajo",
+        "CONDITION_CHANGED",
+        "VIGENTE",
+        "Condición de seguridad/alcance/handover requiere revalidación",
+        "SUSPENDER PTW y bloquear trabajo cubierto",
+        "SUSPENDIDO",
+        "DirectivaOperativa si aplica",
+        "HARD_BLOCK",
+        "PTW ruleset"
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "RUL-045",
+        "HABILITA",
+        "P1",
+        "PTW_EXPIRE",
+        "PermisoTrabajo",
+        "VALID_UNTIL_PASSED",
+        "APROBADO / VIGENTE / SUSPENDIDO",
+        "Superó vigencia",
+        "MARCAR VENCIDO + bloquear nuevos Start/Restart + alertar",
+        "VENCIDO",
+        "Alerta/DecisionTrace",
+        "HARD_BLOCK",
+        "PTW"
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "RUL-046",
+        "HABILITA",
+        "P1",
+        "PTW_CLOSE",
+        "PermisoTrabajo",
+        "CLOSE",
+        "VIGENTE / SUSPENDIDO",
+        "Trabajo/alcance terminado + cierre autorizado/firmas requeridas",
+        "PERMITIR CERRADO",
+        "CERRADO",
+        "Evento cierre",
+        "HARD_GATE",
+        "PTW"
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "RUL-047",
+        "HABILITA",
+        "P7",
+        "FLASH_REPORT",
+        "EventoHabilita",
+        "REPORT_EVENT",
+        "—",
+        "Usuario reporta evento/condición",
+        "AUTODERIVAR contexto activo y solicitar solo inputs mínimos",
+        "REPORTADO",
+        "EventoHabilita",
+        "REQUIRED",
+        "TipoEventoHabilita"
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "RUL-048",
+        "HABILITA",
+        "P5",
+        "TRIAGE",
+        "EventoHabilita",
+        "START_TRIAGE",
+        "REPORTADO",
+        "Evento no descartado/duplicado",
+        "MOVER a EN_TRIAGE y asignar responsable/cola",
+        "EN_TRIAGE",
+        "DecisionTrace",
+        "REQUIRED",
+        "Habilita"
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "RUL-049",
+        "HABILITA",
+        "P5",
+        "CLASSIFY",
+        "EventoHabilita",
+        "CLASSIFY",
+        "EN_TRIAGE",
+        "Información suficiente para categoría/severidad/contexto",
+        "CLASIFICAR sin borrar valores iniciales",
+        "CLASIFICADO",
+        "versión/clasificación vigente",
+        "REQUIRED",
+        "Taxonomía Habilita"
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "RUL-050",
+        "HABILITA",
+        "P1",
+        "ESCALATE",
+        "EventoHabilita",
+        "EVALUATE_ESCALATION",
+        "CLASIFICADO",
+        "Aplica ReglaEscalamientoHabilita",
+        "CREAR EvaluacionEscalamientoHabilita con regla/version + outputs",
+        "CLASIFICADO",
+        "EvaluacionEscalamientoHabilita",
+        "REQUIRED",
+        "Matriz Habilita"
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "RUL-051",
+        "HABILITA",
+        "P1",
+        "UNCONTROLLED_DEFAULT",
+        "EventoHabilita",
+        "FLASH_REPORT_OR_TRIAGE",
+        "REPORTADO / EN_TRIAGE",
+        "situación_controlada = NO",
+        "EMITIR/PROPONER suspensión inmediata del trabajo afectado + escalar triage",
+        "—",
+        "DirectivaOperativa + evaluación",
+        "HARD_BLOCK operacional",
+        "Default baseline / Habilita"
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "RUL-052",
+        "HABILITA",
+        "P1",
+        "OPEN_CASE",
+        "CasoHabilita",
+        "ESCALATION_REQUIRES_CASE",
+        "Evento CLASIFICADO",
+        "EvaluacionEscalamiento exige investigación/caso",
+        "CREAR CasoHabilita ABIERTO",
+        "ABIERTO",
+        "CasoHabilita",
+        "REQUIRED",
+        "ReglaEscalamientoHabilita"
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "RUL-053",
+        "HABILITA",
+        "P5",
+        "CASE_CLOSE_GUARD",
+        "CasoHabilita",
+        "CLOSE_CASE",
+        "LISTO_PARA_CIERRE",
+        "Investigación finalizada + notificaciones requeridas resueltas + no acciones bloqueantes sin verificar",
+        "PERMITIR CERRADO",
+        "CERRADO",
+        "DecisionTrace",
+        "HARD_GATE",
+        "Policy Habilita"
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "RUL-054",
+        "CONTROL PLANE",
+        "P3",
+        "EMIT",
+        "DirectivaOperativa",
+        "POST_DISPATCH_COMMAND",
+        "—",
+        "Existe cambio post-despacho/cancelación/suspensión/reprogramación/repriorización",
+        "CREAR DirectivaOperativa EMITIDA con target/motivo/versión",
+        "EMITIDA",
+        "DirectivaOperativa",
+        "REQUIRED",
+        "TipoDirectiva"
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "RUL-055",
+        "CONTROL PLANE",
+        "P3",
+        "DELIVERY",
+        "DirectivaOperativa",
+        "DEVICE_RECEIVES",
+        "EMITIDA",
+        "Entrega técnica confirmada",
+        "MARCAR RECIBIDA",
+        "RECIBIDA",
+        "received_at",
+        "REQUIRED",
+        "Control Plane"
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "RUL-056",
+        "CONTROL PLANE",
+        "P3",
+        "ACK",
+        "DirectivaOperativa",
+        "ACK",
+        "RECIBIDA",
+        "Receptor reconoce instrucción",
+        "MARCAR RECONOCIDA",
+        "RECONOCIDA",
+        "ack_at",
+        "REQUIRED",
+        "Control Plane"
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "RUL-057",
+        "CONTROL PLANE",
+        "P3",
+        "APPLY",
+        "DirectivaOperativa",
+        "EFFECT_EXECUTED",
+        "RECIBIDA / RECONOCIDA",
+        "Efecto quedó reflejado en target mediante evento/estado válido",
+        "MARCAR APLICADA",
+        "APLICADA",
+        "applied_at + target effect link",
+        "REQUIRED",
+        "Control Plane"
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "RUL-058",
+        "CONTROL PLANE",
+        "P3",
+        "STALE_COMMAND",
+        "DirectivaOperativa",
+        "VALID_UNTIL_PASSED",
+        "EMITIDA / RECIBIDA / RECONOCIDA",
+        "Directiva perdió vigencia antes de aplicar",
+        "MARCAR EXPIRADA y bloquear aplicación",
+        "EXPIRADA",
+        "DecisionTrace",
+        "HARD_BLOCK",
+        "TipoDirectiva"
+      ]
+    }
+  ]
+}

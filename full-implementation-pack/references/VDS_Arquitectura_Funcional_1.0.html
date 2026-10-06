@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/industry-0de016b3-3851-478c-8c4b-1b63116c9736/styles.css">
+  <script src="_ds/industry-0de016b3-3851-478c-8c4b-1b63116c9736/_ds_bundle.js"></script>
+  <meta name="design_doc_mode" content="canvas">
+  <style>
+    body{margin:0;background:#1d2d3d;}
+    a{color:#b5d9fd;} a:hover{color:#f2f2f3;}
+  </style>
+</helmet>
+
+<div id="vds-master" data-screen-label="VDS Arquitectura Funcional 1.0" style="--color-text:#f2f2f3;position:relative;width:3600px;box-sizing:border-box;padding:72px 80px 80px;background-color:#1d2d3d;color:#f2f2f3;font-family:var(--font-body);font-size:15px;line-height:1.3;display:flex;flex-direction:column;gap:40px;">
+
+  <sc-if value="{{ showGrid }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(116,157,196,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(116,157,196,.07) 1px,transparent 1px);background-size:40px 40px;"></div>
+  </sc-if>
+
+  <!-- ═════ HEADER ═════ -->
+  <div style="position:relative;display:grid;grid-template-columns:1fr 1180px;gap:40px;align-items:stretch;">
+    <div class="blueprint" style="border:1px solid #749dc4;padding:28px 34px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="display:flex;gap:28px;align-items:baseline;font:500 14px var(--font-body);letter-spacing:.14em;color:#b5d9fd;">
+        <span>DIAGRAMA MAESTRO DE ARQUITECTURA FUNCIONAL</span><span>FUENTE · Diccionario Canónico v3.0</span><span>HOJA 1 / 1</span>
+      </div>
+      <div style="font:600 92px/0.9 var(--font-heading);letter-spacing:.01em;text-transform:uppercase;">VDS · Sistema de Partes</div>
+      <div style="display:flex;gap:36px;align-items:baseline;">
+        <span style="font:600 36px var(--font-heading);color:#b5d9fd;text-transform:uppercase;letter-spacing:.04em;">Arquitectura Funcional 1.0 · Frozen</span>
+        <span style="font:400 20px var(--font-body);color:#b5d9fd;">De la intención a la realidad, sin recargar información.</span>
+      </div>
+      <div style="display:flex;gap:0;border-top:1px solid #416180;padding-top:14px;font:500 15px var(--font-body);letter-spacing:.06em;">
+        <span style="flex:1;">PLANIFICACIÓN = intención</span><span style="flex:1;color:#7fd1a3;">EJECUCIÓN = realidad</span><span style="flex:1;color:#f2776f;">HABILITA = gates + respuesta</span><span style="flex:1;">CERTIFICACIÓN = aceptación comercial</span><span style="flex:1;color:#b7b7ba;">FACTURACIÓN = boundary administrativo</span>
+      </div>
+    </div>
+
+    <div class="blueprint" style="border:1px solid #749dc4;padding:22px 26px;display:grid;grid-template-columns:1fr 1fr;gap:14px 28px;align-content:start;">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="grid-column:1/-1;font:600 22px var(--font-heading);letter-spacing:.08em;">LEYENDA · LENGUAJE DE CONEXIONES</div>
+      <div style="display:flex;align-items:center;gap:14px;"><div style="display:flex;align-items:center;width:64px;flex:none;"><div style="flex:1;height:1.5px;background:#f2f2f3;"></div><div style="border-left:9px solid #f2f2f3;border-top:5px solid transparent;border-bottom:5px solid transparent;"></div></div><span>Flecha continua · flujo principal / ownership</span></div>
+      <div style="display:flex;align-items:center;gap:14px;"><div style="width:64px;height:12px;background:#2c455d;border-top:2px solid #94bce3;border-bottom:2px solid #94bce3;flex:none;"></div><span>Bus grueso · interfaz transversal</span></div>
+      <div style="display:flex;align-items:center;gap:14px;"><div style="width:64px;border-top:2px dashed #e2b866;flex:none;"></div><span>Punteada · evento / influencia / invalidación</span></div>
+      <div style="display:flex;align-items:center;gap:14px;"><div style="width:64px;height:5px;border-top:1.5px solid #b5d9fd;border-bottom:1.5px solid #b5d9fd;flex:none;"></div><span>Doble · lineage / versionado</span></div>
+      <div style="display:flex;align-items:center;gap:14px;"><div style="width:64px;display:flex;justify-content:center;flex:none;"><div style="width:16px;height:16px;border:2px solid #f2776f;transform:rotate(45deg);"></div></div><span>Gate diamond · decisión / bloqueo</span></div>
+      <div style="display:flex;align-items:center;gap:14px;"><div style="width:64px;display:flex;justify-content:center;flex:none;"><span style="font:600 13px var(--font-heading);border:1px solid #b5d9fd;color:#b5d9fd;padding:1px 6px;">⋈ N:M</span></div><span>Bridge · relación N:M (entidad puente)</span></div>
+      <div style="grid-column:1/-1;display:flex;gap:22px;flex-wrap:wrap;border-top:1px solid #416180;padding-top:12px;font-size:14px;">
+        <span style="display:flex;align-items:center;gap:8px;"><span style="width:14px;height:14px;border:2px solid #7fd1a3;"></span>Fuente de verdad / operación</span>
+        <span style="display:flex;align-items:center;gap:8px;"><span style="width:14px;height:14px;border:2px solid #e2b866;"></span>Configuración / regla</span>
+        <span style="display:flex;align-items:center;gap:8px;"><span style="width:14px;height:14px;border:1.5px solid #b5d9fd;"></span>Puente / lineage</span>
+        <span style="display:flex;align-items:center;gap:8px;"><span style="width:14px;height:14px;border:1.5px dashed #b7b7ba;"></span>Proyección / boundary</span>
+        <span style="display:flex;align-items:center;gap:8px;"><span style="width:14px;height:14px;background:#f2776f;"></span>Gate / bloqueo</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════ 00 CONFIGURATION PLANE ═════ -->
+  <div class="blueprint" data-screen-label="00 Configuration Plane" style="position:relative;border:1px solid #e2b866;padding:22px 28px 26px;">
+    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+    <div style="display:flex;align-items:baseline;gap:24px;margin-bottom:18px;">
+      <span style="font:600 32px var(--font-heading);letter-spacing:.06em;color:#e2b866;">00 · CONFIGURATION PLANE</span>
+      <span style="font:500 15px var(--font-body);letter-spacing:.1em;color:#b5d9fd;">MEMORIA DEL SISTEMA · REGLAS Y MAESTROS VERSIONADOS · 32 ENTIDADES</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1.9fr 1.35fr 0.9fr 1fr 1fr 1.15fr 0.8fr;gap:26px;align-items:start;">
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font:600 15px var(--font-heading);letter-spacing:.12em;color:#e2b866;">CADENA CONTRACTUAL</div>
+        <div style="display:flex;align-items:center;">
+          <div style="border:1.5px solid #e2b866;padding:8px 10px;flex:1;"><div style="font:600 19px var(--font-heading);">Cliente</div><div style="font-size:12px;color:#b5d9fd;">MASTER</div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex:none;"><span style="font-size:11px;color:#b5d9fd;">1 · posee</span><div style="display:flex;align-items:center;width:100%;"><div style="flex:1;height:1.5px;background:#e2b866;"></div><div style="border-left:7px solid #e2b866;border-top:4px solid transparent;border-bottom:4px solid transparent;"></div></div></div>
+          <div style="border:1.5px solid #e2b866;padding:8px 10px;flex:1;"><div style="font:600 19px var(--font-heading);">Contrato</div><div style="font-size:12px;color:#b5d9fd;">MASTER</div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex:none;"><span style="font-size:11px;color:#b5d9fd;">versiona</span><div style="height:5px;width:100%;border-top:1.5px solid #b5d9fd;border-bottom:1.5px solid #b5d9fd;box-sizing:border-box;"></div></div>
+          <div style="border:1.5px solid #e2b866;padding:8px 10px;flex:1.2;"><div style="font:600 19px var(--font-heading);">ContratoVersion</div><div style="font-size:12px;color:#b5d9fd;">VERSION</div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex:none;"><span style="font-size:11px;color:#b5d9fd;">configura</span><div style="display:flex;align-items:center;width:100%;"><div style="flex:1;height:1.5px;background:#e2b866;"></div><div style="border-left:7px solid #e2b866;border-top:4px solid transparent;border-bottom:4px solid transparent;"></div></div></div>
+          <div style="border:2.5px solid #e2b866;padding:8px 10px;flex:1.3;"><div style="font:600 19px var(--font-heading);">ContratoServicio</div><div style="font-size:12px;color:#b5d9fd;">CONFIG · FK versión + servicio</div></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;align-items:center;white-space:nowrap;">
+          <span style="font-size:12px;color:#b5d9fd;">se configura en ↑</span>
+          <div style="border:1px solid #e2b866;padding:6px 10px;"><span style="font:600 17px var(--font-heading);">Servicio</span> <span style="font-size:12px;color:#b5d9fd;">MASTER</span></div>
+          <div style="border:1px solid #e2b866;padding:6px 10px;"><span style="font:600 17px var(--font-heading);">Actividad</span> <span style="font-size:12px;color:#b5d9fd;">MASTER</span></div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font:600 15px var(--font-heading);letter-spacing:.12em;color:#e2b866;">CS ↔ CC · RELACIÓN CONFIGURABLE</div>
+        <div style="display:flex;align-items:center;">
+          <div style="border:1px solid #e2b866;padding:8px 10px;flex:none;font:600 17px var(--font-heading);">ContratoServicio</div>
+          <div style="width:22px;height:1.5px;background:#b5d9fd;flex:none;"></div>
+          <div style="border:1.5px solid #b5d9fd;padding:8px 10px;flex:1;"><div style="display:flex;justify-content:space-between;"><span style="font:600 17px var(--font-heading);">ContratoServicioCentroCosto</span></div><div style="font-size:12px;color:#b5d9fd;">⋈ BRIDGE · 0..N ↔ 0..N · versionable</div></div>
+          <div style="width:22px;height:1.5px;background:#b5d9fd;flex:none;"></div>
+          <div style="border:1.5px solid #e2b866;padding:8px 10px;flex:none;"><div style="font:600 17px var(--font-heading);">CentroCosto</div><div style="font-size:12px;color:#b5d9fd;">MASTER · independiente</div></div>
+        </div>
+        <div style="font:600 14px var(--font-heading);letter-spacing:.08em;color:#e2b866;">CentroCosto ≠ Contrato · no es hijo rígido del contrato</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="font:600 15px var(--font-heading);letter-spacing:.12em;color:#e2b866;">ÍTEM + UM</div>
+        <div style="border:1.5px solid #e2b866;padding:7px 10px;"><div style="font:600 17px var(--font-heading);">ItemContrato</div><div style="font-size:12px;color:#b5d9fd;">CONFIG · FK CS + UM</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="border:1px solid #e2b866;padding:6px 9px;font:600 15px var(--font-heading);">UnidadMedida</div>
+          <div style="border:1px solid #e2b866;padding:6px 9px;font:600 15px var(--font-heading);">ReglaMedicionItem</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="font:600 15px var(--font-heading);letter-spacing:.12em;color:#e2b866;">REGLAS · PARAMETRIZA CS</div>
+        <div style="border:1px solid #e2b866;padding:5px 9px;font:600 15px var(--font-heading);">ReglaTratamientoTiempo</div>
+        <div style="border:1px solid #e2b866;padding:5px 9px;font:600 15px var(--font-heading);">ReglaGranoUnidadComercial</div>
+        <div style="border:1px solid #e2b866;padding:5px 9px;font:600 15px var(--font-heading);">ReglaAgrupacionCertificacion</div>
+        <div style="border:1px solid #e2b866;padding:5px 9px;font:600 15px var(--font-heading);">ReglaParcialidadCertificacion</div>
+        <div style="border:1px solid #e2b866;padding:5px 9px;font:600 15px var(--font-heading);">ReglaFacturacion</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="font:600 15px var(--font-heading);letter-spacing:.12em;color:#e2b866;">TIPOPARTE · CATÁLOGO CERRADO</div>
+        <div style="border:2.5px solid #e2b866;padding:7px 10px;"><div style="font:600 19px var(--font-heading);">TipoParte</div><div style="font-size:12px;color:#b5d9fd;">MASTER/RULE · 3 únicos baseline</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font:600 14px var(--font-heading);text-align:center;">
+          <div style="border:1px solid #e2b866;padding:5px 4px;">TP-01<br>Intervención</div>
+          <div style="border:1px solid #e2b866;padding:5px 4px;">TP-02<br>Transporte</div>
+          <div style="border:1px solid #e2b866;padding:5px 4px;">TP-03<br>Cuadrilla</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div style="border:1px solid #e2b866;padding:5px 8px;font:600 14px var(--font-heading);">TipoParteComponente</div>
+          <div style="border:1px solid #e2b866;padding:5px 8px;font:600 14px var(--font-heading);">ReglaCorteTipoParte</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="font:600 15px var(--font-heading);letter-spacing:.12em;color:#e2b866;">MAESTROS OPERATIVOS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font:600 15px var(--font-heading);">
+          <div style="border:1px solid #e2b866;padding:5px 8px;">Persona</div>
+          <div style="border:1px solid #e2b866;padding:5px 8px;">PerfilOperativo</div>
+          <div style="grid-column:1/-1;border:1px solid #b5d9fd;padding:5px 8px;">PersonaPerfilOperativo <span style="font:400 12px var(--font-body);color:#b5d9fd;">⋈ BRIDGE</span></div>
+          <div style="border:1px solid #e2b866;padding:5px 8px;">TipoRecurso</div>
+          <div style="border:1px solid #e2b866;padding:5px 8px;">Recurso</div>
+          <div style="border:1px solid #e2b866;padding:5px 8px;">UbicacionTecnica</div>
+          <div style="border:1px solid #e2b866;padding:5px 8px;">ActivoCliente</div>
+          <div style="grid-column:1/-1;border:1px solid #e2b866;padding:5px 8px;">Cuadrilla</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="font:600 15px var(--font-heading);letter-spacing:.12em;color:#e2b866;">REGLAS HABILITA</div>
+        <div style="border:1px solid #e2b866;padding:5px 9px;font:600 15px var(--font-heading);">ReglaInicioEmergente</div>
+        <div style="border:1px solid #e2b866;padding:5px 9px;font:600 15px var(--font-heading);">ReglaEscalamientoHabilita</div>
+        <div style="font-size:12.5px;color:#b5d9fd;margin-top:4px;">Requisito / Documento / Cumplimiento: dominio CONFIG, representados en 03 · Control Documental</div>
+      </div>
+    </div>
+    <div style="margin-top:18px;height:12px;background:#2c455d;border-top:2px solid #e2b866;border-bottom:2px solid #e2b866;position:relative;">
+      <span style="position:absolute;right:14px;top:-9px;background:#1d2d3d;padding:0 10px;font:600 14px var(--font-heading);letter-spacing:.12em;color:#e2b866;">CONFIG BUS · RULESET VIGENTE ▼ MASTER RULE ENGINE</span>
+    </div>
+  </div>
+
+  <!-- ═════ 01 MASTER RULE ENGINE ═════ -->
+  <div class="blueprint" data-screen-label="01 Master Rule Engine" style="position:relative;border:1.5px solid #94bce3;padding:22px 28px 26px;">
+    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+    <div style="display:flex;align-items:baseline;gap:24px;margin-bottom:18px;">
+      <span style="font:600 32px var(--font-heading);letter-spacing:.06em;">01 · MASTER RULE ENGINE</span>
+      <span style="font:500 15px var(--font-body);letter-spacing:.1em;color:#b5d9fd;">DECISIÓN DETERMINISTA · EXPLICABLE · IDEMPOTENTE · PRECEDENCIA ESTRICTA (menor P = mayor autoridad)</span>
+    </div>
+    <div style="display:grid;grid-template-columns:250px 34px 1fr 34px 400px 34px 400px 34px 300px;align-items:stretch;">
+
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="font:600 14px var(--font-heading);letter-spacing:.12em;color:#b5d9fd;">INPUT BUS</div>
+        <div style="border:1px solid #94bce3;padding:7px 10px;"><div style="font:600 18px var(--font-heading);">EVENTO</div><div style="font-size:12px;color:#b5d9fd;">START_WORK · CAMBIO · CIERRE</div></div>
+        <div style="text-align:center;font:600 16px var(--font-heading);color:#94bce3;line-height:1;">+</div>
+        <div style="border:1px solid #94bce3;padding:7px 10px;"><div style="font:600 18px var(--font-heading);">ESTADO</div><div style="font-size:12px;color:#b5d9fd;">actual + historia / versión</div></div>
+        <div style="text-align:center;font:600 16px var(--font-heading);color:#94bce3;line-height:1;">+</div>
+        <div style="border:1px solid #94bce3;padding:7px 10px;"><div style="font:600 18px var(--font-heading);">CONTEXTO</div><div style="font-size:12px;color:#b5d9fd;">plan · personas · recursos · ubicación</div></div>
+        <div style="text-align:center;font:600 16px var(--font-heading);color:#94bce3;line-height:1;">+</div>
+        <div style="border:1.5px solid #e2b866;padding:7px 10px;"><div style="font:600 18px var(--font-heading);">RULESET VIGENTE</div><div style="font-size:12px;color:#b5d9fd;">versión al timestamp del hecho</div></div>
+      </div>
+      <div style="display:flex;align-items:center;"><div style="flex:1;height:10px;background:#2c455d;border-top:1.5px solid #94bce3;border-bottom:1.5px solid #94bce3;"></div><div style="border-left:10px solid #94bce3;border-top:9px solid transparent;border-bottom:9px solid transparent;"></div></div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="font:600 14px var(--font-heading);letter-spacing:.12em;color:#b5d9fd;">EVALUATION PIPELINE · P0 → P8</div>
+        <div style="display:grid;grid-template-columns:repeat(9,1fr);border:1.5px solid #94bce3;flex:1;">
+          <div style="border-right:1px solid #416180;padding:12px 10px;display:flex;flex-direction:column;gap:6px;"><div style="font:600 40px/1 var(--font-heading);">P0</div><div style="font:600 17px/1.05 var(--font-heading);">INVARIANTES</div><div style="font-size:12.5px;color:#b5d9fd;">historia · lineage · no-delete</div></div>
+          <div style="border-right:1px solid #416180;padding:12px 10px;display:flex;flex-direction:column;gap:6px;background:rgba(242,119,111,.10);"><div style="font:600 40px/1 var(--font-heading);color:#f2776f;">P1</div><div style="font:600 17px/1.05 var(--font-heading);">HABILITA</div><div style="font-size:12.5px;color:#b5d9fd;">hard gates · PTW · overrides</div></div>
+          <div style="border-right:1px solid #416180;padding:12px 10px;display:flex;flex-direction:column;gap:6px;"><div style="font:600 40px/1 var(--font-heading);">P2</div><div style="font:600 17px/1.05 var(--font-heading);">STATE MACHINES</div><div style="font-size:12.5px;color:#b5d9fd;">transición válida · terminales</div></div>
+          <div style="border-right:1px solid #416180;padding:12px 10px;display:flex;flex-direction:column;gap:6px;"><div style="font:600 40px/1 var(--font-heading);">P3</div><div style="font:600 17px/1.05 var(--font-heading);">CONTROL PLANE</div><div style="font-size:12.5px;color:#b5d9fd;">directivas vigentes · ACK</div></div>
+          <div style="border-right:1px solid #416180;padding:12px 10px;display:flex;flex-direction:column;gap:6px;"><div style="font:600 40px/1 var(--font-heading);">P4</div><div style="font:600 17px/1.05 var(--font-heading);">IDENTIDAD / ROUTING</div><div style="font-size:12.5px;color:#b5d9fd;">TipoParte · corte · UE vs Parte</div></div>
+          <div style="border-right:1px solid #416180;padding:12px 10px;display:flex;flex-direction:column;gap:6px;"><div style="font:600 40px/1 var(--font-heading);">P5</div><div style="font:600 17px/1.05 var(--font-heading);">OPERACIÓN / TEMPORAL</div><div style="font-size:12.5px;color:#b5d9fd;">readiness · tiempos · recursos</div></div>
+          <div style="border-right:1px solid #416180;padding:12px 10px;display:flex;flex-direction:column;gap:6px;"><div style="font:600 40px/1 var(--font-heading);">P6</div><div style="font:600 17px/1.05 var(--font-heading);">CONTRATO / CERT / FACT</div><div style="font-size:12.5px;color:#b5d9fd;">UC · cantidades · billing</div></div>
+          <div style="border-right:1px solid #416180;padding:12px 10px;display:flex;flex-direction:column;gap:6px;"><div style="font:600 40px/1 var(--font-heading);">P7</div><div style="font:600 17px/1.05 var(--font-heading);">UX / AUTOMATIZACIÓN</div><div style="font-size:12.5px;color:#b5d9fd;">autoderivar · confirmar</div></div>
+          <div style="padding:12px 10px;display:flex;flex-direction:column;gap:6px;"><div style="font:600 40px/1 var(--font-heading);color:#b7b7ba;">P8</div><div style="font:600 17px/1.05 var(--font-heading);">ADVISORY / ANALYTICS</div><div style="font-size:12.5px;color:#b5d9fd;">no cambia verdad ni estado</div></div>
+        </div>
+        <div style="display:flex;gap:0;border:1px solid #416180;font-size:13px;">
+          <span style="padding:6px 10px;border-right:1px solid #416180;font:600 14px var(--font-heading);letter-spacing:.08em;">74 REGLAS CANÓNICAS</span>
+          <span style="flex:1;padding:6px 10px;border-right:1px solid #416180;">Routing / Identidad · 8</span>
+          <span style="flex:1;padding:6px 10px;border-right:1px solid #416180;">Planificación · 12</span>
+          <span style="flex:1;padding:6px 10px;border-right:1px solid #416180;">Ejecución · 18</span>
+          <span style="flex:1;padding:6px 10px;border-right:1px solid #416180;">Habilita + Control · 20</span>
+          <span style="flex:1;padding:6px 10px;border-right:1px solid #416180;">Certificación · 11</span>
+          <span style="flex:1;padding:6px 10px;border-right:1px solid #416180;">Facturación · 3</span>
+          <span style="flex:1;padding:6px 10px;">Trace / Corrección · 2</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;"><div style="flex:1;height:1.5px;background:#94bce3;"></div><div style="border-left:9px solid #94bce3;border-top:5px solid transparent;border-bottom:5px solid transparent;"></div></div>
+
+      <div style="border:1.5px solid #f2776f;padding:12px 16px;display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;align-items:center;gap:12px;"><div style="width:18px;height:18px;border:2px solid #f2776f;transform:rotate(45deg);flex:none;margin-left:3px;"></div><span style="font:600 20px var(--font-heading);letter-spacing:.06em;">CONFLICT RESOLVER</span></div>
+        <div style="display:grid;grid-template-columns:22px 1fr;gap:3px 6px;font-size:14px;margin-top:4px;">
+          <span style="color:#94bce3;">1</span><span>precedencia <span style="color:#b5d9fd;">· gana el menor P</span></span>
+          <span style="color:#94bce3;">2</span><span>vigencia <span style="color:#b5d9fd;">· versión efectiva al hecho</span></span>
+          <span style="color:#94bce3;">3</span><span>scope más específico</span>
+          <span style="color:#94bce3;">4</span><span>contexto más específico</span>
+          <span style="color:#94bce3;">5</span><span>configuración explícita</span>
+          <span style="color:#94bce3;">6</span><span>default contract-agnostic</span>
+          <span style="color:#f2776f;">7</span><span style="color:#f2776f;font-weight:500;">FAIL CLOSED · bloquear y escalar</span>
+        </div>
+        <div style="font-size:12.5px;color:#b5d9fd;border-top:1px solid #416180;padding-top:6px;">Override no vence regla superior: solo satisface la excepción que esa regla declaró.</div>
+      </div>
+      <div style="display:flex;align-items:center;"><div style="flex:1;height:1.5px;background:#94bce3;"></div><div style="border-left:9px solid #94bce3;border-top:5px solid transparent;border-bottom:5px solid transparent;"></div></div>
+
+      <div style="border:2px solid #94bce3;padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
+        <div style="font:600 20px var(--font-heading);letter-spacing:.06em;">DECISION ENVELOPE</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font:600 15px var(--font-heading);letter-spacing:.04em;">
+          <span style="border:1px solid #7fd1a3;color:#7fd1a3;padding:5px 8px;">ALLOW</span>
+          <span style="background:#f2776f;color:#1d2d3d;padding:5px 8px;">BLOCK</span>
+          <span style="border:1px solid #e2b866;color:#e2b866;padding:5px 8px;">WARN</span>
+          <span style="border:1px solid #e2b866;color:#e2b866;padding:5px 8px;">REQUIRE_CONFIRMATION</span>
+          <span style="border:1px solid #94bce3;padding:5px 8px;">STATE TRANSITION</span>
+          <span style="border:1px solid #94bce3;padding:5px 8px;">CREATE OBJECT</span>
+          <span style="grid-column:1/-1;border:1px solid #94bce3;padding:5px 8px;">SIDE EFFECT · idempotente</span>
+        </div>
+        <div style="font-size:12.5px;color:#b5d9fd;">+ rules applied · ruleset version · actor</div>
+      </div>
+      <div style="display:flex;align-items:center;flex-direction:column;justify-content:center;"><div style="width:100%;height:5px;border-top:1.5px solid #b5d9fd;border-bottom:1.5px solid #b5d9fd;"></div></div>
+
+      <div style="border:1.5px solid #b5d9fd;padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font:600 22px var(--font-heading);">DecisionTrace</span><span style="font-size:12px;color:#b5d9fd;">EVENT/AUDIT</span></div>
+        <div style="font-size:13.5px;line-height:1.45;">inputs normalizados<br>reglas candidatas + descartadas<br>regla ganadora + resultado</div>
+        <div style="font-size:13px;color:#b5d9fd;border-top:1px solid #416180;padding-top:6px;">Correlation key: mismo evento + contexto = no duplicar side effects. Cambio de ruleset → nueva traza, NO overwrite.</div>
+        <div style="font:600 13px var(--font-heading);letter-spacing:.1em;color:#b5d9fd;margin-top:auto;">▼ TRACE / LINEAGE BUS</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;font:600 17px var(--font-heading);letter-spacing:.1em;">REGLA MADRE · EL MOTOR NO CREA UNA SEGUNDA VERDAD <span style="font:400 15px var(--font-body);letter-spacing:0;color:#b5d9fd;">— coordina responsabilidades de dominio mediante reglas versionadas y deja evidencia de cada decisión.</span></div>
+  </div>
+
+  <!-- ═════ 02 DATA PLANE ═════ -->
+  <div data-screen-label="02 Data Plane" style="position:relative;display:flex;flex-direction:column;gap:14px;">
+    <div style="display:flex;align-items:baseline;gap:24px;">
+      <span style="font:600 32px var(--font-heading);letter-spacing:.06em;">02 · DATA PLANE</span>
+      <span style="font:500 15px var(--font-body);letter-spacing:.1em;color:#b5d9fd;">INTENCIÓN → REALIDAD → ACEPTACIÓN · LECTURA IZQUIERDA → DERECHA</span>
+    </div>
+    <div style="display:grid;grid-template-columns:740px 190px 1460px 190px 740px;gap:30px;align-items:stretch;">
+
+      <!-- PLANIFICACIÓN -->
+      <div class="blueprint" data-screen-label="Planificación" style="position:relative;border:1.5px solid #94bce3;padding:22px 24px;display:flex;flex-direction:column;gap:14px;">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div><div style="font:600 30px var(--font-heading);letter-spacing:.06em;">PLANIFICACIÓN</div><div style="font:500 14px var(--font-body);letter-spacing:.1em;color:#b5d9fd;">INTENCIÓN · 15 ENTIDADES (13 aquí + 2 en Control Plane)</div></div>
+
+        <div style="display:grid;grid-template-columns:268px minmax(0,1fr);gap:22px;">
+          <div style="display:flex;flex-direction:column;align-items:stretch;">
+            <div style="border:1.5px solid #7fd1a3;padding:9px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 20px var(--font-heading);">DemandaOperativa</span><span style="font-size:11.5px;color:#b5d9fd;">TRANSACTION</span></div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;height:30px;"><div style="flex:1;width:1.5px;background:#94bce3;"></div><div style="border-top:7px solid #94bce3;border-left:4px solid transparent;border-right:4px solid transparent;"></div></div>
+            <div style="border:1.5px solid #7fd1a3;padding:9px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 20px var(--font-heading);">Planificacion</span><span style="font-size:11.5px;color:#b5d9fd;">AGGREGATE</span></div></div>
+            <div style="display:flex;align-items:center;gap:10px;height:30px;padding-left:125px;"><div style="width:5px;height:100%;border-left:1.5px solid #b5d9fd;border-right:1.5px solid #b5d9fd;"></div><span style="font-size:12px;color:#b5d9fd;">1 · tiene versiones</span></div>
+            <div style="border:1.5px solid #7fd1a3;padding:9px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 20px var(--font-heading);">PlanificacionVersion</span><span style="font-size:11.5px;color:#b5d9fd;">VERSION</span></div><div style="font-size:12.5px;color:#b5d9fd;">inmutable · aprobada</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;height:30px;"><div style="flex:1;width:1.5px;background:#94bce3;"></div><div style="border-top:7px solid #94bce3;border-left:4px solid transparent;border-right:4px solid transparent;"></div></div>
+            <div style="border:1.5px solid #7fd1a3;padding:9px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 20px var(--font-heading);">AsignacionPlanificada</span><span style="font-size:11.5px;color:#b5d9fd;">TRANSACTION</span></div><div style="font-size:12.5px;color:#b5d9fd;">trabajo despachable previsto</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;height:30px;"><div style="flex:1;width:1.5px;background:#94bce3;"></div><div style="border-top:7px solid #94bce3;border-left:4px solid transparent;border-right:4px solid transparent;"></div></div>
+            <div style="border:1.5px solid #7fd1a3;padding:9px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 20px var(--font-heading);">UnidadPlanificada</span><span style="font-size:11.5px;color:#b5d9fd;">TRANSACTION</span></div><div style="font-size:12.5px;color:#b5d9fd;">FK demanda</div></div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div style="border:1px solid #416180;padding:10px;display:flex;flex-direction:column;gap:6px;">
+                <div style="font:600 14px var(--font-heading);letter-spacing:.1em;color:#b5d9fd;">REQUERIMIENTO · QUÉ</div>
+                <div style="border:1px solid #7fd1a3;padding:6px 7px;font:600 14px var(--font-heading);">RequerimientoRecurso</div>
+                <div style="border:1px solid #7fd1a3;padding:6px 7px;font:600 14px var(--font-heading);">RequerimientoCompetencia</div>
+                <div style="font-size:13px;font-style:italic;">“necesito una retro”</div>
+              </div>
+              <div style="border:1px solid #416180;padding:10px;display:flex;flex-direction:column;gap:6px;">
+                <div style="font:600 14px var(--font-heading);letter-spacing:.1em;color:#b5d9fd;">NOMINACIÓN · QUIÉN</div>
+                <div style="border:1px solid #b5d9fd;padding:6px 7px;font:600 14px var(--font-heading);">AsignacionPersonaPlanificada</div>
+                <div style="border:1px solid #b5d9fd;padding:6px 7px;font:600 14px var(--font-heading);">AsignacionRecursoPlanificada</div>
+                <div style="font-size:13px;font-style:italic;">“asigno la RET-803”</div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:center;font:600 15px var(--font-heading);letter-spacing:.08em;color:#e2b866;">REQUERIMIENTO ≠ NOMINACIÓN · ⋈ 0..N ↔ 0..N temporal</div>
+
+            <div style="border:1.5px solid #94bce3;padding:12px;display:flex;flex-direction:column;gap:8px;">
+              <div style="font:600 18px var(--font-heading);letter-spacing:.08em;">READINESS TEMPORAL</div>
+              <div style="display:flex;align-items:center;">
+                <div style="border:1px solid #7fd1a3;padding:6px 8px;"><div style="font:600 15px var(--font-heading);">EvaluacionPlanificacion</div><div style="font-size:11.5px;color:#b5d9fd;">EVENT/SNAPSHOT</div></div>
+                <div style="display:flex;align-items:center;width:28px;flex:none;"><div style="flex:1;height:1.5px;background:#94bce3;"></div><div style="border-left:7px solid #94bce3;border-top:4px solid transparent;border-bottom:4px solid transparent;"></div></div>
+                <div style="border:2px solid #7fd1a3;color:#7fd1a3;padding:6px 12px;font:600 18px var(--font-heading);letter-spacing:.1em;">READY</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:30px;border-top:2px dashed #e2b866;flex:none;"></div>
+                <div style="border:1px dashed #e2b866;padding:6px 8px;"><div style="font:600 15px var(--font-heading);">EventoInvalidacionReadiness</div><div style="font-size:11.5px;color:#b5d9fd;">EVENT · doc · disponibilidad · fecha · alcance</div></div>
+              </div>
+              <div style="font-size:13px;color:#e2b866;">READY no es un checkbox eterno: vale hasta la próxima invalidación.</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:auto;border:1.5px dashed #b7b7ba;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          <div><div style="font:600 20px var(--font-heading);color:#b7b7ba;">ExecutionContextBundle</div><div style="font-size:12.5px;color:#b7b7ba;">PlanificacionVersion → proyecta · versionada</div></div>
+          <div style="font:600 14px var(--font-heading);letter-spacing:.08em;color:#b7b7ba;text-align:right;white-space:nowrap;">PROJECTION / CACHE OFFLINE<br>NO SOURCE OF TRUTH</div>
+        </div>
+      </div>
+
+      <!-- INTERFACE A -->
+      <div style="position:relative;display:flex;flex-direction:column;background:#2c455d;border-left:3px solid #94bce3;border-right:3px solid #94bce3;padding:18px 12px;gap:10px;">
+        <div style="font:600 26px/1 var(--font-heading);letter-spacing:.06em;">INTERFACE A</div>
+        <div style="font:600 13px var(--font-heading);letter-spacing:.08em;color:#b5d9fd;">PLANIFICACIÓN → EJECUCIÓN</div>
+        <div style="display:flex;align-items:center;margin:4px -12px;"><div style="flex:1;height:2px;background:#94bce3;"></div><div style="border-left:11px solid #94bce3;border-top:7px solid transparent;border-bottom:7px solid transparent;"></div></div>
+        <div style="display:flex;flex-direction:column;gap:7px;font-size:14px;">
+          <span>› versión aprobada</span><span>› asignación</span><span>› contexto</span><span>› personas previstas</span><span>› recursos previstos</span><span>› readiness</span><span>› TipoParte previsto / resuelto</span><span>› reglas / config relevante</span>
+        </div>
+        <div style="margin-top:18px;border:1.5px solid #b5d9fd;padding:8px;background:#1d2d3d;">
+          <div style="font:600 15px var(--font-heading);">VinculoPlanEjecucion</div>
+          <div style="font-size:12px;color:#b5d9fd;">⋈ 0..N ↔ 0..N · append-only</div>
+          <div style="font-size:12px;color:#b5d9fd;">split · merge · emergente · no realizado</div>
+        </div>
+        <div style="font:600 14px var(--font-heading);letter-spacing:.06em;color:#e2b866;">Plan ↔ Real NO es 1:1</div>
+        <div style="margin-top:auto;display:flex;align-items:center;margin-left:-12px;margin-right:-12px;"><div style="flex:1;height:2px;background:#94bce3;"></div><div style="border-left:11px solid #94bce3;border-top:7px solid transparent;border-bottom:7px solid transparent;"></div></div>
+      </div>
+
+      <!-- EJECUCIÓN -->
+      <div class="blueprint" data-screen-label="Ejecución / Partes" style="position:relative;border:3px solid #7fd1a3;padding:24px 28px;display:flex;flex-direction:column;gap:16px;">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <div><div style="font:600 40px var(--font-heading);letter-spacing:.06em;color:#7fd1a3;">EJECUCIÓN / PARTES</div><div style="font:500 14px var(--font-body);letter-spacing:.1em;color:#b5d9fd;">REALIDAD · NÚCLEO OPERACIONAL · 15 ENTIDADES</div></div>
+          <div style="font:600 15px var(--font-heading);letter-spacing:.08em;color:#f2776f;text-align:right;">◇ entra solo por START WORK GATE (03)<br>EN_EJECUCION requiere ALLOW</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:420px 50px 1fr;align-items:stretch;">
+          <div style="border:1.5px solid #e2b866;padding:12px 16px;display:flex;flex-direction:column;gap:4px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font:600 24px var(--font-heading);">ƒ MOTOR DE ROUTING</span><span style="font-size:12px;color:#b5d9fd;">P4</span></div>
+            <div style="font:600 15px var(--font-heading);letter-spacing:.06em;color:#e2b866;">NO selector manual de TipoParte</div>
+            <div style="font-size:13px;color:#b5d9fd;">TipoParte + ReglaCorteTipoParte → resuelve TP y corte</div>
+          </div>
+          <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;"><span style="font-size:12px;color:#b5d9fd;">instancia</span><div style="display:flex;align-items:center;width:100%;"><div style="flex:1;height:1.5px;background:#7fd1a3;"></div><div style="border-left:9px solid #7fd1a3;border-top:5px solid transparent;border-bottom:5px solid transparent;"></div></div></div>
+          <div style="border:3px solid #7fd1a3;padding:12px 18px;display:grid;grid-template-columns:auto 1fr auto;gap:4px 24px;align-items:center;">
+            <span style="font:600 38px/1 var(--font-heading);">Parte</span>
+            <span style="font-size:14px;color:#b5d9fd;">PK parte_id · FK tipo_parte · TipoParte resuelto<br>AGGREGATE · contenedor operativo</span>
+            <span style="font:600 18px var(--font-heading);color:#7fd1a3;text-align:right;">1 ─── 1..N<br>UnidadEjecucion</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;">
+          <div style="border:1.5px solid #7fd1a3;padding:12px 14px;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font:600 22px var(--font-heading);">TP-01 · Intervención</span><span style="font-size:12px;color:#b5d9fd;">identidad: work package</span></div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="border:1.5px solid #f2f2f3;padding:6px 10px;font:600 15px var(--font-heading);flex:none;white-space:nowrap;">WORK PACKAGE</div>
+              <svg width="40" height="64" viewBox="0 0 40 64" style="flex:none;"><path d="M0 32 H16 M16 8 V56 M16 8 H40 M16 32 H40 M16 56 H40" stroke="#7fd1a3" stroke-width="1.5" fill="none"></path></svg>
+              <div style="display:flex;flex-direction:column;gap:4px;font:600 13px var(--font-heading);white-space:nowrap;flex:none;"><span style="border:1px solid #7fd1a3;padding:2px 8px;">UE · subtrabajo</span><span style="border:1px solid #7fd1a3;padding:2px 8px;">UE · subtrabajo</span><span style="border:1px dashed #7fd1a3;padding:2px 8px;">UE · 1..N</span></div>
+            </div>
+            <div style="font-size:13px;color:#b5d9fd;">Handover / turnos / PTW distinto no redefinen el Parte</div>
+          </div>
+          <div style="border:1.5px solid #7fd1a3;padding:12px 14px;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font:600 22px var(--font-heading);">TP-02 · Transporte</span><span style="font-size:12px;color:#b5d9fd;">lógica: movimientos</span></div>
+            <svg width="100%" height="64" viewBox="0 0 400 64" preserveAspectRatio="none"><path d="M10 32 H390" stroke="#7fd1a3" stroke-width="1.5"></path><circle cx="20" cy="32" r="6" fill="#1d2d3d" stroke="#f2f2f3" stroke-width="1.5"></circle><circle cx="140" cy="32" r="6" fill="#1d2d3d" stroke="#f2f2f3" stroke-width="1.5"></circle><circle cx="260" cy="32" r="6" fill="#1d2d3d" stroke="#f2f2f3" stroke-width="1.5"></circle><circle cx="380" cy="32" r="6" fill="#1d2d3d" stroke="#f2f2f3" stroke-width="1.5"></circle><path d="M74 26 L84 32 L74 38 M194 26 L204 32 L194 38 M314 26 L324 32 L314 38" stroke="#7fd1a3" stroke-width="1.5" fill="none"></path><text x="20" y="58" fill="#b5d9fd" font-size="12" text-anchor="middle">origen</text><text x="380" y="58" fill="#b5d9fd" font-size="12" text-anchor="middle">destino</text><text x="200" y="14" fill="#b5d9fd" font-size="12" text-anchor="middle">carga · start/end por tramo</text></svg>
+            <div style="font-size:13px;color:#b5d9fd;">N movimientos / UE · origen → destino · carga</div>
+          </div>
+          <div style="border:1.5px solid #7fd1a3;padding:12px 14px;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font:600 22px var(--font-heading);">TP-03 · Cuadrilla</span><span style="font-size:12px;color:#b5d9fd;">lógica: acumulación del turno</span></div>
+            <svg width="100%" height="64" viewBox="0 0 400 64" preserveAspectRatio="none"><path d="M10 6 V58 M390 6 V58" stroke="#f2f2f3" stroke-width="1.5"></path><rect x="20" y="10" width="110" height="10" fill="none" stroke="#7fd1a3" stroke-width="1.5"></rect><rect x="140" y="10" width="160" height="10" fill="none" stroke="#7fd1a3" stroke-width="1.5"></rect><rect x="60" y="27" width="190" height="10" fill="none" stroke="#7fd1a3" stroke-width="1.5"></rect><rect x="260" y="27" width="120" height="10" fill="none" stroke="#7fd1a3" stroke-width="1.5"></rect><rect x="20" y="44" width="360" height="10" fill="#7fd1a3" fill-opacity=".25" stroke="#7fd1a3" stroke-width="1.5"></rect></svg>
+            <div style="font-size:13px;color:#b5d9fd;">N UE / turno · roster · horas · trabajos → reporte diario</div>
+          </div>
+        </div>
+
+        <!-- HUB -->
+        <div style="position:relative;width:1404px;height:690px;">
+          <svg width="1404" height="690" viewBox="0 0 1404 690" style="position:absolute;inset:0;">
+            <path d="M702 0 V170" stroke="#7fd1a3" stroke-width="2"></path>
+            <path d="M697 160 L702 170 L707 160 Z" fill="#7fd1a3"></path>
+            <path d="M441 44 V564 M380 44 H441 M380 148 H441 M380 252 H441 M380 356 H441 M380 460 H441 M380 564 H441 M441 255 H502" stroke="#94bce3" stroke-width="1.5" fill="none"></path>
+            <path d="M963 44 V564 M1024 44 H963 M1024 148 H963 M1024 252 H963 M1024 356 H963 M1024 460 H963 M1024 564 H963 M963 255 H902" stroke="#94bce3" stroke-width="1.5" fill="none"></path>
+            <path d="M702 340 V380" stroke="#b5d9fd" stroke-width="1.5" fill="none"></path>
+            <path d="M699 560 V600 M705 560 V600" stroke="#b5d9fd" stroke-width="1.2" fill="none"></path>
+          </svg>
+          <div style="position:absolute;left:712px;top:70px;font:600 16px var(--font-heading);color:#7fd1a3;">Parte 1 ── contiene ── 1..N</div>
+
+          <div style="position:absolute;left:502px;top:170px;width:400px;height:170px;box-sizing:border-box;border:4px solid #7fd1a3;background:#1d2d3d;padding:14px 18px;display:flex;flex-direction:column;justify-content:space-between;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font:600 34px/1 var(--font-heading);">UnidadEjecucion</span><span style="font-size:12px;color:#b5d9fd;">TRANSACTION</span></div>
+            <div style="font:600 17px var(--font-heading);letter-spacing:.1em;color:#7fd1a3;">GRANO OPERACIONAL · HUB</div>
+            <div style="font-size:13px;color:#b5d9fd;">PK unidad_ejecucion_id · FK parte</div>
+          </div>
+
+          <div style="position:absolute;left:0;top:0;width:380px;height:88px;box-sizing:border-box;border:1.5px solid #b5d9fd;padding:8px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 18px var(--font-heading);">AsignacionPersonaEjecucion</span><span style="font:600 12px var(--font-heading);border:1px solid #b5d9fd;padding:0 5px;height:16px;">⋈ N:M</span></div><div style="font-size:13px;color:#b5d9fd;">Persona ↔ UE · intervalos · handover · reemplazo</div></div>
+          <div style="position:absolute;left:0;top:104px;width:380px;height:88px;box-sizing:border-box;border:1.5px solid #b5d9fd;padding:8px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 18px var(--font-heading);">AsignacionRecursoEjecucion</span><span style="font:600 12px var(--font-heading);border:1px solid #b5d9fd;padding:0 5px;height:16px;">⋈ N:M</span></div><div style="font-size:13px;color:#b5d9fd;">Recurso ↔ UE · intervalos · apoyo · reemplazo</div></div>
+          <div style="position:absolute;left:0;top:208px;width:380px;height:88px;box-sizing:border-box;border:1px solid #7fd1a3;padding:8px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 18px var(--font-heading);">DisponibilidadRecurso</span><span style="font-size:11.5px;color:#b5d9fd;">EVENT/TEMPORAL</span></div><div style="font-size:13px;color:#b5d9fd;">historial del Recurso · recurso adicional ≠ nuevo Parte</div></div>
+          <div style="position:absolute;left:0;top:312px;width:380px;height:88px;box-sizing:border-box;border:1.5px solid #b5d9fd;padding:8px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 18px var(--font-heading);">EjecucionUbicacion</span><span style="font-size:11.5px;color:#b5d9fd;">BRIDGE</span></div><div style="font-size:13px;color:#b5d9fd;">UE ↔ UbicacionTecnica · roles</div></div>
+          <div style="position:absolute;left:0;top:416px;width:380px;height:88px;box-sizing:border-box;border:1.5px solid #f2776f;padding:8px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 18px var(--font-heading);">PermisoTrabajoUnidadEjecucion</span><span style="font:600 12px var(--font-heading);border:1px solid #b5d9fd;padding:0 5px;height:16px;">⋈ N:M</span></div><div style="font-size:13px;color:#b5d9fd;">PTW ↔ UE · temporal · PTW en Habilita (03)</div></div>
+          <div style="position:absolute;left:0;top:520px;width:380px;height:88px;box-sizing:border-box;border:1px dashed #b7b7ba;padding:8px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 18px var(--font-heading);">ConflictoTemporal</span><span style="font-size:11.5px;color:#b5d9fd;">DERIVED/EVENT</span></div><div style="font-size:13px;color:#b5d9fd;">solapes persona/recurso detectados</div></div>
+
+          <div style="position:absolute;left:1024px;top:0;width:380px;height:88px;box-sizing:border-box;border:1px solid #7fd1a3;padding:8px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 18px var(--font-heading);">EventoTiempo</span><span style="font-size:11.5px;color:#b5d9fd;">EVENT</span></div><div style="font-size:13px;color:#b5d9fd;">Parte/UE · categorías de tiempo · intervalos</div></div>
+          <div style="position:absolute;left:1024px;top:104px;width:380px;height:88px;box-sizing:border-box;border:1px solid #7fd1a3;padding:8px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 18px var(--font-heading);">EventoOperativo</span><span style="font-size:11.5px;color:#b5d9fd;">EVENT</span></div><div style="font-size:13px;color:#b5d9fd;">Parte/UE · hechos operativos</div></div>
+          <div style="position:absolute;left:1024px;top:208px;width:380px;height:88px;box-sizing:border-box;border:1px solid #7fd1a3;padding:8px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 18px var(--font-heading);">TransicionOperativa</span><span style="font-size:11.5px;color:#b5d9fd;">EVENT/BRIDGE</span></div><div style="font-size:13px;color:#b5d9fd;">UE origen ↔ UE destino · 0..N</div></div>
+          <div style="position:absolute;left:1024px;top:312px;width:380px;height:88px;box-sizing:border-box;border:1px solid #7fd1a3;padding:8px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 18px var(--font-heading);">EjecucionMedicion</span><span style="font-size:11.5px;color:#b5d9fd;">CHILD</span></div><div style="font-size:13px;color:#b5d9fd;">medición operativa · solo valor no derivable</div></div>
+          <div style="position:absolute;left:1024px;top:416px;width:380px;height:88px;box-sizing:border-box;border:1px solid #e2b866;padding:8px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 18px var(--font-heading);">ImputacionEjecucion</span><span style="font-size:11.5px;color:#b5d9fd;">CHILD</span></div><div style="font-size:13px;color:#b5d9fd;">CS · CC · Item → RESUELTO / PENDIENTE</div></div>
+          <div style="position:absolute;left:1024px;top:520px;width:380px;height:88px;box-sizing:border-box;border:1px solid #7fd1a3;padding:8px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 18px var(--font-heading);">Evidencia</span><span style="font-size:11.5px;color:#b5d9fd;">DOCUMENT/EVENT</span></div><div style="font-size:13px;color:#b5d9fd;">+ EvidenciaVinculo ⋈ · valida objeto trazable</div></div>
+
+          <div style="position:absolute;left:452px;top:380px;width:500px;height:180px;box-sizing:border-box;border:1px solid #416180;padding:10px 14px;">
+            <div style="display:flex;justify-content:space-between;"><span style="font:600 14px var(--font-heading);letter-spacing:.1em;color:#b5d9fd;">INTERVALOS · PERSONAS / RECURSOS</span><span style="font-size:12px;color:#b5d9fd;">t →</span></div>
+            <svg width="472" height="130" viewBox="0 0 472 130" style="display:block;margin-top:4px;">
+              <text x="0" y="20" fill="#b5d9fd" font-size="12">P-A</text><rect x="44" y="10" width="200" height="12" fill="none" stroke="#7fd1a3" stroke-width="1.5"></rect>
+              <text x="0" y="44" fill="#b5d9fd" font-size="12">P-B</text><rect x="244" y="34" width="220" height="12" fill="none" stroke="#7fd1a3" stroke-width="1.5"></rect>
+              <path d="M244 4 V52" stroke="#e2b866" stroke-width="1.5" stroke-dasharray="3 3"></path><text x="250" y="62" fill="#e2b866" font-size="11">handover</text>
+              <text x="0" y="84" fill="#b5d9fd" font-size="12">R-1</text><rect x="44" y="74" width="150" height="12" fill="none" stroke="#94bce3" stroke-width="1.5"></rect><rect x="194" y="74" width="270" height="12" fill="none" stroke="#94bce3" stroke-width="1.5" stroke-dasharray="4 2"></rect><text x="198" y="70" fill="#e2b866" font-size="11">reemplazo</text>
+              <text x="0" y="114" fill="#b5d9fd" font-size="12">R-2</text><rect x="320" y="104" width="144" height="12" fill="none" stroke="#94bce3" stroke-width="1.5"></rect><text x="236" y="114" fill="#e2b866" font-size="11">incorporación</text>
+            </svg>
+          </div>
+
+          <div style="position:absolute;left:532px;top:600px;width:340px;height:86px;box-sizing:border-box;border:1.5px solid #b5d9fd;padding:8px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 18px var(--font-heading);">EnmiendaOperativa</span><span style="font-size:11.5px;color:#b5d9fd;">EVENT/VERSION</span></div><div style="font-size:13px;color:#b5d9fd;">append-only · corrige objeto/versión · nunca edita</div></div>
+        </div>
+
+        <!-- STATE CONTROLLER -->
+        <div style="border:1.5px solid #94bce3;padding:14px 18px;display:grid;grid-template-columns:240px 1fr;gap:10px 20px;align-items:center;">
+          <div style="grid-row:1/4;display:flex;flex-direction:column;gap:6px;border-right:1px solid #416180;padding-right:18px;">
+            <div style="font:600 22px var(--font-heading);letter-spacing:.06em;">STATE CONTROLLER</div>
+            <div style="font-size:13px;color:#b5d9fd;">11 State Machines + submáquinas · SM-01…SM-11 · P2</div>
+            <div style="font-size:12.5px;color:#e2b866;">READY ≠ EN_EJECUCION ≠ VIGENTE ≠ ACEPTADA</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font:600 15px var(--font-heading);flex-wrap:wrap;"><span style="width:56px;color:#b5d9fd;">Parte</span><span style="border:1px solid #94bce3;padding:3px 8px;">PREPARADO</span>→<span style="border:1.5px solid #7fd1a3;padding:3px 8px;">EN_EJECUCION</span>↔<span style="border:1px solid #e2b866;padding:3px 8px;">SUSPENDIDO</span>→<span style="border:1px solid #94bce3;padding:3px 8px;">CERRADO_OPERATIVAMENTE</span><span style="color:#b5d9fd;font:400 13px var(--font-body);">· terminal alt: ANULADO</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font:600 15px var(--font-heading);flex-wrap:wrap;"><span style="width:56px;color:#b5d9fd;">UE</span><span style="border:1px solid #94bce3;padding:3px 8px;">PENDIENTE</span>→<span style="border:1.5px solid #7fd1a3;padding:3px 8px;">EN_EJECUCION</span>↔<span style="border:1px solid #e2b866;padding:3px 8px;">SUSPENDIDA</span>→<span style="border:1px solid #94bce3;padding:3px 8px;">CERRADA</span><span style="color:#b5d9fd;font:400 13px var(--font-body);">· terminal alt: NO_REALIZADA · ANULADA</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font:600 15px var(--font-heading);flex-wrap:wrap;"><span style="width:56px;color:#b5d9fd;">PTW</span><span style="border:1px solid #94bce3;padding:3px 8px;">BORRADOR</span>→<span style="border:1px solid #94bce3;padding:3px 8px;">PENDIENTE_APROBACION</span>→<span style="border:1px solid #94bce3;padding:3px 8px;">APROBADO</span>→<span style="border:1.5px solid #7fd1a3;padding:3px 8px;">VIGENTE</span>→<span style="border:1px solid #94bce3;padding:3px 8px;">SUSPENDIDO / CERRADO / VENCIDO</span><span style="color:#b5d9fd;font:400 13px var(--font-body);">· alt: RECHAZADO · ANULADO</span></div>
+        </div>
+      </div>
+
+      <!-- INTERFACE B -->
+      <div style="position:relative;display:flex;flex-direction:column;background:#2c455d;border-left:3px solid #94bce3;border-right:3px solid #94bce3;padding:18px 12px;gap:10px;">
+        <div style="font:600 26px/1 var(--font-heading);letter-spacing:.06em;">INTERFACE B</div>
+        <div style="font:600 13px var(--font-heading);letter-spacing:.08em;color:#b5d9fd;">VERDAD OPERACIONAL + LINEAGE</div>
+        <div style="display:flex;align-items:center;margin:4px -12px;"><div style="flex:1;height:2px;background:#94bce3;"></div><div style="border-left:11px solid #94bce3;border-top:7px solid transparent;border-bottom:7px solid transparent;"></div></div>
+        <div style="display:flex;flex-direction:column;gap:7px;font-size:14px;">
+          <span>› UE cerradas</span><span>› intervalos</span><span>› personas</span><span>› recursos</span><span>› ubicación</span><span>› tiempos</span><span>› transiciones</span><span>› mediciones</span><span>› imputación</span><span>› evidencia</span><span>› enmiendas</span><span>› versión fuente</span>
+        </div>
+        <div style="margin-top:14px;font:600 14px var(--font-heading);letter-spacing:.06em;color:#e2b866;">Derivados no mandan al origen</div>
+        <div style="margin-top:auto;display:flex;align-items:center;margin-left:-12px;margin-right:-12px;"><div style="flex:1;height:2px;background:#94bce3;"></div><div style="border-left:11px solid #94bce3;border-top:7px solid transparent;border-bottom:7px solid transparent;"></div></div>
+      </div>
+
+      <!-- CERTIFICACIÓN / FACTURACIÓN -->
+      <div style="display:flex;flex-direction:column;gap:24px;">
+        <div class="blueprint" data-screen-label="Certificación" style="position:relative;border:1px solid #94bce3;padding:20px 22px;display:flex;flex-direction:column;gap:12px;">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div><div style="font:600 28px var(--font-heading);letter-spacing:.06em;">CERTIFICACIÓN</div><div style="font:500 14px var(--font-body);letter-spacing:.1em;color:#b5d9fd;">ACEPTACIÓN COMERCIAL · 7 ENTIDADES</div></div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="border:1px solid #e2b866;padding:6px 10px;font:600 15px var(--font-heading);">ƒ GRANO UC</div>
+            <span style="font-size:13px;color:#b5d9fd;">ReglaGranoUnidadComercial · normaliza verdad operacional</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto 1.4fr auto 1fr;align-items:center;">
+            <div style="border:1.5px solid #7fd1a3;padding:8px 10px;"><div style="font:600 16px var(--font-heading);">UnidadEjecucion</div><div style="font-size:12px;color:#b5d9fd;">fuente · EXEC</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;width:42px;"><span style="font:600 15px var(--font-heading);">N</span><div style="width:100%;height:5px;border-top:1.5px solid #b5d9fd;border-bottom:1.5px solid #b5d9fd;box-sizing:border-box;"></div></div>
+            <div style="border:1.5px solid #b5d9fd;padding:8px 10px;"><div style="font:600 16px var(--font-heading);">UnidadComercialFuenteEjecucion</div><div style="font-size:12px;color:#b5d9fd;">⋈ BRIDGE/LINEAGE · inmutable</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;width:42px;"><span style="font:600 15px var(--font-heading);">N</span><div style="width:100%;height:5px;border-top:1.5px solid #b5d9fd;border-bottom:1.5px solid #b5d9fd;box-sizing:border-box;"></div></div>
+            <div style="border:2px solid #94bce3;padding:8px 10px;"><div style="font:600 16px var(--font-heading);">UnidadComercial</div><div style="font-size:12px;color:#b5d9fd;">DERIVED/WORKFLOW</div></div>
+          </div>
+          <div style="font:600 14px var(--font-heading);letter-spacing:.06em;color:#e2b866;">UC ↔ UE = N:M · nunca 1 UE = 1 UC</div>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;">
+            <div style="border:1.5px solid #b5d9fd;padding:8px 10px;"><div style="font:600 15px var(--font-heading);">PaqueteCertificacionUnidadComercial</div><div style="font-size:12px;color:#b5d9fd;">⋈ BRIDGE/VERSION · no mover ni borrar UC</div></div>
+            <div style="display:flex;align-items:center;width:36px;"><div style="flex:1;height:1.5px;background:#94bce3;"></div><div style="border-left:7px solid #94bce3;border-top:4px solid transparent;border-bottom:4px solid transparent;"></div></div>
+            <div style="border:1.5px solid #94bce3;padding:8px 10px;"><div style="font:600 16px var(--font-heading);">PaqueteCertificacion</div><div style="font-size:12px;color:#b5d9fd;">AGGREGATE · por ReglaAgrupación</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+            <div style="border:1px solid #94bce3;padding:6px 8px;"><div style="font:600 15px var(--font-heading);">ConformidadCliente</div><div style="font-size:11.5px;color:#b5d9fd;">EVENT · Paquete</div></div>
+            <div style="border:1px solid #94bce3;padding:6px 8px;"><div style="font:600 15px var(--font-heading);">ObservacionCertificacion</div><div style="font-size:11.5px;color:#b5d9fd;">EVENT · UC</div></div>
+            <div style="border:1px solid #e2b866;padding:6px 8px;"><div style="font:600 15px var(--font-heading);">AjusteCertificacion</div><div style="font-size:11.5px;color:#b5d9fd;">EVENT · UC/Paquete</div></div>
+          </div>
+          <div style="font-size:13px;color:#e2b866;">AjusteCertificacion NO modifica la realidad operacional.</div>
+
+          <div style="border:1px solid #416180;padding:12px;display:flex;flex-direction:column;gap:6px;">
+            <div style="font:600 15px var(--font-heading);letter-spacing:.1em;color:#b5d9fd;">SUPERSESSION · RUTA DE CORRECCIÓN</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;">
+              <div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;font:600 14px var(--font-heading);white-space:nowrap;">
+                <span style="border:1px solid #7fd1a3;padding:3px 8px;">Ejecución v1</span>
+                <span style="color:#94bce3;padding-left:12px;">↓</span>
+                <span style="border:1px solid #b5d9fd;padding:3px 8px;">EnmiendaOperativa</span>
+                <span style="color:#94bce3;padding-left:12px;">↓</span>
+                <span style="border:1px solid #7fd1a3;padding:3px 8px;">Ejecución v2</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;font:600 14px var(--font-heading);white-space:nowrap;">
+                <span style="border:1px dashed #b7b7ba;color:#b7b7ba;padding:3px 8px;">UC v1 · REQUIERE_RECALCULO</span>
+                <span style="color:#e2b866;padding-left:12px;font:400 12px var(--font-body);">┆ P0 lineage invalidation</span>
+                <span style="border:1.5px solid #94bce3;padding:3px 8px;">UC v2</span>
+                <span style="font:400 12px var(--font-body);color:#b5d9fd;">sustituye_a → UC v1 · 0..1 · acíclica</span>
+              </div>
+            </div>
+            <div style="font-size:12.5px;color:#b5d9fd;">La versión anterior permanece visible. Nunca se borra.</div>
+          </div>
+        </div>
+
+        <div class="blueprint" data-screen-label="Facturación" style="position:relative;border:1px solid #416180;padding:16px 20px;display:flex;flex-direction:column;gap:10px;">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font:600 24px var(--font-heading);letter-spacing:.06em;">FACTURACIÓN</span><span style="font-size:13px;color:#b5d9fd;">3 ENTIDADES · 0 s carga campo</span></div>
+          <div style="display:flex;align-items:center;font:600 14px var(--font-heading);white-space:nowrap;">
+            <span style="border:1px solid #7fd1a3;padding:5px 8px;">UC ACEPTADA + VIGENTE</span>
+            <div style="display:flex;align-items:center;width:22px;flex:none;"><div style="flex:1;height:1.5px;background:#94bce3;"></div><div style="border-left:6px solid #94bce3;border-top:4px solid transparent;border-bottom:4px solid transparent;"></div></div>
+            <span style="border:1px solid #94bce3;padding:5px 8px;">LineaFacturable</span>
+            <div style="display:flex;align-items:center;width:22px;flex:none;"><div style="flex:1;height:1.5px;background:#94bce3;"></div><div style="border-left:6px solid #94bce3;border-top:4px solid transparent;border-bottom:4px solid transparent;"></div></div>
+            <span style="border:1px solid #94bce3;padding:5px 8px;">LoteFacturacion</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:13px;color:#b5d9fd;">se materializa en ↓</span>
+            <div style="border:1.5px dashed #b7b7ba;padding:6px 10px;flex:1;"><div style="font:600 15px var(--font-heading);color:#b7b7ba;">Factura / Documento ERP · BOUNDARY</div><div style="font-size:12px;color:#b7b7ba;">adapter externo · el sistema no inventa fiscalidad</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════ 03 HABILITA PLANE ═════ -->
+  <div class="blueprint" data-screen-label="03 Habilita Plane" style="position:relative;border:2px solid #f2776f;padding:22px 28px 26px;display:flex;flex-direction:column;gap:18px;">
+    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+    <div style="display:flex;align-items:baseline;gap:24px;">
+      <span style="font:600 36px var(--font-heading);letter-spacing:.06em;color:#f2776f;">03 · HABILITA PLANE</span>
+      <span style="font:500 15px var(--font-body);letter-spacing:.1em;color:#b5d9fd;">DOMINIO TRANSVERSAL · CONTROLA SI SE PUEDE TRABAJAR · PREVENT + RESPOND &amp; LEARN · 14 ENTIDADES + 3 CONFIG</span>
+    </div>
+
+    <div style="position:relative;height:56px;">
+      <div style="position:absolute;left:0;right:0;top:24px;height:12px;background:#2c455d;border-top:2px solid #f2776f;border-bottom:2px solid #f2776f;"></div>
+      <span style="position:absolute;left:0;top:0;font:600 15px var(--font-heading);letter-spacing:.12em;color:#f2776f;">ALERT / GATE BUS ▲ alimenta:</span>
+      <span style="position:absolute;left:400px;top:0;font:600 15px var(--font-heading);">▲ Planificación</span>
+      <span style="position:absolute;left:1000px;top:0;font:600 15px var(--font-heading);">▲ Supervisor / Control Center</span>
+      <span style="position:absolute;left:1500px;top:0;font:600 15px var(--font-heading);">▲ Ejecución</span>
+      <span style="position:absolute;left:1820px;top:0;font:600 15px var(--font-heading);">▲ Start Work</span>
+      <span style="position:absolute;left:2140px;top:0;font:600 15px var(--font-heading);">▲ Handover</span>
+      <span style="position:absolute;right:0;top:0;font:400 14px var(--font-body);color:#b5d9fd;">una alerta no es fuente de verdad · la fuente es requisito / documento / cumplimiento / evaluación</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:2.35fr 1fr;gap:28px;">
+      <!-- PREVENT -->
+      <div style="border:1px solid #94bce3;padding:16px 18px;display:flex;flex-direction:column;gap:12px;">
+        <div style="font:600 24px var(--font-heading);letter-spacing:.1em;">PREVENT</div>
+        <div style="display:grid;grid-template-columns:860px 30px 1fr 30px 1fr 30px 470px;align-items:stretch;">
+
+          <div style="border:2px solid #f2776f;padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font:600 26px var(--font-heading);letter-spacing:.06em;">CONTROL DOCUMENTAL</span><span style="font-size:13px;color:#b5d9fd;">planificación · previo al inicio · durante ejecución</span></div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;font:600 14px var(--font-heading);"><span style="color:#b5d9fd;padding:3px 0;margin-right:4px;">MONITOREA</span><span style="border:1px solid #94bce3;padding:3px 8px;">Persona</span><span style="border:1px solid #94bce3;padding:3px 8px;">Recurso</span><span style="border:1px solid #94bce3;padding:3px 8px;">Empresa / contexto aplicable</span><span style="border:1px solid #94bce3;padding:3px 8px;">DocumentoHabilitante</span><span style="border:1px solid #94bce3;padding:3px 8px;">RequisitoHabilitacion</span><span style="border:1px solid #94bce3;padding:3px 8px;">Vigencia</span></div>
+            <div style="display:grid;grid-template-columns:1fr auto 1.1fr auto 1fr;align-items:center;">
+              <div style="border:1.5px solid #e2b866;padding:7px 10px;"><div style="font:600 16px var(--font-heading);">RequisitoHabilitacion</div><div style="font-size:11.5px;color:#b5d9fd;">RULE · qué y cuándo aplica</div></div>
+              <div style="display:flex;flex-direction:column;align-items:center;width:54px;"><span style="font-size:11px;color:#b5d9fd;">se cumple</span><div style="display:flex;align-items:center;width:100%;"><div style="flex:1;height:1.5px;background:#94bce3;"></div><div style="border-left:6px solid #94bce3;border-top:4px solid transparent;border-bottom:4px solid transparent;"></div></div></div>
+              <div style="border:1.5px solid #b5d9fd;padding:7px 10px;"><div style="font:600 16px var(--font-heading);">CumplimientoHabilitacion</div><div style="font-size:11.5px;color:#b5d9fd;">BRIDGE/EVENT</div></div>
+              <div style="display:flex;flex-direction:column;align-items:center;width:54px;"><span style="font-size:11px;color:#b5d9fd;">soporta</span><div style="display:flex;align-items:center;width:100%;"><div style="border-right:6px solid #94bce3;border-top:4px solid transparent;border-bottom:4px solid transparent;"></div><div style="flex:1;height:1.5px;background:#94bce3;"></div></div></div>
+              <div style="border:1.5px solid #7fd1a3;padding:7px 10px;"><div style="font:600 16px var(--font-heading);">DocumentoHabilitante</div><div style="font-size:11.5px;color:#b5d9fd;">DOCUMENT · desde / hasta</div></div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font:600 14px var(--font-heading);letter-spacing:.04em;">
+              <span style="color:#b5d9fd;margin-right:4px;">CONDICIÓN</span>
+              <span style="border:1.5px solid #7fd1a3;color:#7fd1a3;padding:3px 8px;">OK</span>
+              <span style="border:1.5px solid #e2b866;color:#e2b866;padding:3px 8px;">PRÓXIMO A VENCER</span>
+              <span style="border:1.5px solid #e2b866;color:#e2b866;padding:3px 8px;">REQUIERE RENOVACIÓN</span>
+              <span style="border:1.5px solid #f2776f;color:#f2776f;padding:3px 8px;">VENCIDO</span>
+              <span style="border:1.5px solid #f2776f;color:#f2776f;padding:3px 8px;">FALTANTE</span>
+              <span style="border:1.5px solid #f2776f;color:#f2776f;padding:3px 8px;">INCOMPATIBLE</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;font-size:14px;border-top:1px solid #416180;padding-top:10px;">
+              <span>documento próximo a vencer <span style="color:#e2b866;">→ ALERTA · WARNING</span></span>
+              <span>START WORK <span style="color:#f2776f;">→ REVALIDAR</span></span>
+              <span>documento crítico vencido <span style="color:#f2776f;font-weight:500;">→ HARD BLOCK</span></span>
+              <span>HANDOVER <span style="color:#f2776f;">→ REVALIDAR</span></span>
+              <span>cambio documental <span style="color:#e2b866;">┄→ EventoInvalidacionReadiness</span></span>
+              <span style="color:#b5d9fd;">reemplazo: aceptar solo si cumple</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;"><div style="flex:1;height:1.5px;background:#f2776f;"></div><div style="border-left:8px solid #f2776f;border-top:5px solid transparent;border-bottom:5px solid transparent;"></div></div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="border:1.5px solid #f2776f;padding:10px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 18px var(--font-heading);">EvaluacionHabilitacion</span><span style="font-size:11.5px;color:#b5d9fd;">SNAPSHOT</span></div><div style="font-size:12.5px;color:#b5d9fd;">a fecha de plan / inicio / cambio</div></div>
+            <div style="display:flex;flex-direction:column;gap:5px;font:600 14px var(--font-heading);letter-spacing:.04em;">
+              <span style="border:1px solid #94bce3;padding:4px 8px;">INFORMATIVO</span>
+              <span style="border:1.5px solid #e2b866;color:#e2b866;padding:4px 8px;">WARNING · overrideable si la regla lo declara</span>
+              <span style="background:#f2776f;color:#1d2d3d;padding:4px 8px;">HARD BLOCK · sin override</span>
+            </div>
+            <div style="border:1.5px solid #e2b866;padding:8px 10px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 16px var(--font-heading);">OverrideGate</span><span style="font-size:11.5px;color:#b5d9fd;">EVENT</span></div><div style="font-size:12px;color:#b5d9fd;">solo WARNING · actor/rol + motivo + evidencia</div></div>
+          </div>
+          <div style="display:flex;align-items:center;"><div style="flex:1;height:1.5px;background:#f2776f;"></div><div style="border-left:8px solid #f2776f;border-top:5px solid transparent;border-bottom:5px solid transparent;"></div></div>
+
+          <div style="border:1.5px solid #f2776f;padding:10px 12px;display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;justify-content:space-between;"><span style="font:600 20px var(--font-heading);">PermisoTrabajo</span><span style="font-size:11.5px;color:#b5d9fd;">TRANSACTION</span></div>
+            <div style="font-size:13px;color:#b5d9fd;">PTW · autorización formal independiente del Parte</div>
+            <div style="font:600 14px var(--font-heading);">aprobar · VIGENTE · suspender · cerrar</div>
+            <div style="font:600 13px var(--font-heading);border:1px solid #b5d9fd;padding:2px 6px;align-self:flex-start;">⋈ N:M con UE</div>
+            <div style="font-size:12.5px;color:#b5d9fd;margin-top:auto;">timeout ≠ cierre · handover puede exigir suspensión / revalidación</div>
+          </div>
+          <div style="display:flex;align-items:center;"><div style="flex:1;height:1.5px;background:#f2776f;"></div><div style="border-left:8px solid #f2776f;border-top:5px solid transparent;border-bottom:5px solid transparent;"></div></div>
+
+          <div style="border:2px solid #f2776f;padding:12px 16px;display:grid;grid-template-columns:1fr 150px;gap:8px 16px;align-items:center;">
+            <div style="grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;"><span style="font:600 24px var(--font-heading);letter-spacing:.06em;color:#f2776f;">◇ START WORK GATE</span><span style="font-size:12px;color:#b5d9fd;">P1 · ▲ a Ejecución</span></div>
+            <div style="display:flex;flex-direction:column;gap:3px;font-size:13.5px;">
+              <span>Habilita documental</span><span style="color:#94bce3;">+</span>
+              <span>PTW vigente <span style="color:#b5d9fd;">si aplica</span></span><span style="color:#94bce3;">+</span>
+              <span>State Machine válida</span><span style="color:#94bce3;">+</span>
+              <span>contexto operacional</span><span style="color:#94bce3;">+</span>
+              <span>ReglaInicioEmergente <span style="color:#b5d9fd;">si aplica</span></span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+              <div style="width:84px;height:84px;border:2.5px solid #f2776f;transform:rotate(45deg);display:flex;align-items:center;justify-content:center;margin:12px 0;"><span style="transform:rotate(-45deg);font:600 18px var(--font-heading);color:#f2776f;">∧</span></div>
+              <div style="display:flex;flex-direction:column;gap:4px;font:600 13px var(--font-heading);width:100%;">
+                <span style="border:1px solid #7fd1a3;color:#7fd1a3;padding:2px 6px;text-align:center;">ALLOW</span>
+                <span style="background:#f2776f;color:#1d2d3d;padding:2px 6px;text-align:center;">BLOCK</span>
+                <span style="border:1px solid #e2b866;color:#e2b866;padding:2px 6px;text-align:center;">REQUIRE AUTHORIZATION</span>
+              </div>
+            </div>
+            <div style="grid-column:1/-1;font-size:12.5px;color:#b5d9fd;border-top:1px solid #416180;padding-top:6px;">Contexto contractual pendiente habilita ejecución solo si la regla lo permite. <span style="color:#f2776f;font-weight:500;">Nunca puede saltar Habilita.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESPOND & LEARN -->
+      <div style="border:1px solid #94bce3;padding:16px 18px;display:flex;flex-direction:column;gap:10px;">
+        <div style="font:600 24px var(--font-heading);letter-spacing:.1em;">RESPOND &amp; LEARN</div>
+        <div style="display:grid;grid-template-columns:1fr 26px 1fr;gap:10px 0;align-items:stretch;">
+          <div style="border:2px solid #f2776f;padding:10px 12px;display:flex;flex-direction:column;gap:5px;">
+            <div style="display:flex;justify-content:space-between;"><span style="font:600 20px var(--font-heading);">EventoHabilita</span><span style="font-size:11.5px;color:#b5d9fd;">EVENT</span></div>
+            <div style="font:600 14px var(--font-heading);color:#f2776f;">Flash Report ≤ 2 min</div>
+            <div style="font-size:12.5px;color:#b5d9fd;">standalone o vinculado ⋈ N:M:</div>
+            <div style="display:flex;flex-direction:column;gap:3px;font:600 13.5px var(--font-heading);">
+              <span style="border:1px solid #b5d9fd;padding:2px 6px;">EventoHabilitaUnidadEjecucion</span>
+              <span style="border:1px solid #b5d9fd;padding:2px 6px;">EventoHabilitaPersona</span>
+              <span style="border:1px solid #b5d9fd;padding:2px 6px;">EventoHabilitaRecurso</span>
+              <span style="border:1px solid #b5d9fd;padding:2px 6px;">EventoHabilitaPermiso</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;"><div style="flex:1;height:1.5px;background:#94bce3;"></div><div style="border-left:7px solid #94bce3;border-top:4px solid transparent;border-bottom:4px solid transparent;"></div></div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="border:1.5px solid #b5d9fd;padding:8px 10px;"><div style="font:600 16px var(--font-heading);">EvaluacionEscalamientoHabilita</div><div style="font-size:12px;color:#b5d9fd;">SNAPSHOT de ReglaEscalamientoHabilita · triage</div></div>
+            <div style="border:1.5px solid #94bce3;padding:8px 10px;"><div style="font:600 16px var(--font-heading);">CasoHabilita</div><div style="font-size:12px;color:#b5d9fd;">0..1 por Evento · investigación · seguimiento · cierre</div></div>
+            <div style="border:1px solid #94bce3;padding:8px 10px;"><div style="font:600 16px var(--font-heading);">AccionCorrectivaHabilita</div><div style="font-size:12px;color:#b5d9fd;">desde Caso · lifecycle propio</div></div>
+          </div>
+          <div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+            <div style="border:1px solid #94bce3;padding:7px 10px;"><div style="font:600 15px var(--font-heading);">NotificacionHabilita</div><div style="font-size:11.5px;color:#b5d9fd;">Evento / Caso · obligación</div></div>
+            <div style="border:1px solid #7fd1a3;padding:7px 10px;"><div style="font:600 15px var(--font-heading);">MedicionEventoHabilita</div><div style="font-size:11.5px;color:#b5d9fd;">CHILD/VERSION · refinable</div></div>
+            <div style="border:1px solid #7fd1a3;padding:7px 10px;"><div style="font:600 15px var(--font-heading);">Evidencia</div><div style="font-size:11.5px;color:#b5d9fd;">ref. EXEC · EvidenciaVinculo</div></div>
+          </div>
+          <div style="grid-column:1/-1;font-size:12.5px;color:#b5d9fd;">El triage reclasifica sin borrar el reporte inicial. El Caso puede seguir abierto con la operación normalizada.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════ 04 CONTROL PLANE + 05 FIELD AUTOMATION ═════ -->
+  <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:30px;">
+    <div class="blueprint" data-screen-label="04 Control Plane" style="position:relative;border:1.5px solid #94bce3;padding:20px 26px;display:flex;flex-direction:column;gap:14px;">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="display:flex;align-items:baseline;gap:22px;"><span style="font:600 30px var(--font-heading);letter-spacing:.06em;">04 · CONTROL PLANE</span><span style="font:500 14px var(--font-body);letter-spacing:.1em;color:#b5d9fd;">BUS DE CAMBIOS POST-DESPACHO · P3</span></div>
+      <div style="display:grid;grid-template-columns:210px 30px 330px 30px 1fr 30px 250px;align-items:stretch;">
+        <div style="border:1px solid #94bce3;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;gap:4px;font:600 16px var(--font-heading);"><span style="font:600 12px var(--font-heading);letter-spacing:.1em;color:#b5d9fd;">ORIGEN</span><span>Planificación</span><span>Supervisión</span><span>Habilita</span></div>
+        <div style="display:flex;align-items:center;"><div style="flex:1;height:8px;background:#2c455d;border-top:1.5px solid #94bce3;border-bottom:1.5px solid #94bce3;"></div><div style="border-left:8px solid #94bce3;border-top:7px solid transparent;border-bottom:7px solid transparent;"></div></div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="border:2px solid #94bce3;padding:10px 12px;"><div style="display:flex;justify-content:space-between;"><span style="font:600 20px var(--font-heading);">DirectivaOperativa</span><span style="font-size:11.5px;color:#b5d9fd;">EVENT</span></div><div style="font-size:12.5px;color:#b5d9fd;">append-only · retry idempotente</div></div>
+          <div style="border:1.5px solid #b5d9fd;padding:7px 12px;"><div style="font:600 16px var(--font-heading);">DirectivaOperativaObjetivo</div><div style="font-size:12px;color:#b5d9fd;">⋈ BRIDGE · objetivo afectado</div></div>
+          <div style="font-size:13px;line-height:1.5;">suspender · reanudar · cancelar · reprogramar · repriorizar · cambiar alcance · cambiar ubicación</div>
+        </div>
+        <div style="display:flex;align-items:center;"><div style="flex:1;height:1.5px;background:#94bce3;"></div><div style="border-left:8px solid #94bce3;border-top:5px solid transparent;border-bottom:5px solid transparent;"></div></div>
+        <div style="border:1px solid #416180;padding:10px 14px;display:flex;flex-direction:column;gap:10px;justify-content:center;">
+          <div style="font:600 13px var(--font-heading);letter-spacing:.1em;color:#b5d9fd;">LIFECYCLE · SM-06</div>
+          <div style="display:flex;align-items:center;gap:6px;font:600 15px var(--font-heading);flex-wrap:wrap;"><span style="border:1px solid #94bce3;padding:3px 8px;">EMITIDA</span>→<span style="border:1px solid #94bce3;padding:3px 8px;">RECIBIDA</span>→<span style="border:1px solid #94bce3;padding:3px 8px;">RECONOCIDA</span>→<span style="border:1.5px solid #7fd1a3;color:#7fd1a3;padding:3px 8px;">APLICADA</span></div>
+          <div style="display:flex;align-items:center;gap:6px;font:600 14px var(--font-heading);flex-wrap:wrap;"><span style="color:#b5d9fd;font:400 13px var(--font-body);">terminales alt:</span><span style="border:1px solid #f2776f;color:#f2776f;padding:2px 8px;">RECHAZADA</span><span style="border:1px solid #b7b7ba;color:#b7b7ba;padding:2px 8px;">CANCELADA</span><span style="border:1px solid #e2b866;color:#e2b866;padding:2px 8px;">EXPIRADA</span></div>
+          <div style="font-size:12.5px;color:#b5d9fd;">emitida ≠ recibida ≠ reconocida ≠ aplicada</div>
+        </div>
+        <div style="display:flex;align-items:center;"><div style="flex:1;height:1.5px;background:#94bce3;"></div><div style="border-left:8px solid #94bce3;border-top:5px solid transparent;border-bottom:5px solid transparent;"></div></div>
+        <div style="border:1px solid #94bce3;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;gap:4px;"><span style="font:600 12px var(--font-heading);letter-spacing:.1em;color:#b5d9fd;">EFECTO EN OBJETIVO</span><span style="font:600 16px var(--font-heading);">Parte · UE · Plan · PTW · prioridad</span><span style="font-size:13px;color:#e2b866;">sin reescribir historia</span></div>
+      </div>
+      <div style="font:600 17px var(--font-heading);letter-spacing:.08em;">LA PLANIFICACIÓN NO SE MODIFICA SILENCIOSAMENTE.</div>
+    </div>
+
+    <div class="blueprint" data-screen-label="05 Field Automation" style="position:relative;border:1px solid #416180;padding:20px 26px;display:flex;flex-direction:column;gap:14px;">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="display:flex;align-items:baseline;gap:22px;"><span style="font:600 26px var(--font-heading);letter-spacing:.06em;">05 · FIELD AUTOMATION</span><span style="font:500 14px var(--font-body);letter-spacing:.1em;color:#b5d9fd;">CAPTURA INCREMENTAL ≤ 2 MIN · P7</span></div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid #94bce3;">
+        <div style="padding:9px 10px;border-right:1px solid #416180;"><div style="font:600 15px var(--font-heading);color:#7fd1a3;">AUTODERIVADO</div><div style="font-size:12px;color:#b5d9fd;">usuario · plan · cliente · TipoParte</div></div>
+        <div style="padding:9px 10px;border-right:1px solid #416180;"><div style="font:600 15px var(--font-heading);">PRECARGADO + CONFIRMAR</div><div style="font-size:12px;color:#b5d9fd;">ubicación · carga · resumen</div></div>
+        <div style="padding:9px 10px;border-right:1px solid #416180;"><div style="font:600 15px var(--font-heading);color:#e2b866;">INPUT HUMANO INEVITABLE</div><div style="font-size:12px;color:#b5d9fd;">motivo · medición · descripción</div></div>
+        <div style="padding:9px 10px;border-right:1px solid #416180;"><div style="font:600 15px var(--font-heading);">EXCEPCIÓN / EVIDENCIA</div><div style="font-size:12px;color:#b5d9fd;">foto · firma · solo si aplica</div></div>
+        <div style="padding:9px 10px;"><div style="font:600 15px var(--font-heading);color:#b7b7ba;">BACK OFFICE</div><div style="font-size:12px;color:#b5d9fd;">0 s campo</div></div>
+      </div>
+      <div style="font:600 18px var(--font-heading);letter-spacing:.08em;">EL PARTE NO SE COMPLETA; SE CONSTRUYE SOLO.</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px 18px;font-size:13px;color:#b5d9fd;">
+        <span>Start Work ≈ 5 s</span><span>Handover ≈ 26 s</span><span>Reemplazo ≈ 12 s</span><span>Cambio ubicación ≈ 4 s</span>
+        <span>Cambio tiempo ≈ 7 s</span><span>Medición TP-01 ≈ 33 s</span><span>Cierre UE ≈ 10 s</span><span>Cierre Parte ≈ 2 s</span>
+        <span>TP-02 ≈ 17 s</span><span>TP-03 ≈ 23 s</span><span>Flash Habilita ≈ 54 s</span><span>Emergente ≈ 48 s</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════ 06 TRACE / LINEAGE BUS ═════ -->
+  <div data-screen-label="06 Trace Lineage Bus" style="position:relative;display:flex;flex-direction:column;gap:12px;">
+    <div style="display:flex;align-items:baseline;gap:24px;"><span style="font:600 32px var(--font-heading);letter-spacing:.06em;color:#b5d9fd;">06 · TRACE / LINEAGE BUS</span><span style="font:600 18px var(--font-heading);letter-spacing:.12em;">TODO DEBE PODER EXPLICARSE.</span><span style="font:500 14px var(--font-body);letter-spacing:.1em;color:#b5d9fd;">CONECTADO A TODOS LOS DOMINIOS · P0</span></div>
+    <div style="display:grid;grid-template-columns:repeat(12,1fr);">
+      <div style="display:flex;justify-content:center;"><div style="width:1.5px;height:24px;background:#b5d9fd;"></div></div><div style="display:flex;justify-content:center;"><div style="width:1.5px;height:24px;background:#b5d9fd;"></div></div><div style="display:flex;justify-content:center;"><div style="width:1.5px;height:24px;background:#b5d9fd;"></div></div><div style="display:flex;justify-content:center;"><div style="width:1.5px;height:24px;background:#b5d9fd;"></div></div><div style="display:flex;justify-content:center;"><div style="width:1.5px;height:24px;background:#b5d9fd;"></div></div><div style="display:flex;justify-content:center;"><div style="width:1.5px;height:24px;background:#b5d9fd;"></div></div><div style="display:flex;justify-content:center;"><div style="width:1.5px;height:24px;background:#b5d9fd;"></div></div><div style="display:flex;justify-content:center;"><div style="width:1.5px;height:24px;background:#b5d9fd;"></div></div><div style="display:flex;justify-content:center;"><div style="width:1.5px;height:24px;background:#b5d9fd;"></div></div><div style="display:flex;justify-content:center;"><div style="width:1.5px;height:24px;background:#b5d9fd;"></div></div><div style="display:flex;justify-content:center;"><div style="width:1.5px;height:24px;background:#b5d9fd;"></div></div><div style="display:flex;justify-content:center;"><div style="width:1.5px;height:24px;background:#b5d9fd;"></div></div>
+    </div>
+    <div style="height:22px;background:#2c455d;border-top:5px double #b5d9fd;border-bottom:5px double #b5d9fd;margin-top:-12px;"></div>
+    <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:10px;font:600 16px var(--font-heading);text-align:center;">
+      <span style="border:1px solid #b5d9fd;padding:7px 4px;">Versiones</span>
+      <span style="border:1px solid #b5d9fd;padding:7px 4px;">Plan ↔ Real</span>
+      <span style="border:1px solid #b5d9fd;padding:7px 4px;">Intervalos persona / recurso</span>
+      <span style="border:1px solid #b5d9fd;padding:7px 4px;">Tiempos</span>
+      <span style="border:1px solid #b5d9fd;padding:7px 4px;">DecisionTrace</span>
+      <span style="border:1px solid #b5d9fd;padding:7px 4px;">OverrideGate</span>
+      <span style="border:1px solid #b5d9fd;padding:7px 4px;">Directivas</span>
+      <span style="border:1px solid #b5d9fd;padding:7px 4px;">Evidencias</span>
+      <span style="border:1px solid #b5d9fd;padding:7px 4px;">EventoHabilita</span>
+      <span style="border:1px solid #b5d9fd;padding:7px 4px;">Enmiendas</span>
+      <span style="border:1px solid #b5d9fd;padding:7px 4px;">UC lineage</span>
+      <span style="border:1px solid #b5d9fd;padding:7px 4px;">Supersession</span>
+    </div>
+  </div>
+
+  <!-- ═════ FOOTER ═════ -->
+  <div style="display:grid;grid-template-columns:1fr 1040px;gap:40px;align-items:end;">
+    <sc-if value="{{ showNotes }}" hint-placeholder-val="{{ true }}">
+      <div style="border-top:1px solid #416180;padding-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:6px 36px;font-size:13.5px;color:#b5d9fd;">
+        <div style="grid-column:1/-1;font:600 15px var(--font-heading);letter-spacing:.12em;color:#f2f2f3;">NOTAS DE FUENTE · BRIEF vs XLSX (gana XLSX)</div>
+        <span>N-01 · P8 Advisory/Analytics: hoja 74 muestra P0–P7; hoja 58 define P0–P8. Se representa P0–P8.</span>
+        <span>N-02 · “Flash Report” e “Investigación” no son entidades (hoja 42): modo de EventoHabilita y fase de CasoHabilita.</span>
+        <span>N-03 · Condiciones documentales (OK…REQUIERE RENOVACIÓN) vienen del brief; XLSX 07 define resultado Informativo / Advertencia / Bloqueo.</span>
+        <span>N-04 · Budgets: se agrega UX-07 Medición TP-01 ≈ 33 s (hoja 66), ausente en el brief.</span>
+        <span>N-05 · Estados alternativos agregados desde hojas 50–51: ANULADO, NO_REALIZADA, ANULADA, RECHAZADO.</span>
+        <span>N-06 · “Supervisor / Control Center” es consumidor de alertas, no entidad del ERD.</span>
+      </div>
+    </sc-if>
+    <div class="blueprint" style="position:relative;border:1.5px solid #f2f2f3;padding:16px 22px;display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="border-right:1px solid #416180;padding-right:20px;">
+        <div style="font:600 13px var(--font-heading);letter-spacing:.14em;color:#b5d9fd;">07 · VALIDATION / FREEZE</div>
+        <div style="font:600 30px/1 var(--font-heading);letter-spacing:.04em;margin-top:6px;">BASELINE FUNCIONAL 1.0</div>
+        <div style="font:600 30px/1 var(--font-heading);letter-spacing:.3em;color:#7fd1a3;">FROZEN</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px 16px;font-size:13px;color:#b5d9fd;">
+        <span><b style="font:600 22px var(--font-heading);color:#f2f2f3;">87</b> entidades lógicas</span>
+        <span><b style="font:600 22px var(--font-heading);color:#f2f2f3;">75</b> relaciones principales</span>
+        <span><b style="font:600 22px var(--font-heading);color:#f2f2f3;">11</b> state machines</span>
+        <span><b style="font:600 22px var(--font-heading);color:#f2f2f3;">74</b> reglas canónicas</span>
+        <span><b style="font:600 22px var(--font-heading);color:#f2f2f3;">56</b> Golden Scenarios</span>
+        <span><b style="font:600 22px var(--font-heading);color:#7fd1a3;">56</b> PASS</span>
+        <span><b style="font:600 22px var(--font-heading);color:#f2f2f3;">0</b> patches estructurales</span>
+        <span>FZ-01…FZ-13 PASS</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showGrid&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Vista&quot;},&quot;showNotes&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Vista&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return { showGrid: this.props.showGrid ?? true, showNotes: this.props.showNotes ?? true };
+  }
+}
+</script>
+</body>
+</html>

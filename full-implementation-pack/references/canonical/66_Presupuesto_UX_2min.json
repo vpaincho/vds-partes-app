@@ -1,0 +1,313 @@
+{
+  "source": "S2",
+  "sheet": "66_Presupuesto_UX_2min",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "PRESUPUESTO DE INTERACCIÓN · OBJETIVO ≤2 MIN",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "El Parte se construye incrementalmente. El presupuesto mide cada microinteracción crítica de campo; no obliga a completar un formulario monolítico al final del día.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "Interacción",
+        "Nombre",
+        "Actor principal",
+        "Touches humanos",
+        "Segundos estimados",
+        "Target s",
+        "Resultado",
+        "Diseño esperado",
+        "¿Bloquea freeze?"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "UX-01",
+        "Start Work planificado",
+        "Operario",
+        2,
+        5,
+        20,
+        "PASS",
+        "Casi todo derivado; confirmar ubicación + iniciar.",
+        "Sí"
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "UX-02",
+        "Inicio emergente/offline",
+        "Operario + supervisor",
+        6,
+        48,
+        120,
+        "PASS",
+        "Descripción breve + motivo + confirmaciones + autorización.",
+        "Sí"
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "UX-03",
+        "Cambio de turno / handover",
+        "Operario/Supervisor",
+        4,
+        26,
+        45,
+        "PASS",
+        "Confirmar delta de personas/recursos; no reconstruir Parte.",
+        "Sí"
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "UX-04",
+        "Reemplazo persona/recurso",
+        "Operario/Supervisor",
+        3,
+        12,
+        30,
+        "PASS",
+        "Seleccionar saliente/entrante + motivo; elegibilidad automática.",
+        "Sí"
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "UX-05",
+        "Cambio/confirmación ubicación",
+        "Operario",
+        1,
+        4,
+        20,
+        "PASS",
+        "Confirmar ubicación; corte/routing automático.",
+        "Sí"
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "UX-06",
+        "Cambio categoría de tiempo",
+        "Operario",
+        2,
+        7,
+        10,
+        "PASS",
+        "Ideal 1 tap; intervalos automáticos.",
+        "Sí"
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "UX-07",
+        "Medición/evidencia TP-01",
+        "Operario",
+        3,
+        33,
+        45,
+        "PASS",
+        "Solo valor/evidencia que no pueda derivarse.",
+        "Sí"
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "UX-08",
+        "Cierre UnidadEjecucion",
+        "Operario",
+        3,
+        10,
+        60,
+        "PASS",
+        "Resolver faltantes reales + resultado + confirmar cierre.",
+        "Sí"
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "UX-09",
+        "Cierre Parte",
+        "Operario/Supervisor",
+        1,
+        2,
+        20,
+        "PASS",
+        "Resumen automático; 1 confirmación si no hay blockers.",
+        "Sí"
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "UX-10",
+        "TP-02 movimiento",
+        "Operario",
+        5,
+        17,
+        45,
+        "PASS",
+        "Confirmar origen/destino/carga y start/end; contexto ya conocido.",
+        "Sí"
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "UX-11",
+        "TP-03 cierre/cuadrilla",
+        "Operario/Supervisor",
+        4,
+        23,
+        45,
+        "PASS",
+        "Roster/horas/trabajos derivados; solo novedades + confirmación.",
+        "Sí"
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "UX-12",
+        "Flash Report Habilita",
+        "Operario",
+        7,
+        54,
+        120,
+        "PASS",
+        "Contexto auto + categoría + descripción breve + controlada sí/no + evidencia opcional.",
+        "Sí"
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "UX-13",
+        "PTW activation/closure",
+        "Supervisor/Habilita",
+        4,
+        35,
+        120,
+        "PASS",
+        "No se mide contra operador normal, pero sigue diseño rápido y contextual.",
+        "No para Parte"
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "UX-14",
+        "Validación cliente",
+        "Cliente",
+        2,
+        25,
+        60,
+        "PASS",
+        "Aceptar/rechazar/firma; observación solo si excepción.",
+        "No para operador"
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "UX-15",
+        "Certificación/Facturación",
+        "Back Office",
+        0,
+        0,
+        0,
+        "PASS",
+        "Cero input de campo adicional.",
+        "Sí"
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "CHECK DE DISEÑO",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "KPI",
+        "Valor",
+        "Criterio"
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "Interacciones críticas evaluadas",
+        13,
+        "UX-01..UX-12 + UX-15"
+      ]
+    },
+    {
+      "source_row": 25,
+      "cells": [
+        "Interacciones >120 s",
+        0,
+        "Debe ser 0"
+      ]
+    },
+    {
+      "source_row": 26,
+      "cells": [
+        "Carga de campo adicional en Cert/Fact",
+        0,
+        "Debe ser 0 s"
+      ]
+    },
+    {
+      "source_row": 27,
+      "cells": [
+        "Principio",
+        "MICROINTERACCIONES",
+        "No formulario final masivo"
+      ]
+    }
+  ]
+}

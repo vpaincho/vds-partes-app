@@ -1,0 +1,28 @@
+{
+  "status": "PACK_VALIDATED",
+  "scope": "documentation only; no implementation or runtime tests",
+  "markdown_documents": 23,
+  "source_files": 7,
+  "canonical_counts": {
+    "entities": 87,
+    "relationships": 75,
+    "invariants": 36,
+    "rules": 74,
+    "golden_scenarios": 56,
+    "capture_flows": 13
+  },
+  "checks": [
+    "expected ordered filenames 00–22",
+    "87 logical entities mapped exactly once",
+    "exact contiguous IDs: 75 R, 36 C, 74 RUL, 56 GS",
+    "13 capture contracts retained",
+    "original source bytes hash-verified",
+    "explicit reference paths exist",
+    "all software test maps marked SPEC_NOT_RUN"
+  ],
+  "limitations": [
+    "No DDL or software test execution",
+    "Physical grouping, review/sync states and APIs are proposals P for Plan Mode",
+    "Device/PWA retention and production providers/configuration require later validation"
+  ]
+}

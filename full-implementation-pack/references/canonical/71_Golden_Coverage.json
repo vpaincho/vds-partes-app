@@ -1,0 +1,304 @@
+{
+  "source": "S2",
+  "sheet": "71_Golden_Coverage",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "GOLDEN SCENARIOS · COVERAGE & RESULT",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Cobertura funcional del pack de 56 escenarios. Los counts son derivados de 70_Golden_Scenarios_Master.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "Dimensión",
+        "Scenarios",
+        "PASS",
+        "FAIL/REVIEW",
+        "Cobertura esperada",
+        "Lectura"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "PLANIFICACIÓN",
+        4,
+        4,
+        0,
+        "Sí",
+        "Intención, readiness, versionado y post-despacho"
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "ROUTING",
+        2,
+        2,
+        0,
+        "Sí",
+        "TipoParte automático y ambigüedad"
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "TP-01",
+        9,
+        9,
+        0,
+        "Sí",
+        "Identidad, turnos, recursos, ubicación y work package"
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "EJECUCIÓN",
+        5,
+        5,
+        0,
+        "Sí",
+        "Temporalidad, cierre, medición y corrección"
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "EMERGENTE",
+        3,
+        3,
+        0,
+        "Sí",
+        "Offline, autorización y contrato pendiente"
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "OFFLINE",
+        2,
+        2,
+        0,
+        "Sí",
+        "Idempotencia, bundle, sincronización"
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "CONTROL",
+        2,
+        2,
+        0,
+        "Sí",
+        "Directivas y expiración"
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "HABILITA",
+        10,
+        10,
+        0,
+        "Sí",
+        "PTW, eventos, triage, casos y acciones"
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "TP-02",
+        2,
+        2,
+        0,
+        "Sí",
+        "Transporte / movimientos"
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "TP-03",
+        1,
+        1,
+        0,
+        "Sí",
+        "Reporte diario de cuadrilla"
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "CERTIFICACIÓN",
+        7,
+        7,
+        0,
+        "Sí",
+        "Lineage, UC, observaciones, parcialidad"
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "FACTURACIÓN",
+        3,
+        3,
+        0,
+        "Sí",
+        "Líneas, lotes, ERP y correcciones"
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "TRACE",
+        4,
+        4,
+        0,
+        "Sí",
+        "DecisionTrace, evidencia y precedencia"
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "CHANGE CONTROL",
+        2,
+        2,
+        0,
+        "Sí",
+        "Contratos futuros y re-apertura estructural"
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "FREEZE KPIs",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "KPI",
+        "Valor",
+        "Criterio",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "Total scenarios",
+        56,
+        "56",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "PASS",
+        56,
+        "Igual a Total",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 25,
+      "cells": [
+        "FAIL/REVIEW",
+        0,
+        "0",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 26,
+      "cells": [
+        "Patches estructurales",
+        0,
+        "0",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 27,
+      "cells": [
+        "Interacciones UX >120 s",
+        0,
+        "0",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 28,
+      "cells": [
+        "Carga campo Cert/Fact",
+        0,
+        "0 s",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 31,
+      "cells": [
+        "RESULTADO",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 32,
+      "cells": [
+        "GOLDEN PACK RESULT: PASS.\n\nNo aparece una contradicción que obligue a cambiar dominios, cardinalidades principales, identidad Parte/UE, los tres TipoParte, Habilita, Interfaces A/B o el Rule Engine. Los escenarios dependientes de contratos/procedimientos quedan cubiertos por configuración versionada, tal como exige la baseline contract-agnostic.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  ]
+}

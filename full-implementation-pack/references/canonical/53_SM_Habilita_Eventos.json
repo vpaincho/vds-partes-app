@@ -1,0 +1,623 @@
+{
+  "source": "S2",
+  "sheet": "53_SM_Habilita_Eventos",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "STATE MACHINES · HABILITA / EVENTOS Y CASOS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Las transiciones describen comportamiento funcional. El modelo físico podrá implementar constraints, eventos o workflows, pero no cambiar su semántica sin reabrir la baseline.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "HABILITA · EventoHabilita",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "El evento es el hecho reportado. El triage puede reclasificarlo sin borrar el reporte inicial; CasoHabilita es lifecycle separado.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "Estado",
+        "Tipo",
+        "Semántica",
+        "Terminal",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "REPORTADO",
+        "Inicial",
+        "Flash Report creado.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "EN_TRIAGE",
+        "Habilita",
+        "Evento bajo clasificación/evaluación inicial.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "CLASIFICADO",
+        "Habilita",
+        "Tipo/severidad/contexto suficientes para ejecutar escalamiento.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "ESCALADO_A_CASO",
+        "Terminal del evento",
+        "Regla exige CasoHabilita; el hecho queda estable y seguimiento continúa en Caso.",
+        "Sí del workflow evento",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "CERRADO_SIN_CASO",
+        "Terminal",
+        "Triage concluyó que no requiere caso formal.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "DESCARTADO",
+        "Terminal excepcional",
+        "Duplicado/no evento/error de reporte, con causa y vínculo si corresponde.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "ID",
+        "Desde",
+        "Evento",
+        "Hacia",
+        "Gate / condición",
+        "Actor",
+        "Efecto",
+        "Tipo",
+        "Nota"
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "T-EH01",
+        "—",
+        "FLASH_REPORT",
+        "REPORTADO",
+        "Payload mínimo",
+        "Campo/Sistema",
+        "Preservar reporte original.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "T-EH02",
+        "REPORTADO",
+        "INICIAR_TRIAGE",
+        "EN_TRIAGE",
+        "Responsable asignado/cola",
+        "Habilita",
+        "Iniciar clasificación.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "T-EH03",
+        "EN_TRIAGE",
+        "CLASIFICAR",
+        "CLASIFICADO",
+        "Categoría + información suficiente para ReglaEscalamiento",
+        "Habilita",
+        "Persistir clasificación vigente.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "T-EH04",
+        "CLASIFICADO",
+        "EVALUAR_ESCALAMIENTO_ABRE_CASO",
+        "ESCALADO_A_CASO",
+        "EvaluacionEscalamientoHabilita exige Caso",
+        "Motor/Habilita",
+        "Crear CasoHabilita.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "T-EH05",
+        "CLASIFICADO",
+        "CERRAR_SIN_CASO",
+        "CERRADO_SIN_CASO",
+        "Regla no exige seguimiento formal + mínimos completos",
+        "Habilita",
+        "Cerrar workflow de evento.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "T-EH06",
+        "REPORTADO/EN_TRIAGE",
+        "DESCARTAR_DUPLICADO_NO_EVENTO",
+        "DESCARTADO",
+        "Causa + referencia al evento correcto si duplicado",
+        "Habilita",
+        "Preservar reporte pero quitarlo de flujo.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "T-EH07",
+        "CLASIFICADO",
+        "RECLASIFICAR",
+        "CLASIFICADO",
+        "Nueva Evaluacion/justificación; no borrar historia",
+        "Habilita",
+        "Actualizar clasificación mediante versión/evento.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 27,
+      "cells": [
+        "Desde",
+        "Hacia",
+        "Transición prohibida",
+        "Qué hacer en cambio",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 28,
+      "cells": [
+        "REPORTADO",
+        "CERRADO_SIN_CASO",
+        "Cerrar sin triage/clasificación mínima",
+        "Debe existir decisión Habilita.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 29,
+      "cells": [
+        "ESCALADO_A_CASO",
+        "CERRADO_SIN_CASO",
+        "Cerrar evento ignorando Caso abierto",
+        "Caso debe resolverse en su máquina.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 30,
+      "cells": [
+        "DESCARTADO",
+        "ESCALADO_A_CASO",
+        "Reusar evento descartado",
+        "Reactivar mediante revisión explícita o crear evento válido.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 33,
+      "cells": [
+        "HABILITA · CasoHabilita",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 34,
+      "cells": [
+        "Separa investigación, seguimiento de acciones y cierre global. Puede permanecer abierto después de normalizada la operación.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 37,
+      "cells": [
+        "Estado",
+        "Tipo",
+        "Semántica",
+        "Terminal",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 38,
+      "cells": [
+        "ABIERTO",
+        "Inicial",
+        "Caso creado desde EventoHabilita.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 39,
+      "cells": [
+        "EN_INVESTIGACION",
+        "Investigación",
+        "Investigación activa.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 40,
+      "cells": [
+        "SEGUIMIENTO_ACCIONES",
+        "Mejora",
+        "Investigación finalizada; existen acciones/compromisos a seguir.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 41,
+      "cells": [
+        "LISTO_PARA_CIERRE",
+        "Pre-terminal",
+        "Gates de cierre cumplidos según configuración.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 42,
+      "cells": [
+        "CERRADO",
+        "Terminal",
+        "Caso formalmente cerrado.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 45,
+      "cells": [
+        "ID",
+        "Desde",
+        "Evento",
+        "Hacia",
+        "Gate / condición",
+        "Actor",
+        "Efecto",
+        "Tipo",
+        "Nota"
+      ]
+    },
+    {
+      "source_row": 46,
+      "cells": [
+        "T-CH01",
+        "—",
+        "ABRIR_CASO",
+        "ABIERTO",
+        "EventoHabilita escalado + owner",
+        "Habilita",
+        "Crear caso.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 47,
+      "cells": [
+        "T-CH02",
+        "ABIERTO",
+        "INICIAR_INVESTIGACION",
+        "EN_INVESTIGACION",
+        "Responsable + scope",
+        "Habilita",
+        "Iniciar investigación.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 48,
+      "cells": [
+        "T-CH03",
+        "EN_INVESTIGACION",
+        "FINALIZAR_INVESTIGACION",
+        "SEGUIMIENTO_ACCIONES",
+        "estado_investigacion=FINALIZADA + acciones definidas o decisión de no acciones",
+        "Habilita",
+        "Separar investigación de acciones.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 49,
+      "cells": [
+        "T-CH04",
+        "SEGUIMIENTO_ACCIONES",
+        "EVALUAR_CIERRE_OK",
+        "LISTO_PARA_CIERRE",
+        "Notificaciones requeridas resueltas + no acciones bloqueantes sin verificar",
+        "Sistema/Habilita",
+        "Habilitar cierre.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 50,
+      "cells": [
+        "T-CH05",
+        "LISTO_PARA_CIERRE",
+        "CERRAR",
+        "CERRADO",
+        "Autoridad/gate de cierre",
+        "Habilita",
+        "Cerrar formalmente.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 51,
+      "cells": [
+        "T-CH06",
+        "CERRADO",
+        "REABRIR_POR_NUEVA_EVIDENCIA",
+        "EN_INVESTIGACION",
+        "Nueva evidencia material + autorización",
+        "Habilita",
+        "Reabrir con evento auditable.",
+        "CONDICIONAL",
+        null
+      ]
+    },
+    {
+      "source_row": 54,
+      "cells": [
+        "Desde",
+        "Hacia",
+        "Transición prohibida",
+        "Qué hacer en cambio",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 55,
+      "cells": [
+        "ABIERTO",
+        "CERRADO",
+        "Cerrar sin investigación/decisión de triage suficiente",
+        "Debe pasar por gates definidos.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 56,
+      "cells": [
+        "EN_INVESTIGACION",
+        "CERRADO",
+        "Cerrar con investigación abierta",
+        "Finalizar investigación primero.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 57,
+      "cells": [
+        "SEGUIMIENTO_ACCIONES",
+        "CERRADO",
+        "Cerrar con acciones bloqueantes no verificadas",
+        "Solo si configuración marca acciones como no bloqueantes.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 60,
+      "cells": [
+        "SUBMÁQUINA / DIMENSIÓN PARALELA · AccionCorrectivaHabilita",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 61,
+      "cells": [
+        "PENDIENTE → EN_PROGRESO → IMPLEMENTADA → EN_VERIFICACION → VERIFICADA. CANCELADA solo con causa/autoridad.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  ]
+}

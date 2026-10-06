@@ -1,0 +1,413 @@
+{
+  "source": "S2",
+  "sheet": "51_SM_Habilita_PTW",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "STATE MACHINE · HABILITA / PERMISO DE TRABAJO",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Las transiciones describen comportamiento funcional. El modelo físico podrá implementar constraints, eventos o workflows, pero no cambiar su semántica sin reabrir la baseline.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "HABILITA · PermisoTrabajo",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "Autorización formal independiente del Parte. Timeout nunca equivale a cierre; handover puede exigir suspensión/revalidación.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "Estado",
+        "Tipo",
+        "Semántica",
+        "Terminal",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "BORRADOR",
+        "Inicial",
+        "Permiso en preparación.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "PENDIENTE_APROBACION",
+        "Pre-work",
+        "Listo para revisión/aprobación.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "APROBADO",
+        "Pre-work",
+        "Aprobado pero todavía no activado/vigente en campo.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "VIGENTE",
+        "Operativa",
+        "Habilita trabajo dentro de alcance/ventana.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "SUSPENDIDO",
+        "Operativa",
+        "Permiso temporalmente no habilitante.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "CERRADO",
+        "Terminal",
+        "Permiso cerrado formalmente.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "RECHAZADO",
+        "Terminal",
+        "No fue aprobado.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "VENCIDO",
+        "Terminal/control",
+        "Expiró sin cierre normal; requiere tratamiento administrativo, nunca autocierre.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "ANULADO",
+        "Terminal",
+        "Permiso invalidado antes de uso.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "ID",
+        "Desde",
+        "Evento",
+        "Hacia",
+        "Gate / condición",
+        "Actor",
+        "Efecto",
+        "Tipo",
+        "Nota"
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "T-PTW01",
+        "—",
+        "CREAR",
+        "BORRADOR",
+        "Alcance/tipo/contexto identificado",
+        "Supervisor/Habilita",
+        "Crear PTW.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "T-PTW02",
+        "BORRADOR",
+        "ENVIAR_APROBACION",
+        "PENDIENTE_APROBACION",
+        "Campos/requisitos mínimos completos",
+        "Campo/Supervisor",
+        "Solicitar aprobación.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "T-PTW03",
+        "PENDIENTE_APROBACION",
+        "APROBAR",
+        "APROBADO",
+        "Autoridad competente + controles satisfechos",
+        "Habilita/Supervisor",
+        "Aprobar.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "T-PTW04",
+        "PENDIENTE_APROBACION",
+        "RECHAZAR",
+        "RECHAZADO",
+        "Causa",
+        "Habilita/Supervisor",
+        "No habilitar.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 25,
+      "cells": [
+        "T-PTW05",
+        "APROBADO",
+        "ACTIVAR",
+        "VIGENTE",
+        "Ventana/contexto real válidos",
+        "Supervisor/Campo",
+        "Habilitar Start Work.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 26,
+      "cells": [
+        "T-PTW06",
+        "VIGENTE",
+        "SUSPENDER",
+        "SUSPENDIDO",
+        "Cambio condición/handover/evento/orden",
+        "Supervisor/Habilita",
+        "Detener cobertura.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 27,
+      "cells": [
+        "T-PTW07",
+        "SUSPENDIDO",
+        "REVALIDAR_REANUDAR",
+        "VIGENTE",
+        "Condiciones nuevamente válidas + autoridad",
+        "Supervisor/Habilita",
+        "Recuperar vigencia.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 28,
+      "cells": [
+        "T-PTW08",
+        "VIGENTE/SUSPENDIDO",
+        "CERRAR",
+        "CERRADO",
+        "Trabajo/alcance terminado + firmas/autoridad requeridas",
+        "Supervisor/Habilita",
+        "Cerrar formalmente.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 29,
+      "cells": [
+        "T-PTW09",
+        "APROBADO/VIGENTE/SUSPENDIDO",
+        "EXPIRAR",
+        "VENCIDO",
+        "Se superó vigencia sin cierre",
+        "Sistema",
+        "Bloquear nuevas tareas + alertar; NO cerrar.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 30,
+      "cells": [
+        "T-PTW10",
+        "BORRADOR/APROBADO",
+        "ANULAR",
+        "ANULADO",
+        "No se usó / error / cambio alcance",
+        "Rol autorizado",
+        "Invalidar.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 33,
+      "cells": [
+        "Desde",
+        "Hacia",
+        "Transición prohibida",
+        "Qué hacer en cambio",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 34,
+      "cells": [
+        "VENCIDO",
+        "CERRADO",
+        "Autocerrar por timeout",
+        "Exige EventoCierreAdministrativoPTW o cierre autorizado.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 35,
+      "cells": [
+        "RECHAZADO",
+        "VIGENTE",
+        "Activar permiso rechazado",
+        "Crear/revisar nueva solicitud.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 36,
+      "cells": [
+        "CERRADO",
+        "VIGENTE",
+        "Reabrir PTW cerrado",
+        "Emitir nuevo PTW.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  ]
+}

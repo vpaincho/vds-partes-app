@@ -1,0 +1,1166 @@
+# VDS PARTES — FULL PRODUCT IMPLEMENTATION PLAN
+
+La auditoría de producto, arquitectura y validación online quedan aprobadas.
+
+A partir de este momento cambia el objetivo.
+
+NO queremos preparar únicamente un primer vertical slice.
+
+NO queremos construir un MVP parcial.
+
+NO queremos validar TP-03 y recién después decidir cómo será el resto del producto.
+
+Tenemos suficiente evidencia de producto y suficiente arquitectura funcional para definir **la aplicación completa VDS Partes**.
+
+---
+
+# 1. OBJETIVO FINAL
+
+Queremos transformar:
+
+**PRODUCT BASELINE DE JUAN**
++
+**FUNCTIONAL BASELINE VDS**
+
+en una:
+
+# APLICACIÓN REAL, INTEGRAL Y COHERENTE
+
+que contemple desde ahora toda la arquitectura funcional principal.
+
+El resultado de implementación que preparemos para Claude debe dejar la aplicación funcionalmente construida en sus módulos principales.
+
+Posteriormente deberán quedar principalmente pendientes:
+
+- conexión a fuentes MySQL reales;
+- integración con sistemas externos;
+- configuración contractual real;
+- autenticación corporativa definitiva;
+- APIs externas;
+- datos productivos;
+- integraciones documentales;
+- proveedores externos;
+- deployment/productización final.
+
+La aplicación NO debe quedar como una demo que necesite una segunda reconstrucción para entrar en producción.
+
+---
+
+# 2. PRINCIPIO FUNDAMENTAL
+
+NO hacer:
+
+`Slice 1`
+→ prototipo
+→ Slice 2
+→ reinterpretación
+→ Slice 3
+→ otra arquitectura.
+
+Hacer:
+
+# UNA SOLA TARGET APPLICATION
+
+cuya arquitectura completa esté definida previamente.
+
+La implementación puede organizarse internamente por módulos, dependencias y commits para reducir riesgo.
+
+Pero cada etapa debe construir una parte de la **misma aplicación final**.
+
+No debe haber arquitectura descartable.
+
+---
+
+# 3. PRODUCT BASELINE
+
+La aplicación de Juan es el esqueleto real del nuevo producto.
+
+Preservar como baseline, salvo contradicción funcional demostrada:
+
+- shell por rol;
+- navegación;
+- Mi Jornada;
+- Planning;
+- Gantt;
+- vistas recurso/mes;
+- drawer de trabajo;
+- Partes;
+- estructura de detalle;
+- hoja tareas/tiempos;
+- comparación plan-real;
+- evidencia;
+- revisión VDS;
+- bandeja lista-detalle;
+- certificación cliente;
+- dashboard;
+- configuración;
+- lenguaje visual;
+- jerarquía de información;
+- interacción general.
+
+NO reemplazar esto por otra aplicación inspirada en Blueprint.
+
+Blueprint representa lógica.
+
+Juan representa producto.
+
+---
+
+# 4. TARGET
+
+La aplicación final debe integrar coherentemente:
+
+## CONFIGURATION PLANE
+
+- Cliente
+- Contrato
+- ContratoVersion
+- ContratoServicio
+- Servicios
+- Centros de Costo
+- Items contractuales
+- Unidades
+- perfiles
+- roles/capabilities
+- TiposParte
+- reglas
+- requisitos
+- catálogos
+- configuración versionada
+
+No todos requieren UI administrativa completa en la primera release, pero su arquitectura debe existir.
+
+---
+
+## PLANIFICACIÓN
+
+Evolucionar la planificación existente de Juan para soportar:
+
+- demanda/trabajo;
+- asignaciones;
+- personas;
+- recursos;
+- servicio;
+- contrato/contexto;
+- ubicación;
+- ventanas;
+- readiness;
+- disponibilidad;
+- conflictos;
+- versión de planificación;
+- aprobación;
+- despacho;
+- cambios;
+- reprogramación.
+
+Preservar:
+
+- Gantt;
+- recurso;
+- mes;
+- drawer;
+- interacción visual actual.
+
+No permitir que una modificación posterior destruya la versión aprobada histórica.
+
+---
+
+## EXECUTION CORE
+
+Construir correctamente:
+
+- Parte;
+- UnidadEjecucion;
+- routing;
+- TipoParte;
+- personas reales;
+- recursos reales;
+- intervalos;
+- tiempo;
+- ubicación;
+- medición;
+- evidencia;
+- imputación;
+- acciones;
+- enmiendas;
+- timeline.
+
+La UX no debe exponer complejidad innecesaria.
+
+---
+
+## TP-01 / TP-02 / TP-03
+
+La aplicación final debe soportar los tres patrones funcionales definidos.
+
+### TP-01
+Intervención / work package.
+
+### TP-02
+Transporte / movimientos.
+
+### TP-03
+Cuadrilla / operación acumulativa.
+
+NO convertir esto en tres aplicaciones.
+
+Deben compartir:
+
+- shell;
+- ejecución;
+- gates;
+- evidencia;
+- temporalidad;
+- personas;
+- recursos;
+- offline;
+- trace;
+- reglas.
+
+Las diferencias deben resolverse mediante comportamiento/configuración/componentes.
+
+---
+
+# 5. MI JORNADA / FIELD EXPERIENCE
+
+Mi Jornada debe evolucionar hasta convertirse en el punto principal de operación de campo.
+
+Debe soportar:
+
+- próximos trabajos;
+- readiness;
+- preparación;
+- Start Work;
+- trabajo activo;
+- actividad actual;
+- tiempos;
+- pausa;
+- cambio;
+- reemplazo persona;
+- reemplazo recurso;
+- medición;
+- evidencia;
+- ubicación;
+- evento Habilita;
+- cierre;
+- discrepancias;
+- pendientes offline/sync.
+
+No crear un megaformulario.
+
+El Parte debe construirse progresivamente.
+
+---
+
+# 6. START WORK
+
+Implementar correctamente:
+
+PREPARE
+→ EVALUATE
+→ ALLOW / WARN / OVERRIDE / BLOCK
+→ START.
+
+El hard gate debe ocurrir ANTES de iniciar.
+
+Corregir específicamente el patrón observado donde:
+
+ejecución
+→ ocurre
+→ validación después.
+
+Incluir validación temporal del PTW.
+
+Un PTW existente posteriormente NO significa que haya autorizado una ejecución anterior.
+
+Usar `PD-0394` como regression test.
+
+---
+
+# 7. UE
+
+UnidadEjecucion debe tener identidad propia real.
+
+Definir e implementar:
+
+- identidad;
+- estado;
+- Parte;
+- vínculo planificación;
+- personas;
+- recursos;
+- ubicación;
+- tiempos;
+- mediciones;
+- evidencias;
+- imputación;
+- resultado;
+- cierre;
+- versionado;
+- enmienda;
+- lineage.
+
+NO convertir automáticamente cada tarea o fila horaria de Juan en una UE.
+
+---
+
+# 8. ESTADOS
+
+Eliminar conceptualmente el estado combinado único:
+
+`plan / curso / env / obs / apr / cert`
+
+como fuente de verdad universal.
+
+Separar como mínimo:
+
+## OPERACIÓN
+
+## REVISIÓN VDS
+
+## COMERCIAL/CERTIFICACIÓN
+
+## ENTREGA / SYNC
+
+Además:
+
+PTW, Habilita, directivas y otros objetos mantienen lifecycles propios.
+
+Las superficies pueden mostrar un estado resumido derivado para UX.
+
+Pero la persistencia debe conservar las dimensiones correctamente.
+
+---
+
+# 9. CONTROL PLANE
+
+La aplicación completa debe contemplar:
+
+- cancelar;
+- suspender;
+- reprogramar;
+- repriorizar;
+- cambio de alcance;
+- directivas;
+- recepción;
+- ACK;
+- aplicación;
+- rechazo.
+
+No significa construir infraestructura distribuida.
+
+Puede implementarse dentro del monolito modular.
+
+Pero la semántica debe existir.
+
+---
+
+# 10. HABILITA — PREVENT
+
+Transformar la matriz actual de habilitaciones en una vista útil sobre un modelo más correcto.
+
+Incluir:
+
+- requisitos;
+- persona;
+- recurso;
+- documento;
+- vigencia;
+- estado;
+- evaluación;
+- readiness;
+- alertas;
+- warning;
+- hard block;
+- override;
+- PTW.
+
+No pedir nuevamente en Parte documentos existentes.
+
+---
+
+# 11. HABILITA — RESPOND & LEARN
+
+La aplicación final debe incluir como mínimo una primera implementación real de:
+
+- Flash Report;
+- EventoHabilita;
+- triage;
+- severidad;
+- CasoHabilita;
+- acciones;
+- seguimiento;
+- notificaciones como dominio;
+- cierre.
+
+No hace falta construir toda automatización externa.
+
+Pero el producto debe poder gestionar estos objetos correctamente.
+
+Habilita NO es TipoParte.
+
+---
+
+# 12. TRABAJO EMERGENTE
+
+Debe existir una experiencia real para trabajo que aparece fuera de planificación.
+
+No crear planificación ficticia.
+
+Permitir:
+
+- captura mínima;
+- contexto candidato;
+- ubicación;
+- motivo;
+- autorización cuando aplique;
+- estado contractual pendiente;
+- gates Habilita;
+- imputación posterior.
+
+Nunca inventar contrato/CC/item para completar el formulario.
+
+---
+
+# 13. CORRECCIONES
+
+Una ejecución cerrada no vuelve simplemente a edición.
+
+Implementar:
+
+## EnmiendaOperativa
+
+para corregir verdad operacional.
+
+Separar de:
+
+## Ajuste comercial
+
+cuando la discusión es contractual/certificación.
+
+No borrar historia.
+
+No sobrescribir versiones.
+
+---
+
+# 14. REVISIÓN VDS
+
+Preservar la bandeja y experiencia de Juan.
+
+Evolucionarla para:
+
+- completitud;
+- consistencia;
+- observación específica;
+- trazabilidad;
+- versión;
+- fuente;
+- solicitud de enmienda;
+- aceptación.
+
+No convertir revisión VDS en otro estado del Parte operacional.
+
+---
+
+# 15. CERTIFICACIÓN
+
+Evolucionar la bandeja existente para soportar:
+
+- UnidadComercial;
+- fuente operacional;
+- lineage N:M;
+- elegibilidad;
+- observación;
+- aceptación;
+- rechazo;
+- supersession;
+- agrupación;
+- paquetes cuando aplique.
+
+No implementar todavía complejidad contractual inventada.
+
+Donde falte configuración real:
+
+`PENDIENTE_CONFIGURACION`.
+
+Pero la arquitectura debe estar lista.
+
+---
+
+# 16. FACTURACIÓN
+
+Implementar el boundary funcional mínimo.
+
+Preparar:
+
+- LíneaFacturable;
+- lote;
+- estado;
+- adapter/interface ERP.
+
+NO construir un ERP.
+
+NO inventar lógica fiscal.
+
+Debe quedar preparada para conectar posteriormente con el sistema real.
+
+---
+
+# 17. TRACE
+
+La aplicación completa debe poder explicar:
+
+- qué ocurrió;
+- quién;
+- cuándo;
+- qué versión;
+- qué regla;
+- qué decisión;
+- qué override;
+- qué dato cambió;
+- cuál fue la fuente.
+
+Implementar el patrón mínimo de:
+
+`DecisionTrace`
+
+y eventos estructurados.
+
+No full event sourcing.
+
+---
+
+# 18. RULE ENGINE
+
+No construir un producto externo de reglas.
+
+Crear dentro del dominio:
+
+- reglas identificadas;
+- versiones;
+- prioridad;
+- scope;
+- inputs;
+- evaluación;
+- resultado;
+- trace.
+
+Las reglas del producto deben dejar de vivir dispersas solamente en UI/ifs.
+
+No permitir que configuración comercial modifique verdad operacional.
+
+---
+
+# 19. OFFLINE
+
+La aplicación debe quedar arquitectónicamente preparada y funcional para conectividad intermitente.
+
+Implementar:
+
+- almacenamiento local durable;
+- outbox;
+- command IDs;
+- idempotencia;
+- retry;
+- ACK;
+- estado de entrega;
+- reconciliación;
+- conflictos;
+- versionado esperado;
+- bundles/contexto;
+- evidencias pendientes.
+
+Diferenciar siempre:
+
+`GUARDADO LOCAL`
+
+`PENDIENTE`
+
+`ENVIADO`
+
+`RECIBIDO`
+
+`REQUIERE INTERVENCIÓN`
+
+de estados operativos/comerciales.
+
+No simular sincronización.
+
+---
+
+# 20. AUTH / PERMISSIONS
+
+Preparar arquitectura real para:
+
+- identity;
+- session;
+- role;
+- capability;
+- scope;
+- contrato;
+- base;
+- acción;
+- objeto.
+
+Puede utilizar temporalmente un adapter/mock provider si todavía no está definida la identidad corporativa.
+
+Pero no continuar con autorización solo frontend.
+
+---
+
+# 21. DATABASE
+
+La aplicación nueva tendrá PostgreSQL como candidata principal de source of truth operacional.
+
+Diseñar esquema real coherente con:
+
+- identities;
+- relaciones;
+- versiones;
+- estados;
+- lineage;
+- trace;
+- offline/idempotencia.
+
+NO implementar 87 tablas automáticamente.
+
+Normalizar según necesidad real.
+
+JSONB únicamente donde la variabilidad lo justifique.
+
+---
+
+# 22. LEGACY VDS
+
+Las fuentes MySQL reales todavía están siendo relevadas.
+
+Por lo tanto construir adapters/interfaces para:
+
+- Persona;
+- Recurso;
+- Cliente;
+- Contrato;
+- CC;
+- Servicio;
+- documentación.
+
+Utilizar fixtures/mocks detrás de estos adapters mientras no estén disponibles.
+
+La aplicación debe quedar lista para que posteriormente:
+
+`mock adapter`
+
+se reemplace por:
+
+`real VDS adapter`
+
+sin modificar lógica de producto.
+
+ESTO ES CLAVE.
+
+---
+
+# 23. INTEGRACIONES EXTERNAS
+
+Aplicar el mismo patrón para sistemas externos.
+
+La app completa puede funcionar inicialmente con adapters simulados/fixtures para:
+
+- documental;
+- ERP;
+- auth;
+- clima;
+- integraciones clientes;
+- notificaciones;
+- proveedores.
+
+No hardcodear integración dentro de UI.
+
+---
+
+# 24. DASHBOARDS
+
+Preservar dashboard existente.
+
+Separar métricas según fuente:
+
+- planificación;
+- operación;
+- revisión;
+- comercial.
+
+No hacer desaparecer o cambiar históricos porque un Parte pasa de estado.
+
+Toda cifra importante debe tener semántica y fuente.
+
+---
+
+# 25. UI / DESIGN
+
+No rediseñar la aplicación completa.
+
+Preservar el lenguaje visual de Juan.
+
+Claude Design debe trabajar solamente en superficies que necesiten incorporar nuevos comportamientos:
+
+- preparación;
+- readiness;
+- Start Work;
+- trabajo activo;
+- Habilita;
+- offline;
+- discrepancias;
+- enmienda;
+- estados separados;
+- nuevas superficies que todavía no existan.
+
+Las vistas maduras de Juan deben evolucionarse, no reemplazarse.
+
+---
+
+# 26. FUTURE-READINESS
+
+Tracking avanzado, IoT, CV, 3D y digital twins siguen MUY fuera de alcance.
+
+No implementar nada.
+
+Solo mantener boundaries que permitan servicios especializados futuros.
+
+No agregar:
+
+- Kafka;
+- microservices;
+- time-series DB;
+- WebGPU;
+- motores 3D;
+- CV pipelines.
+
+# BUILD FOR TODAY. DESIGN AGAINST DEAD ENDS.
+
+---
+
+# 27. ARQUITECTURA TÉCNICA
+
+Dirección actual:
+
+- TypeScript;
+- React + Vite;
+- API Node;
+- PostgreSQL;
+- modular monolith;
+- CRUD + domain events;
+- versionado;
+- object storage para evidencias;
+- offline durable;
+- adapter pattern para externos.
+
+Mantener como candidatos:
+
+- Fastify;
+- Drizzle;
+- TypeBox/Ajv;
+- Dexie;
+- PWA.
+
+Validar contra implementación completa.
+
+Si no aparece evidencia contraria, mantenerlos.
+
+---
+
+# 28. NO MÁS “SLICE 1” COMO TARGET
+
+Podés organizar la implementación en fases técnicas.
+
+Pero el entregable debe definir el sistema completo.
+
+Cada fase debe indicar qué parte de la Target Application deja funcionando.
+
+NO terminar con:
+
+> ahora tenemos TP-03 y más adelante pensaremos TP-01.
+
+Debemos saber desde el comienzo:
+
+- cómo funciona TP-01;
+- cómo funciona TP-02;
+- cómo funciona TP-03;
+- qué comparten;
+- qué diverge;
+- cómo persisten;
+- cómo aparecen en UX.
+
+Aunque el orden de implementación sea progresivo.
+
+---
+
+# 29. IMPLEMENTATION WAVES
+
+Crear un orden seguro de construcción de la aplicación completa.
+
+Ejemplo conceptual:
+
+## WAVE 0
+Baseline / modularización / foundations.
+
+## WAVE 1
+Identity + DB + masters + contratos + rules foundation.
+
+## WAVE 2
+Planning completo.
+
+## WAVE 3
+Execution Core + UE + TP-01/02/03.
+
+## WAVE 4
+Field UX + offline.
+
+## WAVE 5
+Habilita.
+
+## WAVE 6
+Review / Certification / Commercial.
+
+## WAVE 7
+Trace / dashboards / config / adapters.
+
+Pero NO adoptar este orden automáticamente.
+
+Diseñar el orden óptimo según dependencias del repo.
+
+Cada wave debe dejar el producto integrado.
+
+---
+
+# 30. DEFINITION OF “APP COMPLETA”
+
+La implementación deberá considerarse funcionalmente completa cuando exista:
+
+### PRODUCT
+
+- navegación real;
+- usuarios/roles;
+- planning;
+- execution;
+- Habilita;
+- review;
+- certification;
+- dashboards;
+- configuration.
+
+### DOMAIN
+
+- Parte;
+- UE;
+- TP-01/02/03;
+- estados separados;
+- reglas;
+- versions;
+- enmiendas;
+- lineage;
+- trace.
+
+### FIELD
+
+- Mi Jornada;
+- readiness;
+- Start Work;
+- ejecución;
+- tiempos;
+- recursos/personas;
+- mediciones;
+- evidencia;
+- cierre;
+- emergentes.
+
+### TECH
+
+- API;
+- PostgreSQL;
+- persistence;
+- authorization architecture;
+- validation;
+- offline architecture;
+- sync;
+- tests;
+- observability básica.
+
+### INTEGRATION BOUNDARIES
+
+Adapters listos para sustituir mocks por:
+
+- VDS MySQL;
+- auth;
+- ERP;
+- documental;
+- clientes;
+- servicios externos.
+
+Si algo depende de una conexión que todavía no tenemos:
+
+mock/fixture válido detrás del adapter.
+
+No bloquear la construcción del producto.
+
+---
+
+# 31. REGRESSION CASES OBLIGATORIOS
+
+Incluir:
+
+## PL-093
+No self-conflict.
+
+## PD-0394
+PTW posterior no valida ejecución anterior.
+
+Además:
+
+- hard block before Start Work;
+- planificación histórica preservada;
+- cierre anticipado;
+- observación comercial sin reescribir campo;
+- enmienda;
+- reemplazo;
+- cambio de turno;
+- emergente;
+- retry;
+- offline;
+- sync conflict;
+- Habilita event;
+- TP-01;
+- TP-02;
+- TP-03;
+- lineage comercial.
+
+---
+
+# 32. TEST PLAN COMPLETO
+
+Transformar Golden Scenarios aplicables en pruebas.
+
+Preparar:
+
+- unit;
+- domain;
+- rule;
+- state transition;
+- API;
+- DB;
+- permission;
+- integration;
+- offline;
+- conflict;
+- E2E;
+- visual regression.
+
+No confundir los PASS funcionales del Blueprint con tests de software.
+
+---
+
+# 33. CLAUDE DESIGN
+
+Crear un prompt específico.
+
+Pero NO pedirle:
+
+> diseñá VDS Partes.
+
+Pedirle:
+
+> evolucioná estas superficies existentes para soportar estos estados/comportamientos.
+
+Debe conservar:
+
+- tokens;
+- jerarquía;
+- componentes;
+- navegación;
+- estética.
+
+---
+
+# 34. CLAUDE CODE
+
+Claude Code será el implementador principal.
+
+Debe recibir:
+
+1. repo;
+2. Product Baseline;
+3. Functional Baseline;
+4. Full Application Contract;
+5. Target Architecture;
+6. State Model;
+7. Domain rules;
+8. UX preservation;
+9. Design additions;
+10. acceptance tests;
+11. technical ADR;
+12. integration boundaries.
+
+Primera ejecución:
+
+# PLAN MODE ONLY
+
+Debe devolver:
+
+- target repo architecture;
+- módulos;
+- migrations;
+- models;
+- APIs;
+- components affected;
+- components preserved;
+- adapters;
+- implementation waves;
+- test map;
+- risks;
+- contradictions.
+
+NO modificar código.
+
+Luego se aprueba plan y comienza implementación.
+
+---
+
+# 35. CLAUDE.md
+
+Preparar reglas globales breves.
+
+Incluir:
+
+- preserve Juan Product Baseline;
+- no rewrite;
+- no silent domain reinterpretation;
+- Planning ≠ Execution;
+- operational ≠ review ≠ commercial ≠ sync;
+- no historical mutation;
+- UE first-class;
+- hard gates before actions;
+- Habilita transversal;
+- adapters for missing integrations;
+- no premature microservices;
+- no H3 features;
+- keep app integrated after every wave;
+- tests required.
+
+---
+
+# 36. FULL IMPLEMENTATION PACK
+
+Crear:
+
+```text
+/full-implementation-pack
+
+00_MISSION.md
+01_PRODUCT_BASELINE.md
+02_TARGET_PRODUCT.md
+03_TARGET_ARCHITECTURE.md
+04_DOMAIN_MODEL_IMPLEMENTATION.md
+05_STATE_MODEL.md
+06_RULES_AND_INVARIANTS.md
+07_PLANNING.md
+08_EXECUTION_CORE.md
+09_TP01_TP02_TP03.md
+10_HABILITA.md
+11_REVIEW_CERTIFICATION.md
+12_OFFLINE_SYNC.md
+13_AUTH_PERMISSIONS.md
+14_DATA_INTEGRATION_ADAPTERS.md
+15_UX_PRESERVATION.md
+16_DESIGN_TARGETS.md
+17_ACCEPTANCE_TESTS.md
+18_TECHNICAL_ADR.md
+19_IMPLEMENTATION_WAVES.md
+20_CLAUDE_DESIGN_PROMPT.md
+21_CLAUDE_CODE_PLAN_PROMPT.md
+22_CLAUDE.md
+```
+
+Evitar duplicación.
+
+Cada archivo debe ser corto, operativo y referenciar fuentes.
+
+---
+
+# 37. CONTEXT MANAGEMENT
+
+Claude no debe cargar siempre toda la baseline.
+
+Clasificar documentos como:
+
+`ALWAYS LOAD`
+
+`LOAD BY MODULE`
+
+`REFERENCE ONLY`.
+
+El Full Implementation Pack es la traducción ejecutable de la baseline.
+
+El XLSX/Blueprint siguen siendo autoridad para resolver dudas.
+
+---
+
+# 38. OPEN QUESTIONS
+
+No bloquear el Full Application Plan por información que puede resolverse luego mediante adapter/configuración.
+
+Separar:
+
+## BLOCKS ARCHITECTURE
+
+preguntas sin las cuales realmente no puede diseñarse.
+
+## BLOCKS REAL CONNECTION
+
+preguntas necesarias para conectar sistema real pero no para desarrollar la app.
+
+## CONFIGURATION LATER
+
+contratos, thresholds, catálogos, usuarios, etc.
+
+Queremos que la falta de accesos externos NO impida construir el producto.
+
+---
+
+# 39. RESULTADO ESPERADO
+
+Al finalizar quiero tener:
+
+### 1.
+Una definición completa de VDS Partes como producto final.
+
+### 2.
+La arquitectura técnica completa.
+
+### 3.
+Todos los dominios principales reconciliados con la app de Juan.
+
+### 4.
+Un plan de implementación completo.
+
+### 5.
+Prompts finales para Claude Design y Claude Code.
+
+### 6.
+Acceptance tests de la aplicación completa.
+
+### 7.
+Boundaries/adapters para que posteriormente solo tengamos que conectar:
+
+- fuentes reales;
+- credenciales;
+- integraciones;
+- configuración contractual;
+- servicios externos.
+
+NO IMPLEMENTES.
+
+NO REDISEÑES.
+
+NO PREPARES SOLAMENTE UN MVP.
+
+Tu objetivo es transformar las dos baselines existentes en el **contrato completo de construcción de VDS Partes**.

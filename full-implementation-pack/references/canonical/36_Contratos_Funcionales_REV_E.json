@@ -1,0 +1,241 @@
+{
+  "source": "S2",
+  "sheet": "36_Contratos_Funcionales_REV_E",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "REV E CANDIDATE v2 · CONTRATOS FUNCIONALES ENTRE DOMINIOS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Contratos funcionales actualizados tras auditoría Gemini: se congela responsabilidad entre dominios, evitando duplicar entidades o introducir decisiones tecnológicas.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "ID",
+        "Interfaz / Contrato",
+        "Productor",
+        "Debe entregar",
+        "Consumidor puede asumir",
+        "Consumidor NO puede",
+        "Pendientes",
+        "Estado candidato"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "FC-01",
+        "I-A · Planificación → Ejecución",
+        "Planificación",
+        "PlanificacionVersion aprobada; Asignaciones/UE planificadas; ventana; contexto; recursos/personas previstas; prioridad; readiness/precheck; TipoParte previsto; versiones de reglas/catálogos.",
+        "Que la intención fue confirmada bajo una versión concreta y puede reconstruirse exactamente.",
+        "Asumir que lo planificado ocurrió; convertir TipoParte previsto en verdad sin revalidar; sobrescribir versión histórica.",
+        "Q-02 política emergente/offline; payload exacto por servicio.",
+        "Candidate Freeze"
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "FC-02",
+        "Execution Context Bundle · Backend → Dispositivo",
+        "Backend/compilador de contexto",
+        "Proyección versionada mínima de asignaciones, ubicaciones, personas/recursos, reglas TipoParte/corte, documental/Habilita, catálogos y vigencia.",
+        "Que puede operar dentro del alcance/validez del bundle incluso sin toda la capa maestra.",
+        "Asumir que bundle vencido sigue vigente; inventar reglas faltantes; ignorar directivas pendientes conocidas.",
+        "Q-02 + decisión técnica de TTL/sync.",
+        "Core funcional congelable"
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "FC-03",
+        "Control Plane · Planificación/Habilita → Ejecución",
+        "Planificación / Supervisión / Habilita",
+        "DirectivaOperativa tipada, target, motivo, prioridad, emitida_at, versión/contexto y requisitos de ACK.",
+        "Que toda instrucción posterior al despacho llega como hecho nuevo, no mutación retroactiva.",
+        "Reescribir el snapshot original; marcar aplicada una directiva no recibida; crear un segundo bus 'DirectivaHabilita' paralelo.",
+        "Semántica exacta por directiva; Q-02/Q-06.",
+        "Candidate Freeze"
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "FC-04",
+        "Habilita PREVENT · Reglas → Start Work",
+        "Control documental / Habilita / PTW",
+        "Evaluación actual de habilitaciones + permisos requeridos/aprobados/vigentes + overrides autorizados cuando correspondan.",
+        "Que Start Work solo ocurre si los gates aplicables habilitan o existe excepción explícita permitida.",
+        "Transformar hard block en override; autocerrar PTW por timeout; usar falta de imputación comercial como excusa para omitir Habilita.",
+        "Q-01/Q-02/Q-06.",
+        "Candidate Freeze"
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "FC-05",
+        "TipoParte → Ejecución",
+        "Motor de ruteo + configuración",
+        "Identidad del TP; componentes; UE; reglas de corte; tiempos; evidencias; mediciones; estados.",
+        "Que work package define TP-01; un recurso adicional puede vivir en la misma UE o nueva UE sin crear Parte automáticamente.",
+        "Permitir selector libre como camino normal; aplicar PTW distinto como driver automático de nuevo TP-01.",
+        "Q-01 excepciones por turno; reglas específicas.",
+        "Candidate Freeze"
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "FC-06",
+        "Habilita Event Bus · Operación → Habilita",
+        "Campo / sistema / ejecución",
+        "EventoHabilita con identidad, reportado_at, ocurrido_at, ubicación, contexto activo TP-01/02/03/UE/PTW si existe, categoría inicial, descripción, situación controlada y evidencia disponible.",
+        "Que el hecho existe aunque no haya Parte y que triage avanzado ocurre después.",
+        "Exigir root cause/severidad formal al reportante; asumir TP-01 como único contexto posible; cerrar Caso al cerrar Parte.",
+        "Taxonomía/obligatoriedad por categoría configurable.",
+        "Core transversal congelable"
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "FC-07",
+        "Habilita Escalation · Evento → Habilita/Control",
+        "Motor Habilita",
+        "EvaluacionEscalamientoHabilita con inputs, versión de ReglaEscalamientoHabilita, resultado y acciones requeridas.",
+        "Que la razón del escalamiento es auditable y versionada.",
+        "Crear DirectivaHabilita paralela; hardcodear RAM 5x5/thresholds no validados; ejecutar notificación externa sin regla/autoridad.",
+        "Q-06 matriz/acciones VDS.",
+        "Core estructural congelable"
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "FC-08",
+        "I-B · Ejecución → Certificación",
+        "Ejecución / Parte",
+        "UE cerradas; ubicación/activo real; intervalos persona/recurso; tiempos/transiciones; CC/Item o estado_contexto_contractual; mediciones; evidencias; desvíos; versión fuente; enmiendas.",
+        "Que representa verdad operacional versionada y puede contener contexto contractual pendiente explícito, nunca falsificado.",
+        "Editar Parte para coincidir con criterio comercial; usar CC default ficticio; asumir 1 Parte=1 UC.",
+        "Q-02 + contratos reales + Q-04.",
+        "Candidate Freeze"
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "FC-09",
+        "Derivación comercial · Ejecución → UnidadComercial",
+        "Motor contractual/certificación",
+        "ReglaGranoUC; ReglaTratamientoTiempo; mapping Item/UM/CC; fuente_ejecucion_version; cantidades derivadas y evidencia requerida.",
+        "Que cada UC sabe de qué fuente/version nació y por qué tiene esa cantidad.",
+        "Perder lineage; sumar Partes ciegamente; mezclar ajuste comercial con corrección operativa.",
+        "Contratos reales.",
+        "Candidate Freeze"
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "FC-10",
+        "EnmiendaOperativa → Downstream",
+        "Supervisión / ejecución autorizada",
+        "Objeto afectado; versión anterior/nueva; valor anterior/nuevo; motivo; evidencia; actor/aprobador; timestamp.",
+        "Que existe nueva verdad operativa y UC derivadas de versiones anteriores pueden quedar obsoletas.",
+        "Borrar versión previa; mantener UC obsoleta como vigente; crear otra entidad de enmienda duplicada.",
+        "Q-04 flujo post-aceptación/factura.",
+        "Candidate Freeze"
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "FC-11",
+        "Supersession Comercial · UC → UC/Ajuste",
+        "Certificación",
+        "unidad_comercial_sustituye_a_id, estado_supersession_comercial, lineage de fuente y decisión de revisión/reversión.",
+        "Que una nueva UC puede sustituir a otra sin borrar el histórico.",
+        "Actualizar silenciosamente una UC aceptada; borrar certificación previa; asumir documento contable antes de conocer ERP.",
+        "Q-04 política certificado/facturado.",
+        "Estructura congelable"
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "FC-12",
+        "Certificación → Facturación",
+        "Certificación",
+        "Líneas aceptadas vigentes; cantidades aceptadas; ítems; referencias contractuales; estado/lineage; ajustes/reversiones válidos.",
+        "Que Facturación recibe base comercial aceptada y vigente.",
+        "Reinterpretar evidencia cruda; recalcular campo; modificar ejecución.",
+        "Q-04 + requisitos fiscales/ERP.",
+        "Core congelable / detalle pendiente"
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "FC-13",
+        "Notificación Habilita · Regla → Obligación",
+        "Habilita / EvaluacionEscalamientoHabilita",
+        "NotificacionHabilita con trigger, destinatario/rol, deadline, responsable, estado y evidencia.",
+        "Que la obligación existe independientemente del canal técnico.",
+        "Congelar Pub/Sub, Kafka, email/SMS específicos o enviar automáticamente a externos sin política.",
+        "Destinatarios/plazos/reglas configurables.",
+        "Core funcional congelable"
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "FC-14",
+        "CasoHabilita / Acciones · Learn",
+        "Habilita",
+        "estado_investigacion_habilita, estado_caso_habilita y AccionCorrectivaHabilita con lifecycle independiente/estado propio.",
+        "Que investigación puede terminar mientras acciones siguen; el gate de cierre global es configurable.",
+        "Ocultar acciones abiertas cerrando estados por conveniencia; forzar un único lifecycle.",
+        "Q-09 gate formal de CERRADO.",
+        "Estructura congelable"
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "Si durante diseño técnico aparece una necesidad que exige que un consumidor 'adivine' o reconstruya información que su contrato funcional no recibe, la solución no es agregar lógica oculta en la app: hay que volver al dominio productor y decidir si el dato debe derivarse, versionarse o incorporarse explícitamente a la interfaz.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  ]
+}

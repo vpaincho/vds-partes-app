@@ -1,0 +1,651 @@
+{
+  "source": "S2",
+  "sheet": "49_SM_Planificacion",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "STATE MACHINES · PLANIFICACIÓN",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Las transiciones describen comportamiento funcional. El modelo físico podrá implementar constraints, eventos o workflows, pero no cambiar su semántica sin reabrir la baseline.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "PLANIFICACIÓN · Planificacion",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "Contenedor de intención. Las versiones se congelan por PlanificacionVersion; el estado del Plan no prueba ejecución.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "Estado",
+        "Tipo",
+        "Semántica",
+        "Terminal",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "ABIERTA",
+        "Inicial",
+        "Existe y admite nuevas versiones/borradores.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "ACTIVA",
+        "Operativa",
+        "Existe una PlanificacionVersion aprobada con asignaciones vigentes.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "CERRADA",
+        "Terminal",
+        "No quedan asignaciones abiertas ni trabajo pendiente bajo este plan.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "CANCELADA",
+        "Terminal",
+        "Plan abandonado antes de materializar ejecución relevante.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "ID",
+        "Desde",
+        "Evento",
+        "Hacia",
+        "Gate / condición",
+        "Actor",
+        "Efecto",
+        "Tipo",
+        "Nota"
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "T-P01",
+        "—",
+        "CREAR_PLAN",
+        "ABIERTA",
+        "Datos mínimos de contexto",
+        "Sistema/Planificación",
+        "Crear identidad del plan.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "T-P02",
+        "ABIERTA",
+        "APROBAR_VERSION",
+        "ACTIVA",
+        "PlanificacionVersion APROBADA + ≥1 AsignacionPlanificada",
+        "Planificación",
+        "Activar versión como intención vigente.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "T-P03",
+        "ACTIVA",
+        "APROBAR_NUEVA_VERSION",
+        "ACTIVA",
+        "Nueva versión válida; anterior pasa SUPERSEDIDA",
+        "Planificación",
+        "Replanificar sin reescribir versión anterior.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "T-P04",
+        "ACTIVA",
+        "CERRAR_PLAN",
+        "CERRADA",
+        "Todas las asignaciones terminales + sin directivas pendientes relevantes",
+        "Planificación",
+        "Cierre lógico del contenedor.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "T-P05",
+        "ABIERTA",
+        "CANCELAR_PLAN",
+        "CANCELADA",
+        "Sin ejecución materializada vinculada",
+        "Planificación",
+        "Cancelar antes de ejecución.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "T-P06",
+        "ACTIVA",
+        "CANCELAR_PLAN_COMPLETO",
+        "CANCELADA",
+        "Solo si ninguna ejecución comenzó; si comenzó, usar directivas/resultado de asignaciones",
+        "Planificación",
+        "Evitar cancelar historia ya ejecutada.",
+        "CONDICIONAL",
+        null
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "Desde",
+        "Hacia",
+        "Transición prohibida",
+        "Qué hacer en cambio",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 25,
+      "cells": [
+        "CERRADA",
+        "ACTIVA",
+        "Reabrir silenciosamente un plan cerrado",
+        "Crear nueva versión/plan según contexto; conservar cierre histórico.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 26,
+      "cells": [
+        "CANCELADA",
+        "ACTIVA",
+        "Reactivar plan cancelado",
+        "Nueva Planificacion o versión explícita con trazabilidad.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 27,
+      "cells": [
+        "ACTIVA",
+        "CANCELADA",
+        "Cancelar si ya existen ejecuciones iniciadas",
+        "Resolver asignaciones/directivas; no borrar materialización real.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 30,
+      "cells": [
+        "SUBMÁQUINA / DIMENSIÓN PARALELA · PlanificacionVersion",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 31,
+      "cells": [
+        "BORRADOR → EN_VALIDACION → APROBADA → SUPERSEDIDA. Alternativa: EN_VALIDACION → RECHAZADA. Una APROBADA no se edita.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 35,
+      "cells": [
+        "PLANIFICACIÓN · AsignacionPlanificada",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 36,
+      "cells": [
+        "Representa trabajo despachable previsto. Su estado nunca debe confundirse con el estado de Parte/UE real.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 39,
+      "cells": [
+        "Estado",
+        "Tipo",
+        "Semántica",
+        "Terminal",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 40,
+      "cells": [
+        "PROGRAMADA",
+        "Inicial aprobada",
+        "Existe dentro de versión aprobada; aún puede no estar READY.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 41,
+      "cells": [
+        "READY",
+        "Operativa",
+        "Readiness vigente y gates previos satisfechos.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 42,
+      "cells": [
+        "DESPACHADA",
+        "Operativa",
+        "Contexto fue entregado a campo/dispositivo.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 43,
+      "cells": [
+        "CUMPLIDA",
+        "Terminal",
+        "La intención fue materializada y cerrada suficientemente por ejecución real.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 44,
+      "cells": [
+        "NO_REALIZADA",
+        "Terminal",
+        "La asignación venció/cerró sin ejecución efectiva, con causa.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 45,
+      "cells": [
+        "CANCELADA",
+        "Terminal",
+        "Se canceló antes de inicio por decisión operativa.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 46,
+      "cells": [
+        "SUPERSEDIDA",
+        "Terminal versión",
+        "Nueva PlanificacionVersion reemplazó esta asignación.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 49,
+      "cells": [
+        "ID",
+        "Desde",
+        "Evento",
+        "Hacia",
+        "Gate / condición",
+        "Actor",
+        "Efecto",
+        "Tipo",
+        "Nota"
+      ]
+    },
+    {
+      "source_row": 50,
+      "cells": [
+        "T-A01",
+        "—",
+        "APROBAR_VERSION",
+        "PROGRAMADA",
+        "Asignación incluida en PlanificacionVersion aprobada",
+        "Planificación",
+        "Crear asignación vigente.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 51,
+      "cells": [
+        "T-A02",
+        "PROGRAMADA",
+        "READINESS_OK",
+        "READY",
+        "EvaluacionPlanificacion vigente = READY",
+        "Sistema",
+        "Habilitar despacho.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 52,
+      "cells": [
+        "T-A03",
+        "READY",
+        "INVALIDAR_READINESS",
+        "PROGRAMADA",
+        "EventoInvalidacionReadiness",
+        "Sistema",
+        "Volver a requerir evaluación.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 53,
+      "cells": [
+        "T-A04",
+        "READY",
+        "DESPACHAR",
+        "DESPACHADA",
+        "ExecutionContextBundle/contexto emitido",
+        "Planificación",
+        "Entregar intención a campo.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 54,
+      "cells": [
+        "T-A05",
+        "DESPACHADA",
+        "MATERIALIZAR_EJECUCION",
+        "DESPACHADA",
+        "Crear VinculoPlanEjecucion; el estado real vive en Parte/UE",
+        "Sistema",
+        "No duplicar EN_EJECUCION aquí.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 55,
+      "cells": [
+        "T-A06",
+        "DESPACHADA",
+        "EJECUCION_CERRADA_CUMPLE",
+        "CUMPLIDA",
+        "Vínculo real satisface alcance según regla",
+        "Sistema/Planificación",
+        "Cerrar intención como cumplida.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 56,
+      "cells": [
+        "T-A07",
+        "PROGRAMADA/READY/DESPACHADA",
+        "CERRAR_NO_REALIZADA",
+        "NO_REALIZADA",
+        "Causa estructurada; no existe ejecución efectiva que la cumpla",
+        "Planificación",
+        "Preservar desvío previsto vs real.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 57,
+      "cells": [
+        "T-A08",
+        "PROGRAMADA/READY",
+        "CANCELAR",
+        "CANCELADA",
+        "Directiva/decisión antes de Start Work",
+        "Planificación",
+        "Cancelar intención.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 58,
+      "cells": [
+        "T-A09",
+        "PROGRAMADA/READY/DESPACHADA",
+        "SUPERSEDER",
+        "SUPERSEDIDA",
+        "Nueva PlanificacionVersion reemplaza asignación",
+        "Sistema",
+        "Versionar, no editar.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 61,
+      "cells": [
+        "Desde",
+        "Hacia",
+        "Transición prohibida",
+        "Qué hacer en cambio",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 62,
+      "cells": [
+        "DESPACHADA",
+        "READY",
+        "Deshacer despacho borrando historia",
+        "Emitir nueva versión/directiva; el despacho original queda trazado.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 63,
+      "cells": [
+        "CUMPLIDA",
+        "PROGRAMADA",
+        "Reabrir asignación cumplida",
+        "Nueva asignación/versión.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 64,
+      "cells": [
+        "CANCELADA",
+        "CUMPLIDA",
+        "Marcar cancelada como cumplida sin ejecución",
+        "Solo mediante nueva evidencia y revisión explícita.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  ]
+}

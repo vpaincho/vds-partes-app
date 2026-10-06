@@ -1,0 +1,199 @@
+{
+  "source": "S2",
+  "sheet": "68_Contratos_Captura_Flujos",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "CONTRATOS DE CAPTURA · HAPPY PATH + EXCEPCIONES",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Estos contratos no son pantallas. Definen qué información debe estar disponible y cuánto debe pedir el futuro producto en cada momento.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "ID",
+        "Flujo",
+        "Momento",
+        "Sistema ya conoce / deriva",
+        "Humano solo hace",
+        "Excepción abre",
+        "Budget"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "CF-01",
+        "TP-01 Intervención",
+        "Inicio",
+        "Plan/asignación, usuario, perfil, cliente, TipoParte, personas/recursos previstos, ubicación candidata, gates Habilita/PTW.",
+        "Confirmar ubicación si hace falta + INICIAR.",
+        "Cambio recurso/persona, ubicación ambigua, trabajo emergente.",
+        "≤20 s"
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "CF-02",
+        "TP-01 Intervención",
+        "Durante",
+        "UE activa, intervalos, recursos/personas, tiempo actual, ubicación, componentes/mediciones aplicables.",
+        "Cambiar categoría solo si no inferible; ingresar medición física/evidencia cuando aplica.",
+        "Desvío, espera, subtrabajo autónomo, reemplazo, Habilita.",
+        "micro 3–45 s"
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "CF-03",
+        "TP-01 Intervención",
+        "Cierre UE",
+        "Tiempos, intervalos, evidencias/mediciones requeridas, blockers, contexto contractual.",
+        "Elegir resultado + causa condicional + CERRAR.",
+        "Faltantes reales, no realizado, error de medición.",
+        "≤60 s"
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "CF-04",
+        "TP-01 Intervención",
+        "Cierre Parte",
+        "UE terminales, resumen, tiempos/personas/recursos, evidencias y blockers.",
+        "Confirmar cierre operativo.",
+        "Alguna UE abierta o inconsistencia.",
+        "≤20 s"
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "CF-05",
+        "TP-02 Transporte",
+        "Inicio movimiento",
+        "Origen/destino previstos, recurso/chofer, carga prevista, permisos/contexto.",
+        "Confirmar origen/destino/carga + START.",
+        "Cambio real de destino/carga/recurso.",
+        "≤20 s"
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "CF-06",
+        "TP-02 Transporte",
+        "Fin movimiento",
+        "GPS/contexto de destino, timestamps, transición, carga prevista/real.",
+        "Confirmar llegada/cantidad si varió + FINALIZAR.",
+        "Incidente, descarga parcial, destino distinto.",
+        "≤20 s"
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "CF-07",
+        "TP-03 Cuadrilla",
+        "Durante turno",
+        "Roster real, recursos, UE/trabajos, tiempos/eventos acumulados.",
+        "Solo registrar excepciones que el sistema no capturó.",
+        "Reemplazo, trabajo adicional, no realizado, espera.",
+        "microeventos"
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "CF-08",
+        "TP-03 Cuadrilla",
+        "Cierre turno",
+        "Roster/recursos/UE/horas/resumen real.",
+        "Confirmar resumen + novedad excepcional si falta.",
+        "Inconsistencia temporal o UE abierta.",
+        "≤45 s"
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "CF-09",
+        "Habilita",
+        "Flash Report",
+        "Reportante, timestamp, contexto activo, UE/PTW/personas/recursos, ubicación candidata.",
+        "Confirmar hora/ubicación + categoría + descripción breve + controlada sí/no + evidencia opcional.",
+        "Contexto ambiguo o evento standalone.",
+        "≤120 s"
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "CF-10",
+        "Habilita",
+        "Triage / investigación",
+        "Todo el reporte inicial + evidencia/contexto/lineage.",
+        "Nada al reportante normal; Habilita completa severidad, clasificación, investigación y acciones.",
+        "Nueva evidencia/reclasificación.",
+        "Back office"
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "CF-11",
+        "Emergente",
+        "Inicio",
+        "Usuario/hora/ubicación, contexto activo, Habilita/documental, recursos/personas actuales.",
+        "Describir tarea + motivo + confirmar cliente candidato; supervisor autoriza si regla lo exige.",
+        "Contrato/CC/Item quedan pendientes.",
+        "≤120 s"
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "CF-12",
+        "Certificación",
+        "Derivación",
+        "UE cerradas, tiempos, mediciones, imputación, lineage, evidencia.",
+        "Nada al operario.",
+        "Contexto contractual pendiente bloquea downstream.",
+        "0 s campo"
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "CF-13",
+        "Facturación",
+        "Derivación",
+        "UC aceptada vigente, regla facturación, ajustes/supersession.",
+        "Nada al operario.",
+        "ERP error / ajuste administrativo.",
+        "0 s campo"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,202 @@
+{
+  "source": "S2",
+  "sheet": "45_Hallazgos_Modelo_Relacional",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "HALLAZGOS DE NORMALIZACIÓN · MODELO RELACIONAL LÓGICO v0.1",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Esta etapa busca anomalías relacionales, no nuevas funcionalidades. Un hallazgo solo se incorpora si evita perder historia, imponer 1:1 falso o duplicar fuente de verdad.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "ID",
+        "Severidad",
+        "Hallazgo",
+        "Problema si no se corrige",
+        "Decisión v2.0",
+        "Patch lógico",
+        "¿Cambia REV E?",
+        "Estado"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "MR-01",
+        "CRÍTICA",
+        "UnidadComercial tenía lineage conceptual demasiado escalar.",
+        "Una UC mensual/período puede derivar de muchas UE y una UE puede generar distintas UC/ítems. Un solo fuente_ejecucion_version_id rompe ambos casos.",
+        "Modelar UC↔UE como N:M.",
+        "UnidadComercialFuenteEjecucion con versión fuente e imputación opcional.",
+        "NO: formaliza una capacidad ya prevista.",
+        "APLICADO"
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "MR-02",
+        "ALTA",
+        "PaqueteCertificacion↔UC no debe ser pertenencia rígida.",
+        "Una UC observada/reprocesada puede entrar en una nueva versión de paquete; mover package_id borraría historia.",
+        "Usar asociación versionable.",
+        "PaqueteCertificacionUnidadComercial.",
+        "NO",
+        "APLICADO"
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "MR-03",
+        "ALTA",
+        "PermisoTrabajo↔UE es naturalmente N:M.",
+        "Una intervención puede requerir varios permisos y un permiso puede cubrir más de una UE/subtarea.",
+        "Formalizar puente.",
+        "PermisoTrabajoUnidadEjecucion.",
+        "NO",
+        "APLICADO"
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "MR-04",
+        "CRÍTICA",
+        "Planificación↔Ejecución no puede resolverse con FK 1:1.",
+        "Una tarea planificada puede no realizarse, dividirse o consolidarse; emergente no tiene plan.",
+        "Mantener bridge 0..N↔0..N.",
+        "VinculoPlanEjecucion se vuelve pieza central del ERD.",
+        "NO",
+        "APLICADO"
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "MR-05",
+        "ALTA",
+        "Evidencia tiene múltiples scopes reales.",
+        "Firmas/fotos pueden validar UE, PTW, Habilita, UC o paquete; columnas específicas duplicarían modelo.",
+        "Evidencia independiente + vínculo controlado.",
+        "EvidenciaVinculo lógico; implementación con targets tipados.",
+        "NO",
+        "APLICADO"
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "MR-06",
+        "ALTA",
+        "CentroCosto no debe colgar rígidamente de ContratoServicio.",
+        "Un CC puede cruzar servicios/contextos y los datos actuales no permiten mapear 1:1.",
+        "Dimensión independiente + bridge configurable.",
+        "ContratoServicioCentroCosto.",
+        "NO",
+        "APLICADO"
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "MR-07",
+        "MEDIA",
+        "Planificación nominal necesitaba diferenciar requisito de nominación.",
+        "'Necesito 1 retro' y 'asigno Retro 803' son hechos diferentes.",
+        "Separar Requerimiento de Asignación nominal.",
+        "AsignacionPersonaPlanificada / AsignacionRecursoPlanificada.",
+        "NO",
+        "APLICADO"
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "MR-08",
+        "CRÍTICA",
+        "ExecutionContextBundle podía confundirse con entidad maestra.",
+        "Si offline cache se trata como verdad, aparecen conflictos imposibles de reconciliar.",
+        "Clasificar como PROJECTION descartable/versionada.",
+        "Bundle referencia PlanificacionVersion/rulesets, nunca al revés.",
+        "NO",
+        "APLICADO"
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "MR-09",
+        "ALTA",
+        "Targets genéricos (Directiva, Evidencia, Conformidad, Enmienda) pueden degenerar en FK polimórficos opacos.",
+        "Se pierde integridad referencial y aparecen IDs válidos con tipo incorrecto.",
+        "Mantener scope lógico, pero exigir implementación tipada/constraint fuerte.",
+        "Puentes de objetivo o tablas target específicas en modelo físico.",
+        "NO",
+        "GUARDRAIL"
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "MR-10",
+        "MEDIA",
+        "Cuadrilla todavía puede ser maestro o composición temporal.",
+        "Si se congela mal, podría duplicar AsignacionPersonaEjecucion.",
+        "Mantener Cuadrilla como CONFIG, no core obligatorio.",
+        "Validar cuando diseñemos planificación/UI.",
+        "NO",
+        "ABIERTO NO BLOQUEANTE"
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "MR-11",
+        "MEDIA",
+        "Factura pertenece al límite con ERP, no al núcleo funcional actual.",
+        "Sin proceso administrativo real, modelar documento fiscal interno sería inventar campos/reglas.",
+        "Terminar modelo interno en LoteFacturacion y representar Factura como boundary.",
+        "Adapter futuro al ERP/documento real.",
+        "NO",
+        "APLICADO"
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "MR-12",
+        "ALTA",
+        "Corrección post-cert necesita supersession, no update.",
+        "Actualizar UC aceptada destruye qué se certificó originalmente.",
+        "Self-reference + lineage N:M + estado supersession.",
+        "UC v2 sustituye UC v1; ambas permanecen.",
+        "NO",
+        "APLICADO"
+      ]
+    }
+  ]
+}

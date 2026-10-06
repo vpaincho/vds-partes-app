@@ -1,0 +1,735 @@
+{
+  "source": "S2",
+  "sheet": "54_SM_Certificacion",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "STATE MACHINES · CERTIFICACIÓN",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Las transiciones describen comportamiento funcional. El modelo físico podrá implementar constraints, eventos o workflows, pero no cambiar su semántica sin reabrir la baseline.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "CERTIFICACIÓN · UnidadComercial",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "Estado de certificación separado de la vigencia del lineage. Fuente operacional nunca se edita desde Certificación.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "Estado",
+        "Tipo",
+        "Semántica",
+        "Terminal",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "INCOMPLETA",
+        "Inicial",
+        "Falta evidencia, mapping o dato requerido.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "ELEGIBLE",
+        "Pre-cert",
+        "Cumple requisitos para revisión/certificación.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "EN_REVISION",
+        "Certificación",
+        "Está siendo revisada.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "OBSERVADA",
+        "Certificación",
+        "Requiere aclaración/evidencia/ajuste comercial permitido.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "ACEPTADA",
+        "Terminal comercial",
+        "Cliente/proceso la acepta.",
+        "Sí respecto de esa versión",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "RECHAZADA",
+        "Terminal comercial",
+        "No aceptada bajo esa versión.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "ID",
+        "Desde",
+        "Evento",
+        "Hacia",
+        "Gate / condición",
+        "Actor",
+        "Efecto",
+        "Tipo",
+        "Nota"
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "T-UC01",
+        "—",
+        "GENERAR_UC",
+        "INCOMPLETA",
+        "ReglaGrano aplicada + lineage fuente creado",
+        "Motor contractual",
+        "Crear derivado comercial.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "T-UC02",
+        "INCOMPLETA",
+        "COMPLETAR_REQUISITOS",
+        "ELEGIBLE",
+        "Completitud/evidencia/mapping OK",
+        "Sistema/Backoffice",
+        "Habilitar revisión.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "T-UC03",
+        "ELEGIBLE",
+        "INGRESAR_REVISION",
+        "EN_REVISION",
+        "Incluida en proceso/paquete o revisión directa",
+        "Certificación",
+        "Tomar UC.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "T-UC04",
+        "EN_REVISION",
+        "OBSERVAR",
+        "OBSERVADA",
+        "Motivo estructurado",
+        "Certificación/Cliente",
+        "Solicitar resolución.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "T-UC05",
+        "OBSERVADA",
+        "RESOLVER_OBSERVACION",
+        "ELEGIBLE",
+        "Evidencia/ajuste permitido completado",
+        "Certificación",
+        "Volver elegible.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "T-UC06",
+        "EN_REVISION",
+        "ACEPTAR",
+        "ACEPTADA",
+        "Conformidad/regla aplicable",
+        "Cliente/Certificación",
+        "Aceptar versión.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "T-UC07",
+        "EN_REVISION",
+        "RECHAZAR",
+        "RECHAZADA",
+        "Causa",
+        "Cliente/Certificación",
+        "Rechazar versión.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 27,
+      "cells": [
+        "Desde",
+        "Hacia",
+        "Transición prohibida",
+        "Qué hacer en cambio",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 28,
+      "cells": [
+        "ACEPTADA",
+        "ELEGIBLE",
+        "Editar/reabrir misma UC aceptada por cambio en campo",
+        "Usar supersession: nueva UC/version; anterior permanece.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 29,
+      "cells": [
+        "RECHAZADA",
+        "ACEPTADA",
+        "Cambiar rechazo a aceptación sin nueva revisión/version",
+        "Nueva versión/revisión explícita.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 30,
+      "cells": [
+        "INCOMPLETA",
+        "ACEPTADA",
+        "Aceptar saltando elegibilidad/revisión",
+        "Debe satisfacer gates.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 33,
+      "cells": [
+        "SUBMÁQUINA / DIMENSIÓN PARALELA · estado_supersession_comercial",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 34,
+      "cells": [
+        "VIGENTE → REQUIERE_RECALCULO → EN_REVISION → SUSTITUIDA/INVALIDADA. Esta dimensión corre en paralelo al estado de certificación.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 38,
+      "cells": [
+        "CERTIFICACIÓN · PaqueteCertificacion",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 39,
+      "cells": [
+        "Agrupa UC por regla. La composición se versiona; observaciones no borran inclusiones históricas.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 42,
+      "cells": [
+        "Estado",
+        "Tipo",
+        "Semántica",
+        "Terminal",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 43,
+      "cells": [
+        "BORRADOR",
+        "Inicial",
+        "Paquete en armado.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 44,
+      "cells": [
+        "LISTO_PARA_ENVIO",
+        "Pre-envío",
+        "Composición válida y reglas de completitud satisfechas.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 45,
+      "cells": [
+        "ENVIADO",
+        "Tránsito",
+        "Paquete enviado al cliente/circuito.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 46,
+      "cells": [
+        "EN_REVISION",
+        "Certificación",
+        "Bajo revisión/conformidad.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 47,
+      "cells": [
+        "OBSERVADO",
+        "Certificación",
+        "Requiere resolución.",
+        "No",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 48,
+      "cells": [
+        "ACEPTADO_PARCIAL",
+        "Terminal/condicional",
+        "Parte de las UC aceptadas y regla permite parcialidad.",
+        "Sí de esa versión",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 49,
+      "cells": [
+        "ACEPTADO",
+        "Terminal",
+        "Paquete aceptado.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 50,
+      "cells": [
+        "RECHAZADO",
+        "Terminal",
+        "Paquete rechazado.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 51,
+      "cells": [
+        "SUSTITUIDO",
+        "Terminal versión",
+        "Nueva versión/paquete reemplaza éste.",
+        "Sí",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 54,
+      "cells": [
+        "ID",
+        "Desde",
+        "Evento",
+        "Hacia",
+        "Gate / condición",
+        "Actor",
+        "Efecto",
+        "Tipo",
+        "Nota"
+      ]
+    },
+    {
+      "source_row": 55,
+      "cells": [
+        "T-PC01",
+        "—",
+        "CREAR_PAQUETE",
+        "BORRADOR",
+        "ReglaAgrupacion + UC candidatas",
+        "Sistema/Certificación",
+        "Crear contenedor.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 56,
+      "cells": [
+        "T-PC02",
+        "BORRADOR",
+        "VALIDAR_COMPLETITUD",
+        "LISTO_PARA_ENVIO",
+        "Todas las UC/inclusiones cumplen reglas del paquete",
+        "Sistema",
+        "Habilitar envío.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 57,
+      "cells": [
+        "T-PC03",
+        "LISTO_PARA_ENVIO",
+        "ENVIAR",
+        "ENVIADO",
+        "Canal/cliente resuelto",
+        "Certificación",
+        "Registrar envío.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 58,
+      "cells": [
+        "T-PC04",
+        "ENVIADO",
+        "INICIAR_REVISION",
+        "EN_REVISION",
+        "Recepción/revisión confirmada",
+        "Cliente/Certificación",
+        "Entrar revisión.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 59,
+      "cells": [
+        "T-PC05",
+        "EN_REVISION",
+        "OBSERVAR",
+        "OBSERVADO",
+        "Observación documentada",
+        "Cliente/Certificación",
+        "Bloquear/condicionar.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 60,
+      "cells": [
+        "T-PC06",
+        "OBSERVADO",
+        "RESOLVER_Y_REENVIAR",
+        "ENVIADO",
+        "Nueva versión/inclusión/evidencia según corresponda",
+        "Certificación",
+        "No borrar versión previa.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 61,
+      "cells": [
+        "T-PC07",
+        "EN_REVISION",
+        "ACEPTAR_COMPLETO",
+        "ACEPTADO",
+        "Todas las UC pertinentes aceptadas",
+        "Cliente/Certificación",
+        "Aceptar.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 62,
+      "cells": [
+        "T-PC08",
+        "EN_REVISION",
+        "ACEPTAR_PARCIAL",
+        "ACEPTADO_PARCIAL",
+        "ReglaParcialidadCertificacion lo permite",
+        "Cliente/Certificación",
+        "Aceptar subset explícito.",
+        "CONDICIONAL",
+        null
+      ]
+    },
+    {
+      "source_row": 63,
+      "cells": [
+        "T-PC09",
+        "EN_REVISION",
+        "RECHAZAR",
+        "RECHAZADO",
+        "Causa",
+        "Cliente/Certificación",
+        "Rechazar.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 64,
+      "cells": [
+        "T-PC10",
+        "BORRADOR/LISTO/OBSERVADO",
+        "SUPERSEDER",
+        "SUSTITUIDO",
+        "Nueva versión sustituye composición anterior",
+        "Sistema/Certificación",
+        "Preservar histórico.",
+        "PERMITIDA",
+        null
+      ]
+    },
+    {
+      "source_row": 67,
+      "cells": [
+        "Desde",
+        "Hacia",
+        "Transición prohibida",
+        "Qué hacer en cambio",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 68,
+      "cells": [
+        "ACEPTADO",
+        "BORRADOR",
+        "Editar paquete aceptado",
+        "Crear nueva versión/ajuste.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 69,
+      "cells": [
+        "EN_REVISION",
+        "ACEPTADO_PARCIAL",
+        "Aceptar parcial si regla lo prohíbe",
+        "Debe respetar ReglaParcialidad.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 70,
+      "cells": [
+        "ENVIADO",
+        "BORRADOR",
+        "Volver atrás borrando envío",
+        "Crear versión nueva o registrar observación.",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  ]
+}

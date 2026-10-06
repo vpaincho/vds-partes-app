@@ -1,0 +1,439 @@
+{
+  "source": "S2",
+  "sheet": "56_Transiciones_Prohibidas",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "TRANSICIONES PROHIBIDAS · GUARDRAILS DE ESTADO",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "El software debe impedir estas transiciones directas. La columna 'Camino correcto' indica cómo preservar historia sin romper la máquina.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "ID",
+        "Máquina",
+        "Desde",
+        "Hacia",
+        "Qué está prohibido",
+        "Camino correcto",
+        "Severidad"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "TPR-001",
+        "Planificacion",
+        "CERRADA",
+        "ACTIVA",
+        "Reabrir silenciosamente un plan cerrado",
+        "Crear nueva versión/plan según contexto; conservar cierre histórico.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "TPR-002",
+        "Planificacion",
+        "CANCELADA",
+        "ACTIVA",
+        "Reactivar plan cancelado",
+        "Nueva Planificacion o versión explícita con trazabilidad.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "TPR-003",
+        "Planificacion",
+        "ACTIVA",
+        "CANCELADA",
+        "Cancelar si ya existen ejecuciones iniciadas",
+        "Resolver asignaciones/directivas; no borrar materialización real.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "TPR-004",
+        "AsignacionPlanificada",
+        "DESPACHADA",
+        "READY",
+        "Deshacer despacho borrando historia",
+        "Emitir nueva versión/directiva; el despacho original queda trazado.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "TPR-005",
+        "AsignacionPlanificada",
+        "CUMPLIDA",
+        "PROGRAMADA",
+        "Reabrir asignación cumplida",
+        "Nueva asignación/versión.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "TPR-006",
+        "AsignacionPlanificada",
+        "CANCELADA",
+        "CUMPLIDA",
+        "Marcar cancelada como cumplida sin ejecución",
+        "Solo mediante nueva evidencia y revisión explícita.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "TPR-007",
+        "Parte",
+        "CERRADO_OPERATIVAMENTE",
+        "EN_EJECUCION",
+        "Reabrir y editar Parte cerrado",
+        "Corrección mediante EnmiendaOperativa/nueva ejecución.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "TPR-008",
+        "Parte",
+        "ANULADO",
+        "EN_EJECUCION",
+        "Ejecutar Parte anulado",
+        "Crear Parte válido nuevo.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "TPR-009",
+        "Parte",
+        "PREPARADO",
+        "CERRADO_OPERATIVAMENTE",
+        "Cerrar sin resolver UE",
+        "UE deben quedar cerradas/no realizadas/anuladas explícitamente.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "TPR-010",
+        "UnidadEjecucion",
+        "CERRADA",
+        "EN_EJECUCION",
+        "Reabrir UE para editar realidad",
+        "Usar EnmiendaOperativa o nueva UE.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "TPR-011",
+        "UnidadEjecucion",
+        "NO_REALIZADA",
+        "CERRADA",
+        "Inventar ejecución después",
+        "Nueva evidencia requiere revisión/new UE.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "TPR-012",
+        "UnidadEjecucion",
+        "ANULADA",
+        "EN_EJECUCION",
+        "Ejecutar UE anulada",
+        "Crear nueva UE válida.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "TPR-013",
+        "PermisoTrabajo",
+        "VENCIDO",
+        "CERRADO",
+        "Autocerrar por timeout",
+        "Exige EventoCierreAdministrativoPTW o cierre autorizado.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "TPR-014",
+        "PermisoTrabajo",
+        "RECHAZADO",
+        "VIGENTE",
+        "Activar permiso rechazado",
+        "Crear/revisar nueva solicitud.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "TPR-015",
+        "PermisoTrabajo",
+        "CERRADO",
+        "VIGENTE",
+        "Reabrir PTW cerrado",
+        "Emitir nuevo PTW.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "TPR-016",
+        "DirectivaOperativa",
+        "EMITIDA",
+        "APLICADA",
+        "Marcar aplicada sin trazabilidad de recepción/efecto",
+        "Debe existir evidencia de recepción/aplicación; ACK puede ser implícito solo si regla lo permite.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "TPR-017",
+        "DirectivaOperativa",
+        "APLICADA",
+        "CANCELADA",
+        "Cancelar retroactivamente",
+        "Emitir nueva directiva compensatoria.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "TPR-018",
+        "DirectivaOperativa",
+        "RECHAZADA",
+        "APLICADA",
+        "Aplicar la misma directiva rechazada",
+        "Emitir nueva versión/directiva.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "TPR-019",
+        "EventoHabilita",
+        "REPORTADO",
+        "CERRADO_SIN_CASO",
+        "Cerrar sin triage/clasificación mínima",
+        "Debe existir decisión Habilita.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "TPR-020",
+        "EventoHabilita",
+        "ESCALADO_A_CASO",
+        "CERRADO_SIN_CASO",
+        "Cerrar evento ignorando Caso abierto",
+        "Caso debe resolverse en su máquina.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 25,
+      "cells": [
+        "TPR-021",
+        "EventoHabilita",
+        "DESCARTADO",
+        "ESCALADO_A_CASO",
+        "Reusar evento descartado",
+        "Reactivar mediante revisión explícita o crear evento válido.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 26,
+      "cells": [
+        "TPR-022",
+        "CasoHabilita",
+        "ABIERTO",
+        "CERRADO",
+        "Cerrar sin investigación/decisión de triage suficiente",
+        "Debe pasar por gates definidos.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 27,
+      "cells": [
+        "TPR-023",
+        "CasoHabilita",
+        "EN_INVESTIGACION",
+        "CERRADO",
+        "Cerrar con investigación abierta",
+        "Finalizar investigación primero.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 28,
+      "cells": [
+        "TPR-024",
+        "CasoHabilita",
+        "SEGUIMIENTO_ACCIONES",
+        "CERRADO",
+        "Cerrar con acciones bloqueantes no verificadas",
+        "Solo si configuración marca acciones como no bloqueantes.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 29,
+      "cells": [
+        "TPR-025",
+        "UnidadComercial",
+        "ACEPTADA",
+        "ELEGIBLE",
+        "Editar/reabrir misma UC aceptada por cambio en campo",
+        "Usar supersession: nueva UC/version; anterior permanece.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 30,
+      "cells": [
+        "TPR-026",
+        "UnidadComercial",
+        "RECHAZADA",
+        "ACEPTADA",
+        "Cambiar rechazo a aceptación sin nueva revisión/version",
+        "Nueva versión/revisión explícita.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 31,
+      "cells": [
+        "TPR-027",
+        "UnidadComercial",
+        "INCOMPLETA",
+        "ACEPTADA",
+        "Aceptar saltando elegibilidad/revisión",
+        "Debe satisfacer gates.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 32,
+      "cells": [
+        "TPR-028",
+        "PaqueteCertificacion",
+        "ACEPTADO",
+        "BORRADOR",
+        "Editar paquete aceptado",
+        "Crear nueva versión/ajuste.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 33,
+      "cells": [
+        "TPR-029",
+        "PaqueteCertificacion",
+        "EN_REVISION",
+        "ACEPTADO_PARCIAL",
+        "Aceptar parcial si regla lo prohíbe",
+        "Debe respetar ReglaParcialidad.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 34,
+      "cells": [
+        "TPR-030",
+        "PaqueteCertificacion",
+        "ENVIADO",
+        "BORRADOR",
+        "Volver atrás borrando envío",
+        "Crear versión nueva o registrar observación.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 35,
+      "cells": [
+        "TPR-031",
+        "LoteFacturacion",
+        "ACEPTADO_ERP",
+        "BORRADOR",
+        "Editar/reusar lote aceptado",
+        "Crear ajuste/reversión mediante proceso administrativo externo.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 36,
+      "cells": [
+        "TPR-032",
+        "LoteFacturacion",
+        "ENVIADO_ERP",
+        "CANCELADO",
+        "Cancelar unilateralmente después de aceptación potencial",
+        "Esperar respuesta/usar operación compensatoria.",
+        "CRÍTICA"
+      ]
+    },
+    {
+      "source_row": 37,
+      "cells": [
+        "TPR-033",
+        "LoteFacturacion",
+        "BORRADOR",
+        "ACEPTADO_ERP",
+        "Saltar validación/envío",
+        "Debe cruzar boundary explícitamente.",
+        "CRÍTICA"
+      ]
+    }
+  ]
+}

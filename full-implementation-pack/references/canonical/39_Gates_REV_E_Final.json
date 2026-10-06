@@ -1,0 +1,189 @@
+{
+  "source": "S2",
+  "sheet": "39_Gates_REV_E_Final",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "HISTÓRICO · GATES REV E · RESUELTOS COMO DEFAULTS EN BASELINE 1.0",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Conservar para trazabilidad. Las decisiones baseline vigentes están en 41_REV_E_Final_Baseline; pueden reabrirse ante evidencia real.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "ID",
+        "Gate",
+        "Decisión que falta",
+        "Opciones soportadas por arquitectura",
+        "Quién debe cerrar",
+        "Patch cuando responda",
+        "Bloquea",
+        "Estado"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "G-01",
+        "TP-01 cruza turno",
+        "Cuándo se mantiene mismo TP-01 y cuándo un contexto obliga split.",
+        "DEFAULT continuidad+Handover / excepción ReglaCorte por servicio-cliente-PTW-procedimiento.",
+        "Operaciones + Habilita",
+        "Cerrar Q-01; ReglaCorte + handover.",
+        "REV E Final",
+        "RESUELTO DEFAULT / REABRIBLE"
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "G-02",
+        "Emergente/offline",
+        "Quién puede autorizar y en qué condiciones iniciar con contexto contractual PENDIENTE.",
+        "BLOQUEAR / PERMITIR_AUTORIZADO / política por riesgo-contexto.",
+        "Operaciones + Contratos + Habilita",
+        "Cerrar Q-02; ReglaInicioEmergente + autoridad/mínimos.",
+        "REV E Final",
+        "RESUELTO DEFAULT / REABRIBLE"
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "G-03",
+        "Enmienda post-aceptación/factura",
+        "Qué workflow aplica si verdad operativa cambia después de certificación y/o factura.",
+        "Re-certificar/supersede antes de factura / reversión-ajuste downstream después de barrera financiera.",
+        "Certificaciones + Facturación/Administración",
+        "Cerrar Q-04; estados UC/Paquete/Lote.",
+        "REV E Final",
+        "RESUELTO DEFAULT / REABRIBLE"
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "G-04",
+        "Escalamiento Habilita",
+        "Matriz VDS y qué outputs se disparan por tipo/severidad/contexto.",
+        "EvaluacionEscalamientoHabilita → DirectivaOperativa / PTW / CasoHabilita / NotificacionHabilita.",
+        "Habilita + Operaciones",
+        "Cerrar Q-06; cargar reglas reales.",
+        "Módulo Habilita final",
+        "RESUELTO DEFAULT / REABRIBLE"
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "G-05",
+        "Cierre CasoHabilita",
+        "Cuándo estado_caso_habilita puede pasar a CERRADO respecto de acciones correctivas.",
+        "Cerrar con acciones asignadas / implementadas / verificadas / política por severidad.",
+        "Habilita",
+        "Cerrar Q-09; gate de estado_caso_habilita.",
+        "Módulo Habilita final",
+        "RESUELTO DEFAULT / REABRIBLE"
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "NO BLOQUEAN EL FREEZE ESTRUCTURAL",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "Tema",
+        "Decisión ya tomada",
+        "Qué sigue configurable",
+        "Estado",
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "Q-03 recurso adicional",
+        "Work package define Parte; autonomía define UE; PTW distinto no corta por sí solo.",
+        "Criterios de subtrabajo autónomo por servicio.",
+        "Verde",
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "Q-05 scope Habilita",
+        "EventoHabilita core + extensiones.",
+        "Taxonomía/campos por categoría.",
+        "Verde",
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "Q-07 flash report",
+        "Contrato mínimo contextual y triage posterior.",
+        "Obligatoriedad específica por tipo de evento.",
+        "Verde",
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "Q-08 notificaciones",
+        "NotificacionHabilita + SLA/estado/evidencia como dominio.",
+        "Destinatarios, plazos, canales y stack.",
+        "Verde",
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  ]
+}

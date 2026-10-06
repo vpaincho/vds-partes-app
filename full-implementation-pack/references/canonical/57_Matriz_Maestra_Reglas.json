@@ -1,0 +1,1547 @@
+{
+  "source": "S2",
+  "sheet": "57_Matriz_Maestra_Reglas",
+  "extraction": "data_only values; original workbook authoritative for formulas, formatting and validations",
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": [
+        "MATRIZ MAESTRA DE REGLAS v0.1 · MOTOR LÓGICO VDS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 2,
+      "cells": [
+        "Cada fila es una regla funcional evaluable. P0 es mayor precedencia. Las reglas comerciales interpretan la realidad; Habilita/estado/invariantes pueden bloquear antes.",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "source_row": 4,
+      "cells": [
+        "Rule ID",
+        "Dominio",
+        "Precedencia",
+        "Clase",
+        "Sujeto",
+        "Trigger",
+        "Estado/contexto",
+        "Condición",
+        "Decisión / resultado",
+        "Estado destino",
+        "Side effects / objetos",
+        "Fuerza",
+        "Scope configuración",
+        "Autoridad / fuente",
+        "Rationale / audit note"
+      ]
+    },
+    {
+      "source_row": 5,
+      "cells": [
+        "RUL-001",
+        "CONFIG / ROUTING",
+        "P4",
+        "ROUTE",
+        "Parte",
+        "BEFORE_CREATE",
+        "—",
+        "Existe perfil operativo + contexto planificado/real suficiente",
+        "DERIVAR tipo_parte_id mediante ruleset; no pedir selector libre como camino normal",
+        "—",
+        "DecisionTrace + tipo_parte_id",
+        "REQUIRED",
+        "Global / TipoParte / servicio",
+        "Motor de Ruteo",
+        "La selección manual queda solo como excepción autorizada."
+      ]
+    },
+    {
+      "source_row": 6,
+      "cells": [
+        "RUL-002",
+        "CONFIG / ROUTING",
+        "P4",
+        "ROUTE_FALLBACK",
+        "Parte",
+        "ROUTING_AMBIGUOUS",
+        "—",
+        "Más de un TipoParte es compatible o faltan datos discriminantes",
+        "PEDIR confirmación mínima o escalar a supervisor; registrar candidatos y motivo",
+        "—",
+        "DecisionTrace",
+        "WARN/BLOCK según riesgo",
+        "Ruleset de ruteo",
+        "Motor + supervisor",
+        "Nunca elegir silenciosamente un TipoParte arbitrario."
+      ]
+    },
+    {
+      "source_row": 7,
+      "cells": [
+        "RUL-003",
+        "CONFIG / IDENTITY",
+        "P4",
+        "IDENTITY",
+        "TP-01",
+        "CHANGE_CONTEXT",
+        "PREPARADO / EN_EJECUCION / SUSPENDIDO",
+        "Mismo work package/objetivo operacional",
+        "MANTENER mismo TP-01 salvo ReglaCorte configurada aplicable",
+        "sin cambio",
+        "EventoOperativo si cambió contexto",
+        "REQUIRED",
+        "TipoParte + ContratoServicio",
+        "ReglaCorteTipoParte",
+        "Work package gobierna identidad, no turno/recurso/PTW por sí solos."
+      ]
+    },
+    {
+      "source_row": 8,
+      "cells": [
+        "RUL-004",
+        "CONFIG / IDENTITY",
+        "P4",
+        "CUT",
+        "TP-01",
+        "WORK_PACKAGE_CHANGED",
+        "PREPARADO / EN_EJECUCION / SUSPENDIDO",
+        "El objetivo/work package pasa a ser independiente",
+        "CERRAR/TERMINAR alcance actual según estado y CREAR nuevo TP-01",
+        "según máquina",
+        "Nuevo Parte + VinculoPlanEjecucion si aplica",
+        "REQUIRED",
+        "TipoParte / servicio",
+        "ReglaCorteTipoParte",
+        "Cambio de identidad real, no mero cambio de dato."
+      ]
+    },
+    {
+      "source_row": 9,
+      "cells": [
+        "RUL-005",
+        "CONFIG / IDENTITY",
+        "P4",
+        "NO_CUT_DEFAULT",
+        "TP-01",
+        "SHIFT_CHANGED",
+        "EN_EJECUCION / SUSPENDIDO",
+        "No existe ReglaCorte específica que obligue split",
+        "MANTENER Parte + generar handover + cerrar/abrir intervalos + revalidar gates",
+        "sin cambio",
+        "EventoHandover / asignaciones temporales / reevaluación PTW",
+        "REQUIRED",
+        "TipoParte / cliente / servicio",
+        "Default Baseline 1.0",
+        "Cambio turno es transición de responsabilidad."
+      ]
+    },
+    {
+      "source_row": 10,
+      "cells": [
+        "RUL-006",
+        "CONFIG / IDENTITY",
+        "P4",
+        "NO_CUT_DEFAULT",
+        "Parte / UE",
+        "RESOURCE_CHANGED",
+        "PREPARADO / EN_EJECUCION / SUSPENDIDO",
+        "El recurso nuevo apoya misma unidad de trabajo",
+        "NO crear nuevo Parte; actualizar AsignacionRecursoEjecucion",
+        "sin cambio",
+        "AsignacionRecursoEjecucion",
+        "REQUIRED",
+        "TipoParte / servicio",
+        "Baseline 1.0",
+        "Recurso no define identidad."
+      ]
+    },
+    {
+      "source_row": 11,
+      "cells": [
+        "RUL-007",
+        "CONFIG / IDENTITY",
+        "P4",
+        "CREATE_CHILD",
+        "UnidadEjecucion",
+        "INDEPENDENT_SUBWORK_DETECTED",
+        "Parte no terminal",
+        "Mismo work package pero existe subtrabajo autónomo/resultado distinguible",
+        "CREAR nueva UnidadEjecucion dentro del mismo Parte",
+        "PENDIENTE",
+        "UnidadEjecucion",
+        "REQUIRED",
+        "TipoParte / servicio",
+        "Regla de identidad UE",
+        "No crear TP-01 si work package no cambia."
+      ]
+    },
+    {
+      "source_row": 12,
+      "cells": [
+        "RUL-008",
+        "CONFIG / IDENTITY",
+        "P4",
+        "NO_CUT_DEFAULT",
+        "Parte",
+        "LOCATION_CHANGED",
+        "PREPARADO / EN_EJECUCION / SUSPENDIDO",
+        "TipoParte no define ubicación como driver de corte",
+        "NO cortar automáticamente; registrar ubicación/transición y evaluar regla específica",
+        "sin cambio",
+        "EjecucionUbicacion / TransicionOperativa",
+        "REQUIRED",
+        "TipoParte / servicio",
+        "ReglaCorteTipoParte",
+        "No existe regla universal de corte por ubicación."
+      ]
+    },
+    {
+      "source_row": 13,
+      "cells": [
+        "RUL-009",
+        "PLANIFICACIÓN",
+        "P5",
+        "CREATE",
+        "Planificacion",
+        "DEMAND_ACCEPTED",
+        "—",
+        "Demanda válida y no duplicada",
+        "CREAR Planificacion ABIERTA",
+        "ABIERTA",
+        "Planificacion",
+        "REQUIRED",
+        "Global",
+        "Planificación",
+        "Demanda no implica aún ejecución."
+      ]
+    },
+    {
+      "source_row": 14,
+      "cells": [
+        "RUL-010",
+        "PLANIFICACIÓN",
+        "P2",
+        "TRANSITION_GUARD",
+        "PlanificacionVersion",
+        "APPROVE_VERSION",
+        "BORRADOR / EN_VALIDACION",
+        "Asignaciones consistentes + no errores críticos + reglas/catálogos versionados",
+        "PERMITIR APROBADA; congelar snapshot",
+        "APROBADA",
+        "DecisionTrace",
+        "HARD_GATE",
+        "Planificación",
+        "Planificación",
+        "Versión aprobada no se edita."
+      ]
+    },
+    {
+      "source_row": 15,
+      "cells": [
+        "RUL-011",
+        "PLANIFICACIÓN",
+        "P5",
+        "DERIVE",
+        "UnidadPlanificada",
+        "BUILD_REQUIREMENTS",
+        "—",
+        "Servicio/actividad/contexto conocidos",
+        "DERIVAR RequerimientoRecurso y RequerimientoCompetencia desde configuración",
+        "—",
+        "Requerimientos",
+        "REQUIRED",
+        "Servicio / TipoParte previsto",
+        "Ruleset planificación",
+        "Planifica capacidad antes de nominar activos concretos."
+      ]
+    },
+    {
+      "source_row": 16,
+      "cells": [
+        "RUL-012",
+        "PLANIFICACIÓN",
+        "P5",
+        "MATCH",
+        "AsignacionPlanificada",
+        "NOMINATE",
+        "PROGRAMADA",
+        "Recurso/persona cumple requisitos, disponibilidad y competencias vigentes",
+        "PERMITIR nominación",
+        "PROGRAMADA",
+        "AsignacionPersonaPlanificada / AsignacionRecursoPlanificada",
+        "HARD_GATE",
+        "Plan/servicio",
+        "Planificación + Habilita",
+        "No nominar sujeto inelegible."
+      ]
+    },
+    {
+      "source_row": 17,
+      "cells": [
+        "RUL-013",
+        "PLANIFICACIÓN",
+        "P1",
+        "READINESS_BLOCK",
+        "AsignacionPlanificada",
+        "EVALUATE_READINESS",
+        "PROGRAMADA",
+        "Falla requisito Habilita/documental duro",
+        "RESULTADO NO_READY; bloquear READY",
+        "PROGRAMADA",
+        "EvaluacionPlanificacion + causas",
+        "HARD_BLOCK",
+        "Reglas Habilita",
+        "Habilita",
+        "Hard block domina sobre conveniencia operativa."
+      ]
+    },
+    {
+      "source_row": 18,
+      "cells": [
+        "RUL-014",
+        "PLANIFICACIÓN",
+        "P5",
+        "READINESS",
+        "AsignacionPlanificada",
+        "EVALUATE_READINESS",
+        "PROGRAMADA",
+        "Contrato/contexto mínimo + alcance + capacidad + documental/Habilita aplicable OK",
+        "RESULTADO READY con evaluado_at y valido_hasta_at",
+        "READY",
+        "EvaluacionPlanificacion",
+        "REQUIRED",
+        "Servicio / riesgo / contexto",
+        "Motor Readiness",
+        "READY siempre temporal."
+      ]
+    },
+    {
+      "source_row": 19,
+      "cells": [
+        "RUL-015",
+        "PLANIFICACIÓN",
+        "P5",
+        "INVALIDATE",
+        "AsignacionPlanificada",
+        "DEPENDENCY_CHANGED",
+        "READY / DESPACHADA",
+        "Cambió documento, disponibilidad, alcance, ventana, persona/recurso, contrato/contexto",
+        "INVALIDAR evaluación previa; exigir reevaluación",
+        "PROGRAMADA o flag REEVALUAR",
+        "EventoInvalidacionReadiness",
+        "REQUIRED",
+        "Readiness ruleset",
+        "Sistema",
+        "No borrar el READY histórico."
+      ]
+    },
+    {
+      "source_row": 20,
+      "cells": [
+        "RUL-016",
+        "PLANIFICACIÓN",
+        "P2",
+        "TRANSITION_GUARD",
+        "AsignacionPlanificada",
+        "DISPATCH",
+        "READY",
+        "EvaluacionPlanificacion vigente + contexto/bundle construible",
+        "PERMITIR DESPACHADA",
+        "DESPACHADA",
+        "ExecutionContextBundle + DecisionTrace",
+        "HARD_GATE",
+        "Planificación",
+        "Planificación",
+        "No despachar asignación NO_READY."
+      ]
+    },
+    {
+      "source_row": 21,
+      "cells": [
+        "RUL-017",
+        "PLANIFICACIÓN",
+        "P5",
+        "PROJECTION",
+        "ExecutionContextBundle",
+        "BUILD_BUNDLE",
+        "Asignacion DESPACHADA",
+        "Existe PlanificacionVersion aprobada y catálogo/reglas suficientes",
+        "GENERAR proyección mínima versionada con context_valid_until_at",
+        "—",
+        "ExecutionContextBundle",
+        "REQUIRED",
+        "Ruleset/version",
+        "Backend",
+        "Bundle es proyección, no fuente de verdad."
+      ]
+    },
+    {
+      "source_row": 22,
+      "cells": [
+        "RUL-018",
+        "PLANIFICACIÓN",
+        "P5",
+        "RESULT",
+        "AsignacionPlanificada",
+        "EXECUTION_CLOSED",
+        "DESPACHADA",
+        "Ejecución vinculada satisface alcance planificado según regla",
+        "MARCAR CUMPLIDA",
+        "CUMPLIDA",
+        "DecisionTrace",
+        "REQUIRED",
+        "Plan/servicio",
+        "Sistema/Planificación",
+        "Cierre del Parte no implica automáticamente cumplimiento si alcance difiere."
+      ]
+    },
+    {
+      "source_row": 23,
+      "cells": [
+        "RUL-019",
+        "PLANIFICACIÓN",
+        "P5",
+        "RESULT",
+        "AsignacionPlanificada",
+        "WINDOW_CLOSED_NO_EXECUTION",
+        "PROGRAMADA / READY / DESPACHADA",
+        "No hay ejecución efectiva que satisfaga asignación",
+        "MARCAR NO_REALIZADA con causa",
+        "NO_REALIZADA",
+        "EventoOperativo / causa",
+        "REQUIRED",
+        "Planificación",
+        "Planificación",
+        "Nunca borrar lo planificado no realizado."
+      ]
+    },
+    {
+      "source_row": 24,
+      "cells": [
+        "RUL-020",
+        "PLANIFICACIÓN",
+        "P3",
+        "CONTROL",
+        "AsignacionPlanificada",
+        "POST_DISPATCH_CHANGE",
+        "DESPACHADA",
+        "Plan cambia después del despacho",
+        "NO mutar snapshot; EMITIR DirectivaOperativa o nueva PlanificacionVersion",
+        "sin cambio",
+        "DirectivaOperativa / nueva versión",
+        "REQUIRED",
+        "Control Plane",
+        "Planificación",
+        "Cambio post-despacho viaja como evento nuevo."
+      ]
+    },
+    {
+      "source_row": 25,
+      "cells": [
+        "RUL-021",
+        "EJECUCIÓN",
+        "P2",
+        "CREATE_GUARD",
+        "Parte",
+        "CREATE_PART",
+        "—",
+        "TipoParte resuelto + identidad/contexto mínimo",
+        "CREAR Parte PREPARADO",
+        "PREPARADO",
+        "Parte + DecisionTrace",
+        "HARD_GATE",
+        "TipoParte ruleset",
+        "Motor",
+        "No crear Parte huérfano sin tipo."
+      ]
+    },
+    {
+      "source_row": 26,
+      "cells": [
+        "RUL-022",
+        "EJECUCIÓN",
+        "P1",
+        "START_BLOCK",
+        "Parte / UE",
+        "START_WORK",
+        "PREPARADO / PENDIENTE",
+        "Existe hard block Habilita/documental o PTW requerido no VIGENTE",
+        "BLOQUEAR Start Work",
+        "sin cambio",
+        "DecisionTrace + alerta",
+        "HARD_BLOCK",
+        "Habilita / PTW",
+        "Habilita",
+        "Comercial nunca puede overridear este bloqueo."
+      ]
+    },
+    {
+      "source_row": 27,
+      "cells": [
+        "RUL-023",
+        "EJECUCIÓN",
+        "P2",
+        "START_GUARD",
+        "Parte / UE",
+        "START_WORK",
+        "PREPARADO / PENDIENTE",
+        "Gates Habilita/PTW/documental aplicables OK + contexto operativo suficiente",
+        "PERMITIR inicio",
+        "EN_EJECUCION",
+        "timestamps + intervalos",
+        "HARD_GATE",
+        "TipoParte / Habilita",
+        "Motor de ejecución",
+        "Inicio real se registra una sola vez por intervalo."
+      ]
+    },
+    {
+      "source_row": 28,
+      "cells": [
+        "RUL-024",
+        "EJECUCIÓN",
+        "P5",
+        "AUTO_DERIVE",
+        "Parte / UE",
+        "START_WORK",
+        "PREPARADO / PENDIENTE",
+        "Contexto activo disponible",
+        "PRECARGAR usuario, hora, plan/UE, recursos/personas, ubicación candidata y PTW",
+        "—",
+        "datos derivados",
+        "REQUIRED",
+        "UX/contexto",
+        "Sistema",
+        "Minimiza input humano."
+      ]
+    },
+    {
+      "source_row": 29,
+      "cells": [
+        "RUL-025",
+        "EJECUCIÓN",
+        "P5",
+        "TEMPORAL",
+        "AsignacionPersonaEjecucion",
+        "PERSON_REPLACED",
+        "UE EN_EJECUCION",
+        "Persona saliente deja rol y entra reemplazo",
+        "CERRAR intervalo saliente + CREAR intervalo entrante; no editar pasado",
+        "sin cambio",
+        "2 asignaciones temporales",
+        "REQUIRED",
+        "Ejecución",
+        "Sistema/Supervisor",
+        "Reemplazo trazable."
+      ]
+    },
+    {
+      "source_row": 30,
+      "cells": [
+        "RUL-026",
+        "EJECUCIÓN",
+        "P5",
+        "TEMPORAL",
+        "AsignacionRecursoEjecucion",
+        "RESOURCE_REPLACED",
+        "UE EN_EJECUCION",
+        "Recurso saliente sustituido",
+        "CERRAR intervalo anterior + CREAR nuevo intervalo",
+        "sin cambio",
+        "Asignaciones recurso",
+        "REQUIRED",
+        "Ejecución",
+        "Sistema/Supervisor",
+        "Historial de uso completo."
+      ]
+    },
+    {
+      "source_row": 31,
+      "cells": [
+        "RUL-027",
+        "EJECUCIÓN",
+        "P5",
+        "TEMPORAL_CONFLICT",
+        "Persona/Recurso",
+        "ASSIGN_INTERVAL",
+        "—",
+        "Intervalo solapa asignación incompatible según ReglaSolapamiento",
+        "BLOQUEAR o ADVERTIR según regla; registrar ConflictoTemporal",
+        "—",
+        "ConflictoTemporal / OverrideGate si aplica",
+        "BLOCK/WARN",
+        "TipoRecurso / rol / servicio",
+        "Sistema",
+        "No todo recurso de apoyo es exclusivo."
+      ]
+    },
+    {
+      "source_row": 32,
+      "cells": [
+        "RUL-028",
+        "EJECUCIÓN",
+        "P5",
+        "TIME_EVENT",
+        "UE / Parte",
+        "TIME_CATEGORY_START",
+        "EN_EJECUCION / SUSPENDIDO",
+        "Se inicia ejecución/traslado/espera/standby/carga-descarga/etc.",
+        "ABRIR EventoTiempo correspondiente",
+        "sin cambio",
+        "EventoTiempo",
+        "REQUIRED",
+        "TipoParte / catálogo tiempo",
+        "Campo/Sistema",
+        "Categoría operacional se registra aunque contrato no la pague."
+      ]
+    },
+    {
+      "source_row": 33,
+      "cells": [
+        "RUL-029",
+        "EJECUCIÓN",
+        "P5",
+        "TIME_EVENT",
+        "UE / Parte",
+        "TIME_CATEGORY_CHANGE",
+        "EN_EJECUCION / SUSPENDIDO",
+        "Cambia categoría temporal",
+        "CERRAR EventoTiempo previo + ABRIR siguiente",
+        "sin cambio",
+        "EventosTiempo",
+        "REQUIRED",
+        "TipoParte",
+        "Sistema",
+        "Sin intervalos superpuestos incompatibles."
+      ]
+    },
+    {
+      "source_row": 34,
+      "cells": [
+        "RUL-030",
+        "EJECUCIÓN",
+        "P5",
+        "TRANSITION_TIME",
+        "TransicionOperativa",
+        "MOVE_BETWEEN_WORK_PACKAGES",
+        "—",
+        "Existe tiempo real entre origen y destino que no pertenece claramente a una UE",
+        "CREAR TransicionOperativa con origen/destino/personas/recursos",
+        "—",
+        "TransicionOperativa",
+        "REQUIRED",
+        "Operación",
+        "Sistema/Campo",
+        "Evita tiempo huérfano."
+      ]
+    },
+    {
+      "source_row": 35,
+      "cells": [
+        "RUL-031",
+        "EJECUCIÓN",
+        "P5",
+        "LOCATION",
+        "EjecucionUbicacion",
+        "LOCATION_CONFIRMED",
+        "UE activa",
+        "Ubicación derivada/candidata confirmada o corregida",
+        "REGISTRAR relación de ubicación con rol",
+        "sin cambio",
+        "EjecucionUbicacion",
+        "REQUIRED",
+        "TipoParte",
+        "Campo/Sistema",
+        "No guardar texto libre si existe maestro."
+      ]
+    },
+    {
+      "source_row": 36,
+      "cells": [
+        "RUL-032",
+        "EJECUCIÓN",
+        "P5",
+        "MEASUREMENT",
+        "EjecucionMedicion",
+        "MEASUREMENT_CAPTURED",
+        "UE activa/cerrable",
+        "Métrica aplicable al servicio/tipo de trabajo",
+        "REGISTRAR medición operacional con unidad/timestamp/fuente",
+        "sin cambio",
+        "EjecucionMedicion",
+        "REQUIRED",
+        "Servicio / componente",
+        "Campo/Sistema",
+        "Medición ≠ cantidad certificable."
+      ]
+    },
+    {
+      "source_row": 37,
+      "cells": [
+        "RUL-033",
+        "EJECUCIÓN",
+        "P2",
+        "CLOSE_GUARD",
+        "UnidadEjecucion",
+        "CLOSE_UE",
+        "EN_EJECUCION / SUSPENDIDA",
+        "Tiempos consistentes + resultado/causa + mediciones obligatorias aplicables",
+        "PERMITIR CERRADA",
+        "CERRADA",
+        "DecisionTrace",
+        "HARD_GATE",
+        "TipoParte / componente",
+        "Motor ejecución",
+        "No exigir campos que no aplican al tipo."
+      ]
+    },
+    {
+      "source_row": 38,
+      "cells": [
+        "RUL-034",
+        "EJECUCIÓN",
+        "P2",
+        "CLOSE_GUARD",
+        "Parte",
+        "CLOSE_PART",
+        "EN_EJECUCION / SUSPENDIDO",
+        "Todas las UE terminales + no intervalos abiertos + no trabajo activo",
+        "PERMITIR CERRADO_OPERATIVAMENTE",
+        "CERRADO_OPERATIVAMENTE",
+        "DecisionTrace",
+        "HARD_GATE",
+        "TipoParte",
+        "Motor ejecución",
+        "Cierre operativo no certifica."
+      ]
+    },
+    {
+      "source_row": 39,
+      "cells": [
+        "RUL-035",
+        "EJECUCIÓN",
+        "P2",
+        "NO_REOPEN",
+        "UE / Parte",
+        "EDIT_AFTER_CLOSE",
+        "CERRADA / CERRADO_OPERATIVAMENTE",
+        "Se detecta error real",
+        "BLOQUEAR edición directa; CREAR EnmiendaOperativa",
+        "sin cambio",
+        "EnmiendaOperativa",
+        "HARD_BLOCK",
+        "Global",
+        "Sistema/Supervisor",
+        "Historia inmutable."
+      ]
+    },
+    {
+      "source_row": 40,
+      "cells": [
+        "RUL-036",
+        "EJECUCIÓN",
+        "P5",
+        "EMERGENT_CONTEXT",
+        "ImputacionEjecucion",
+        "EMERGENT_WORK",
+        "UE PENDIENTE / EN_EJECUCION",
+        "ContratoServicio/CC/Item no pueden resolverse confiablemente",
+        "MARCAR estado_contexto_contractual=PENDIENTE o AMBIGUO; no inventar valores",
+        "sin cambio",
+        "ImputacionEjecucion + DecisionTrace",
+        "REQUIRED",
+        "ReglaInicioEmergente",
+        "Sistema",
+        "La realidad puede existir sin imputación final."
+      ]
+    },
+    {
+      "source_row": 41,
+      "cells": [
+        "RUL-037",
+        "EJECUCIÓN",
+        "P1",
+        "EMERGENT_START",
+        "UE",
+        "START_WITH_CONTRACT_PENDING",
+        "PENDIENTE",
+        "Habilita gates OK y ReglaInicioEmergente=PERMITIR_AUTORIZADO con autoridad válida",
+        "PERMITIR Start Work y registrar autorización",
+        "EN_EJECUCION",
+        "Override/DecisionTrace",
+        "HARD_GATE",
+        "Cliente/servicio/riesgo",
+        "RolAutorizadorEmergente",
+        "No es bypass de Habilita."
+      ]
+    },
+    {
+      "source_row": 42,
+      "cells": [
+        "RUL-038",
+        "EJECUCIÓN",
+        "P6",
+        "COMMERCIAL_BLOCK",
+        "ImputacionEjecucion / UC",
+        "DERIVE_COMMERCIAL",
+        "UE CERRADA",
+        "estado_contexto_contractual != RESUELTO",
+        "BLOQUEAR creación/avance comercial definitivo; enviar a reconciliación",
+        "sin cambio",
+        "cola/backoffice resolución",
+        "HARD_BLOCK comercial",
+        "ContratoServicio",
+        "Motor contractual",
+        "No bloquea historia operacional ya ocurrida."
+      ]
+    },
+    {
+      "source_row": 43,
+      "cells": [
+        "RUL-039",
+        "HABILITA",
+        "P1",
+        "HARD_BLOCK",
+        "EvaluacionHabilitacion",
+        "EVALUATE",
+        "—",
+        "Falta requisito crítico/no overrideable aplicable a persona/recurso/contexto",
+        "RESULTADO BLOQUEA",
+        "—",
+        "EvaluacionHabilitacion",
+        "HARD_BLOCK",
+        "RequisitoHabilitacion",
+        "Habilita",
+        "Prioridad superior a comercial/UX."
+      ]
+    },
+    {
+      "source_row": 44,
+      "cells": [
+        "RUL-040",
+        "HABILITA",
+        "P1",
+        "WARNING",
+        "EvaluacionHabilitacion",
+        "EVALUATE",
+        "—",
+        "Requisito genera advertencia overrideable",
+        "RESULTADO ADVIERTE; no continuar sin OverrideGate válido",
+        "—",
+        "EvaluacionHabilitacion",
+        "WARN",
+        "RequisitoHabilitacion",
+        "Habilita",
+        "Warning no equivale a autorización."
+      ]
+    },
+    {
+      "source_row": 45,
+      "cells": [
+        "RUL-041",
+        "HABILITA",
+        "P1",
+        "OVERRIDE_GUARD",
+        "OverrideGate",
+        "AUTHORIZE_OVERRIDE",
+        "—",
+        "Gate está explícitamente marcado overrideable + actor tiene autoridad + motivo/evidencia",
+        "PERMITIR override y registrar evento append-only",
+        "—",
+        "OverrideGate",
+        "HARD_GATE",
+        "Regla de gate",
+        "Rol autorizado",
+        "Hard block no se convierte en override por conveniencia."
+      ]
+    },
+    {
+      "source_row": 46,
+      "cells": [
+        "RUL-042",
+        "HABILITA",
+        "P1",
+        "PTW_REQUIRED",
+        "PermisoTrabajo",
+        "PRE_START_CHECK",
+        "Parte/UE PREPARADO/PENDIENTE",
+        "Tipo de trabajo/contexto requiere PTW",
+        "EXIGIR ≥1 PTW aplicable VIGENTE antes de Start Work",
+        "—",
+        "DecisionTrace",
+        "HARD_BLOCK",
+        "TipoTrabajo / ubicación / riesgo",
+        "Habilita",
+        "PTW separado de Parte."
+      ]
+    },
+    {
+      "source_row": 47,
+      "cells": [
+        "RUL-043",
+        "HABILITA",
+        "P1",
+        "PTW_ACTIVATE",
+        "PermisoTrabajo",
+        "ACTIVATE",
+        "APROBADO",
+        "Ventana/contexto real coincide + controles previos válidos",
+        "PERMITIR VIGENTE",
+        "VIGENTE",
+        "DecisionTrace",
+        "HARD_GATE",
+        "PTW ruleset",
+        "Habilita/Supervisor",
+        "Aprobado no significa vigente automáticamente."
+      ]
+    },
+    {
+      "source_row": 48,
+      "cells": [
+        "RUL-044",
+        "HABILITA",
+        "P1",
+        "PTW_SUSPEND",
+        "PermisoTrabajo",
+        "CONDITION_CHANGED",
+        "VIGENTE",
+        "Condición de seguridad/alcance/handover requiere revalidación",
+        "SUSPENDER PTW y bloquear trabajo cubierto",
+        "SUSPENDIDO",
+        "DirectivaOperativa si aplica",
+        "HARD_BLOCK",
+        "PTW ruleset",
+        "Habilita/Supervisor",
+        "No cerrar PTW."
+      ]
+    },
+    {
+      "source_row": 49,
+      "cells": [
+        "RUL-045",
+        "HABILITA",
+        "P1",
+        "PTW_EXPIRE",
+        "PermisoTrabajo",
+        "VALID_UNTIL_PASSED",
+        "APROBADO / VIGENTE / SUSPENDIDO",
+        "Superó vigencia",
+        "MARCAR VENCIDO + bloquear nuevos Start/Restart + alertar",
+        "VENCIDO",
+        "Alerta/DecisionTrace",
+        "HARD_BLOCK",
+        "PTW",
+        "Sistema",
+        "Timeout nunca autocierra."
+      ]
+    },
+    {
+      "source_row": 50,
+      "cells": [
+        "RUL-046",
+        "HABILITA",
+        "P1",
+        "PTW_CLOSE",
+        "PermisoTrabajo",
+        "CLOSE",
+        "VIGENTE / SUSPENDIDO",
+        "Trabajo/alcance terminado + cierre autorizado/firmas requeridas",
+        "PERMITIR CERRADO",
+        "CERRADO",
+        "Evento cierre",
+        "HARD_GATE",
+        "PTW",
+        "Supervisor/Habilita",
+        "Todos los permisos deben cerrarse formalmente."
+      ]
+    },
+    {
+      "source_row": 51,
+      "cells": [
+        "RUL-047",
+        "HABILITA",
+        "P7",
+        "FLASH_REPORT",
+        "EventoHabilita",
+        "REPORT_EVENT",
+        "—",
+        "Usuario reporta evento/condición",
+        "AUTODERIVAR contexto activo y solicitar solo inputs mínimos",
+        "REPORTADO",
+        "EventoHabilita",
+        "REQUIRED",
+        "TipoEventoHabilita",
+        "Campo/Sistema",
+        "Objetivo 1–2 min; no pedir root cause."
+      ]
+    },
+    {
+      "source_row": 52,
+      "cells": [
+        "RUL-048",
+        "HABILITA",
+        "P5",
+        "TRIAGE",
+        "EventoHabilita",
+        "START_TRIAGE",
+        "REPORTADO",
+        "Evento no descartado/duplicado",
+        "MOVER a EN_TRIAGE y asignar responsable/cola",
+        "EN_TRIAGE",
+        "DecisionTrace",
+        "REQUIRED",
+        "Habilita",
+        "Habilita",
+        "Reporte original se conserva."
+      ]
+    },
+    {
+      "source_row": 53,
+      "cells": [
+        "RUL-049",
+        "HABILITA",
+        "P5",
+        "CLASSIFY",
+        "EventoHabilita",
+        "CLASSIFY",
+        "EN_TRIAGE",
+        "Información suficiente para categoría/severidad/contexto",
+        "CLASIFICAR sin borrar valores iniciales",
+        "CLASIFICADO",
+        "versión/clasificación vigente",
+        "REQUIRED",
+        "Taxonomía Habilita",
+        "Habilita",
+        "Reclasificación futura es evento/version."
+      ]
+    },
+    {
+      "source_row": 54,
+      "cells": [
+        "RUL-050",
+        "HABILITA",
+        "P1",
+        "ESCALATE",
+        "EventoHabilita",
+        "EVALUATE_ESCALATION",
+        "CLASIFICADO",
+        "Aplica ReglaEscalamientoHabilita",
+        "CREAR EvaluacionEscalamientoHabilita con regla/version + outputs",
+        "CLASIFICADO",
+        "EvaluacionEscalamientoHabilita",
+        "REQUIRED",
+        "Matriz Habilita",
+        "Motor Habilita",
+        "No hardcodear thresholds fuera de configuración."
+      ]
+    },
+    {
+      "source_row": 55,
+      "cells": [
+        "RUL-051",
+        "HABILITA",
+        "P1",
+        "UNCONTROLLED_DEFAULT",
+        "EventoHabilita",
+        "FLASH_REPORT_OR_TRIAGE",
+        "REPORTADO / EN_TRIAGE",
+        "situación_controlada = NO",
+        "EMITIR/PROPONER suspensión inmediata del trabajo afectado + escalar triage",
+        "—",
+        "DirectivaOperativa + evaluación",
+        "HARD_BLOCK operacional",
+        "Default baseline / Habilita",
+        "Habilita",
+        "Default conservador reabrible por política real."
+      ]
+    },
+    {
+      "source_row": 56,
+      "cells": [
+        "RUL-052",
+        "HABILITA",
+        "P1",
+        "OPEN_CASE",
+        "CasoHabilita",
+        "ESCALATION_REQUIRES_CASE",
+        "Evento CLASIFICADO",
+        "EvaluacionEscalamiento exige investigación/caso",
+        "CREAR CasoHabilita ABIERTO",
+        "ABIERTO",
+        "CasoHabilita",
+        "REQUIRED",
+        "ReglaEscalamientoHabilita",
+        "Motor Habilita",
+        "Evento queda ESCALADO_A_CASO."
+      ]
+    },
+    {
+      "source_row": 57,
+      "cells": [
+        "RUL-053",
+        "HABILITA",
+        "P5",
+        "CASE_CLOSE_GUARD",
+        "CasoHabilita",
+        "CLOSE_CASE",
+        "LISTO_PARA_CIERRE",
+        "Investigación finalizada + notificaciones requeridas resueltas + no acciones bloqueantes sin verificar",
+        "PERMITIR CERRADO",
+        "CERRADO",
+        "DecisionTrace",
+        "HARD_GATE",
+        "Policy Habilita",
+        "Habilita",
+        "Acciones no bloqueantes pueden continuar según configuración."
+      ]
+    },
+    {
+      "source_row": 58,
+      "cells": [
+        "RUL-054",
+        "CONTROL PLANE",
+        "P3",
+        "EMIT",
+        "DirectivaOperativa",
+        "POST_DISPATCH_COMMAND",
+        "—",
+        "Existe cambio post-despacho/cancelación/suspensión/reprogramación/repriorización",
+        "CREAR DirectivaOperativa EMITIDA con target/motivo/versión",
+        "EMITIDA",
+        "DirectivaOperativa",
+        "REQUIRED",
+        "TipoDirectiva",
+        "Planificación/Supervisión/Habilita",
+        "No mutar snapshot."
+      ]
+    },
+    {
+      "source_row": 59,
+      "cells": [
+        "RUL-055",
+        "CONTROL PLANE",
+        "P3",
+        "DELIVERY",
+        "DirectivaOperativa",
+        "DEVICE_RECEIVES",
+        "EMITIDA",
+        "Entrega técnica confirmada",
+        "MARCAR RECIBIDA",
+        "RECIBIDA",
+        "received_at",
+        "REQUIRED",
+        "Control Plane",
+        "Sistema",
+        "Offline puede demorar transición."
+      ]
+    },
+    {
+      "source_row": 60,
+      "cells": [
+        "RUL-056",
+        "CONTROL PLANE",
+        "P3",
+        "ACK",
+        "DirectivaOperativa",
+        "ACK",
+        "RECIBIDA",
+        "Receptor reconoce instrucción",
+        "MARCAR RECONOCIDA",
+        "RECONOCIDA",
+        "ack_at",
+        "REQUIRED",
+        "Control Plane",
+        "Actor/Sistema",
+        "ACK no significa aplicada."
+      ]
+    },
+    {
+      "source_row": 61,
+      "cells": [
+        "RUL-057",
+        "CONTROL PLANE",
+        "P3",
+        "APPLY",
+        "DirectivaOperativa",
+        "EFFECT_EXECUTED",
+        "RECIBIDA / RECONOCIDA",
+        "Efecto quedó reflejado en target mediante evento/estado válido",
+        "MARCAR APLICADA",
+        "APLICADA",
+        "applied_at + target effect link",
+        "REQUIRED",
+        "Control Plane",
+        "Sistema",
+        "Aplicación debe poder auditarse."
+      ]
+    },
+    {
+      "source_row": 62,
+      "cells": [
+        "RUL-058",
+        "CONTROL PLANE",
+        "P3",
+        "STALE_COMMAND",
+        "DirectivaOperativa",
+        "VALID_UNTIL_PASSED",
+        "EMITIDA / RECIBIDA / RECONOCIDA",
+        "Directiva perdió vigencia antes de aplicar",
+        "MARCAR EXPIRADA y bloquear aplicación",
+        "EXPIRADA",
+        "DecisionTrace",
+        "HARD_BLOCK",
+        "TipoDirectiva",
+        "Sistema",
+        "Nunca aplicar instrucción obsoleta."
+      ]
+    },
+    {
+      "source_row": 63,
+      "cells": [
+        "RUL-059",
+        "CERTIFICACIÓN",
+        "P6",
+        "DERIVE",
+        "UnidadComercial",
+        "EXECUTION_AVAILABLE",
+        "UE CERRADA",
+        "Contexto contractual RESUELTO + ReglaGranoUnidadComercial aplicable",
+        "DERIVAR una o más UC y crear lineage N:M",
+        "INCOMPLETA",
+        "UnidadComercial + UnidadComercialFuenteEjecucion",
+        "REQUIRED",
+        "ContratoServicio / Item",
+        "Motor contractual",
+        "Parte ≠ UC."
+      ]
+    },
+    {
+      "source_row": 64,
+      "cells": [
+        "RUL-060",
+        "CERTIFICACIÓN",
+        "P6",
+        "TIME_TREATMENT",
+        "UnidadComercial",
+        "DERIVE_QUANTITY",
+        "INCOMPLETA",
+        "Existen EventosTiempo/Transiciones aplicables",
+        "APLICAR ReglaTratamientoTiempo para mapear tiempo real a certificable/no certificable/otro item",
+        "INCOMPLETA",
+        "componentes de cantidad + DecisionTrace",
+        "REQUIRED",
+        "ContratoServicio / Item",
+        "Motor contractual",
+        "No modificar EventoTiempo."
+      ]
+    },
+    {
+      "source_row": 65,
+      "cells": [
+        "RUL-061",
+        "CERTIFICACIÓN",
+        "P6",
+        "MEASUREMENT_TREATMENT",
+        "UnidadComercial",
+        "DERIVE_QUANTITY",
+        "INCOMPLETA",
+        "Item usa medición operacional",
+        "APLICAR ReglaMedicionItem sobre EjecucionMedicion/otras fuentes autorizadas",
+        "INCOMPLETA",
+        "cantidad derivada",
+        "REQUIRED",
+        "ItemContrato",
+        "Motor contractual",
+        "Mantener fuente/version."
+      ]
+    },
+    {
+      "source_row": 66,
+      "cells": [
+        "RUL-062",
+        "CERTIFICACIÓN",
+        "P6",
+        "ELIGIBILITY",
+        "UnidadComercial",
+        "CHECK_COMPLETENESS",
+        "INCOMPLETA",
+        "Lineage, item, UM, cantidad y evidencia requerida completos",
+        "MARCAR ELEGIBLE",
+        "ELEGIBLE",
+        "DecisionTrace",
+        "HARD_GATE comercial",
+        "ContratoServicio / Item",
+        "Motor certificación",
+        "No aceptar incompleta."
+      ]
+    },
+    {
+      "source_row": 67,
+      "cells": [
+        "RUL-063",
+        "CERTIFICACIÓN",
+        "P6",
+        "OBSERVE",
+        "UnidadComercial",
+        "CLIENT_OBSERVATION",
+        "EN_REVISION",
+        "Cliente/certificador detecta incidencia comercial/documental",
+        "MARCAR OBSERVADA + crear ObservacionCertificacion",
+        "OBSERVADA",
+        "ObservacionCertificacion",
+        "REQUIRED",
+        "Certificación",
+        "Cliente/Certificación",
+        "Observación no edita campo."
+      ]
+    },
+    {
+      "source_row": 68,
+      "cells": [
+        "RUL-064",
+        "CERTIFICACIÓN",
+        "P6",
+        "ADJUST",
+        "AjusteCertificacion",
+        "COMMERCIAL_DIFFERENCE",
+        "UC/Paquete en revisión/observado",
+        "Diferencia es comercial, no error en realidad operacional",
+        "CREAR AjusteCertificacion autorizado; mantener UE intacta",
+        "—",
+        "AjusteCertificacion",
+        "HARD_GATE",
+        "Contrato/cliente",
+        "Certificación",
+        "Separar verdad operativa de acuerdo comercial."
+      ]
+    },
+    {
+      "source_row": 69,
+      "cells": [
+        "RUL-065",
+        "CERTIFICACIÓN",
+        "P0",
+        "LINEAGE_INVALIDATE",
+        "UnidadComercial",
+        "SOURCE_EXECUTION_AMENDED",
+        "cualquier estado no invalidado",
+        "Alguna fuente_ejecucion_version queda superada por EnmiendaOperativa",
+        "MARCAR supersession=REQUIERE_RECALCULO; bloquear nueva facturación",
+        "estado certificación histórico sin reescribir",
+        "DecisionTrace",
+        "HARD_BLOCK",
+        "Global",
+        "Sistema",
+        "Aceptación histórica permanece; vigencia cambia."
+      ]
+    },
+    {
+      "source_row": 70,
+      "cells": [
+        "RUL-066",
+        "CERTIFICACIÓN",
+        "P6",
+        "SUPERSEDE",
+        "UnidadComercial",
+        "RECALCULATE_AFTER_AMENDMENT",
+        "REQUIERE_RECALCULO / EN_REVISION supersession",
+        "Nueva derivación válida disponible",
+        "CREAR UC nueva que sustituye_a UC previa",
+        "INCOMPLETA/ELEGIBLE",
+        "Nueva UC + lineage + self-reference",
+        "REQUIRED",
+        "ContratoServicio",
+        "Motor contractual",
+        "Nunca update/delete UC previa."
+      ]
+    },
+    {
+      "source_row": 71,
+      "cells": [
+        "RUL-067",
+        "CERTIFICACIÓN",
+        "P6",
+        "PACKAGE",
+        "PaqueteCertificacion",
+        "GROUP_ELIGIBLE_UC",
+        "—",
+        "ReglaAgrupacionCertificacion agrupa UC elegibles/vigentes",
+        "CREAR/ACTUALIZAR versión de Paquete mediante bridge versionado",
+        "BORRADOR",
+        "Paquete + inclusiones",
+        "REQUIRED",
+        "ContratoServicio",
+        "Motor certificación",
+        "Paquete puede cruzar Partes."
+      ]
+    },
+    {
+      "source_row": 72,
+      "cells": [
+        "RUL-068",
+        "CERTIFICACIÓN",
+        "P6",
+        "PARTIALITY",
+        "PaqueteCertificacion",
+        "CLIENT_PARTIAL_ACCEPT",
+        "EN_REVISION",
+        "ReglaParcialidadCertificacion permite parcialidad",
+        "PERMITIR ACEPTADO_PARCIAL y registrar subset explícito",
+        "ACEPTADO_PARCIAL",
+        "ConformidadCliente / inclusiones efectivas",
+        "HARD_GATE comercial",
+        "ContratoServicio / cliente",
+        "Motor certificación",
+        "Si regla no lo permite, bloquear."
+      ]
+    },
+    {
+      "source_row": 73,
+      "cells": [
+        "RUL-069",
+        "CERTIFICACIÓN",
+        "P6",
+        "ACCEPT",
+        "UnidadComercial / Paquete",
+        "ACCEPT",
+        "EN_REVISION",
+        "Conformidad/requisitos aplicables satisfechos",
+        "MARCAR ACEPTADA/ACEPTADO",
+        "ACEPTADA / ACEPTADO",
+        "ConformidadCliente",
+        "HARD_GATE comercial",
+        "Cliente/contrato",
+        "Cliente/Certificación",
+        "No implica Factura emitida."
+      ]
+    },
+    {
+      "source_row": 74,
+      "cells": [
+        "RUL-070",
+        "FACTURACIÓN",
+        "P6",
+        "BILLABLE",
+        "LineaFacturable",
+        "BUILD_LINE",
+        "UC ACEPTADA",
+        "UC vigente (no sustituida/inválida) + reglas de facturación satisfechas",
+        "CREAR LineaFacturable",
+        "—",
+        "LineaFacturable",
+        "REQUIRED",
+        "ReglaFacturacion",
+        "Facturación",
+        "No volver a evidencia cruda para recalcular."
+      ]
+    },
+    {
+      "source_row": 75,
+      "cells": [
+        "RUL-071",
+        "FACTURACIÓN",
+        "P6",
+        "LOT",
+        "LoteFacturacion",
+        "GROUP_LINES",
+        "—",
+        "Líneas vigentes compatibles según ReglaFacturacion",
+        "CREAR LoteFacturacion BORRADOR",
+        "BORRADOR",
+        "LoteFacturacion",
+        "REQUIRED",
+        "ReglaFacturacion",
+        "Facturación",
+        "PaqueteCertificacion ≠ LoteFacturacion."
+      ]
+    },
+    {
+      "source_row": 76,
+      "cells": [
+        "RUL-072",
+        "FACTURACIÓN",
+        "P2",
+        "ERP_BOUNDARY",
+        "LoteFacturacion",
+        "SEND_ERP",
+        "VALIDADO",
+        "Adapter disponible + payload válido + líneas siguen vigentes",
+        "PERMITIR ENVIADO_ERP; registrar referencia/idempotency",
+        "ENVIADO_ERP",
+        "DecisionTrace",
+        "HARD_GATE",
+        "Adapter/ERP",
+        "Facturación/Sistema",
+        "Modelo no inventa documento fiscal."
+      ]
+    },
+    {
+      "source_row": 77,
+      "cells": [
+        "RUL-073",
+        "TRACE / CORRECCIÓN",
+        "P0",
+        "AMEND",
+        "Objeto operacional",
+        "REAL_ERROR_DISCOVERED",
+        "objeto cerrado/versionado",
+        "Error afecta verdad operacional real",
+        "CREAR EnmiendaOperativa con old/new/motivo/evidencia/actor; nunca editar silenciosamente",
+        "sin cambio del original",
+        "EnmiendaOperativa + nueva versión efectiva",
+        "HARD_RULE",
+        "Global",
+        "Supervisor autorizado",
+        "Error comercial va por AjusteCertificacion, no aquí."
+      ]
+    },
+    {
+      "source_row": 78,
+      "cells": [
+        "RUL-074",
+        "TRACE / AUDIT",
+        "P0",
+        "AUDIT",
+        "Rule Engine",
+        "ANY_DECISION",
+        "cualquier",
+        "Regla produce block/warn/transition/create/derive/override relevante",
+        "PERSISTIR DecisionTrace con inputs normalizados, ruleset/version, reglas evaluadas/aplicadas, resultado, override y actor",
+        "—",
+        "DecisionTrace",
+        "REQUIRED",
+        "Global",
+        "Motor",
+        "Permite explicar cualquier decisión futura del sistema."
+      ]
+    }
+  ]
+}

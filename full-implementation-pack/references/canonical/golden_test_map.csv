@@ -1,0 +1,57 @@
+scenario_id,source_row,name,canonical_rule_ids,owner_modules_proposed,layers_proposed,test_file_proposed,status
+GS-001,5,Plan aprobado y despachado,"RUL-010,RUL-013,RUL-014,RUL-016,RUL-017","planning,control","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-001.spec.ts,SPEC_NOT_RUN
+GS-002,6,Readiness invalidado después de READY,"RUL-015,RUL-013,RUL-014","planning,control","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-002.spec.ts,SPEC_NOT_RUN
+GS-003,7,Cambio post-despacho con campo desconectado,"RUL-020,RUL-054,RUL-055","control,planning,execution;planning,control","domain,rule,state,API/DB,permission,E2E,offline/reconcile",tests/acceptance/gs-003.spec.ts,SPEC_NOT_RUN
+GS-004,8,Cancelar plan con ejecución ya iniciada,P0/P2 + State Machine Planificacion + RUL-054,"control,planning,execution","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-004.spec.ts,SPEC_NOT_RUN
+GS-005,9,TipoParte derivado por perfil/contexto,"RUL-001,RUL-021,RUL-074","config/routing,execution;execution,field;trace,all modules","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-005.spec.ts,SPEC_NOT_RUN
+GS-006,10,Ruteo ambiguo,"RUL-002,RUL-074","config/routing,execution;trace,all modules","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-006.spec.ts,SPEC_NOT_RUN
+GS-007,11,Intervención planificada normal,"RUL-022,RUL-023,RUL-024,RUL-031","execution,field","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-007.spec.ts,SPEC_NOT_RUN
+GS-008,12,Cambio de turno sin cambio de work package,"RUL-005,RUL-025,RUL-044","config/routing,execution;execution,field;habilita.prevent,execution","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-008.spec.ts,SPEC_NOT_RUN
+GS-009,13,Reemplazo de operario,"RUL-025,RUL-039","execution,field;habilita.prevent,execution","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-009.spec.ts,SPEC_NOT_RUN
+GS-010,14,Reemplazo por persona no habilitada,"RUL-039,RUL-041,RUL-027","execution,field;habilita.prevent,execution","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-010.spec.ts,SPEC_NOT_RUN
+GS-011,15,Recurso adicional como apoyo,"RUL-006,RUL-026","config/routing,execution;execution,field","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-011.spec.ts,SPEC_NOT_RUN
+GS-012,16,Subtrabajo autónomo dentro del mismo work package,"RUL-007,RUL-003","config/routing,execution","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-012.spec.ts,SPEC_NOT_RUN
+GS-013,17,Cambio real de work package,"RUL-004,RUL-034","config/routing,execution;execution,field","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-013.spec.ts,SPEC_NOT_RUN
+GS-014,18,Cambio de ubicación sin regla de corte,"RUL-008,RUL-031,RUL-030","config/routing,execution;execution,field","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-014.spec.ts,SPEC_NOT_RUN
+GS-015,19,Cliente exige corte por ubicación,"RUL-003,RUL-008 + precedencia/especificidad","config/routing,execution","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-015.spec.ts,SPEC_NOT_RUN
+GS-016,20,Cambio de categoría de tiempo,"RUL-028,RUL-029","execution,field","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-016.spec.ts,SPEC_NOT_RUN
+GS-017,21,Solapamiento incompatible de recurso,RUL-027,"execution,field","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-017.spec.ts,SPEC_NOT_RUN
+GS-018,22,Cierre UE con medición requerida faltante,"RUL-032,RUL-033","execution,field","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-018.spec.ts,SPEC_NOT_RUN
+GS-019,23,Cierre operativo con contrato pendiente,"RUL-033,RUL-034,RUL-038","execution,field","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-019.spec.ts,SPEC_NOT_RUN
+GS-020,24,Error descubierto después del cierre,"RUL-035,RUL-073","execution,commercial;execution,field","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-020.spec.ts,SPEC_NOT_RUN
+GS-021,25,Emergente con contrato desconocido autorizado,"RUL-036,RUL-037,RUL-038,RUL-074","execution,field;trace,all modules","domain,rule,state,API/DB,permission,E2E,offline/reconcile",tests/acceptance/gs-021.spec.ts,SPEC_NOT_RUN
+GS-022,26,Emergente con hard block Habilita,"RUL-022,RUL-039,RUL-042 + precedencia P1>P6/P7","execution,field;habilita.prevent,execution","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-022.spec.ts,SPEC_NOT_RUN
+GS-023,27,Emergente sin autoridad válida,"RUL-037,RUL-041","execution,field;habilita.prevent,execution","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-023.spec.ts,SPEC_NOT_RUN
+GS-024,28,Bundle vencido antes de Start Work,RUL-017 + invariant Bundle projection + P1/P2,"planning,control","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-024.spec.ts,SPEC_NOT_RUN
+GS-025,29,Retry duplica evento de inicio,RUL-074 + contrato idempotencia,"trace,all modules","domain,rule,state,API/DB,permission,E2E,offline/reconcile",tests/acceptance/gs-025.spec.ts,SPEC_NOT_RUN
+GS-026,30,Directiva emitida todavía no recibida,"RUL-054,RUL-055,RUL-057","control,planning,execution","domain,rule,state,API/DB,permission,E2E,offline/reconcile",tests/acceptance/gs-026.spec.ts,SPEC_NOT_RUN
+GS-027,31,Directiva expirada llega tarde,RUL-058,"control,planning,execution","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-027.spec.ts,SPEC_NOT_RUN
+GS-028,32,PTW completo y activado,"RUL-042,RUL-043","habilita.prevent,execution","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-028.spec.ts,SPEC_NOT_RUN
+GS-029,33,PTW vence durante el trabajo,"RUL-045,RUL-044","habilita.prevent,execution","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-029.spec.ts,SPEC_NOT_RUN
+GS-030,34,Timeout de PTW no es cierre,"RUL-045,RUL-046","habilita.prevent,execution","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-030.spec.ts,SPEC_NOT_RUN
+GS-031,35,Flash Report controlado sin caso,"RUL-047,RUL-048,RUL-049,RUL-050",habilita.response,"domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-031.spec.ts,SPEC_NOT_RUN
+GS-032,36,Evento no controlado,"RUL-051,RUL-050,RUL-052",habilita.response,"domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-032.spec.ts,SPEC_NOT_RUN
+GS-033,37,Evento standalone sin Parte,RUL-047 + ERD EventoHabilita standalone,habilita.response,"domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-033.spec.ts,SPEC_NOT_RUN
+GS-034,38,Evento afecta múltiples UE,ERD R-052 + Habilita core,,"domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-034.spec.ts,SPEC_NOT_RUN
+GS-035,39,Investigación finaliza con acciones abiertas,State Machine CasoHabilita + RUL-053,habilita.response,"domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-035.spec.ts,SPEC_NOT_RUN
+GS-036,40,Acción crítica bloquea cierre de Caso,RUL-053,habilita.response,"domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-036.spec.ts,SPEC_NOT_RUN
+GS-037,41,Reporte duplicado por retry/offline,RUL-074 + idempotencia,"trace,all modules","domain,rule,state,API/DB,permission,E2E,offline/reconcile",tests/acceptance/gs-037.spec.ts,SPEC_NOT_RUN
+GS-038,42,Movimiento planificado,"RUL-023,RUL-024,RUL-031,RUL-032,RUL-033","execution,field","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-038.spec.ts,SPEC_NOT_RUN
+GS-039,43,Destino real difiere del plan,"RUL-020,RUL-031,RUL-054","control,planning,execution;execution,field;planning,control","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-039.spec.ts,SPEC_NOT_RUN
+GS-040,44,Cierre diario de cuadrilla,"RUL-025,RUL-026,RUL-028,RUL-034","execution,field","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-040.spec.ts,SPEC_NOT_RUN
+GS-041,45,N ejecuciones consolidan 1 UC,"RUL-059,RUL-074","commercial,review;trace,all modules","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-041.spec.ts,SPEC_NOT_RUN
+GS-042,46,Una UE genera múltiples UC,"RUL-059,RUL-061","commercial,review","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-042.spec.ts,SPEC_NOT_RUN
+GS-043,47,Standby registrado pero no certificable,RUL-060,"commercial,review","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-043.spec.ts,SPEC_NOT_RUN
+GS-044,48,Cliente observa UC,"RUL-063,RUL-064","commercial,review","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-044.spec.ts,SPEC_NOT_RUN
+GS-045,49,Aceptación parcial permitida,RUL-068,"commercial,review","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-045.spec.ts,SPEC_NOT_RUN
+GS-046,50,Aceptación parcial no permitida,RUL-068 + P6 hard gate,"commercial,review","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-046.spec.ts,SPEC_NOT_RUN
+GS-047,51,"Enmienda después de aceptación, antes de factura","RUL-065,RUL-066,RUL-073","commercial,review;execution,commercial","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-047.spec.ts,SPEC_NOT_RUN
+GS-048,52,Enmienda después de factura/ERP,"RUL-065,RUL-066,RUL-070,RUL-072,RUL-073","billing,adapters;commercial,review;execution,commercial","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-048.spec.ts,SPEC_NOT_RUN
+GS-049,53,Intento de facturar UC sustituida,"RUL-065,RUL-070","billing,adapters;commercial,review","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-049.spec.ts,SPEC_NOT_RUN
+GS-050,54,UC aceptada vigente a ERP,"RUL-070,RUL-071,RUL-072","billing,adapters","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-050.spec.ts,SPEC_NOT_RUN
+GS-051,55,Una evidencia valida múltiples scopes,ERD R-048 + invariant evidencia,,"domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-051.spec.ts,SPEC_NOT_RUN
+GS-052,56,Explicar decisión histórica con reglas antiguas,RUL-074 + precedencia temporal,"trace,all modules","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-052.spec.ts,SPEC_NOT_RUN
+GS-053,57,Commercial rule contradice Habilita,"precedencia P1>P6 + RUL-022,RUL-042","execution,field;habilita.prevent,execution","domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-053.spec.ts,SPEC_NOT_RUN
+GS-054,58,Dos reglas iguales se contradicen,58_Prioridad_Conflictos_Reglas,,"domain,rule,state,API/DB,permission,E2E",tests/acceptance/gs-054.spec.ts,SPEC_NOT_RUN
+GS-055,59,Contrato futuro introduce nueva regla comercial,P6 configuration + baseline contract-agnostic,,"config/import validation,domain,change-control review",tests/acceptance/gs-055.spec.ts,SPEC_NOT_RUN
+GS-056,60,Contrato futuro parece requerir cuarto TipoParte,Baseline governance / Freeze rule,,"config/import validation,domain,change-control review",tests/acceptance/gs-056.spec.ts,SPEC_NOT_RUN
