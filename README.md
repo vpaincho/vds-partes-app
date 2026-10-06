@@ -1,66 +1,100 @@
-# VDS · Partes de campo
+# VDS Partes
 
-Prototipo navegable de la app de tablet de **Vientos del Sur** para gestionar partes de servicio con las operadoras.
+Field-reporting application for **Vientos del Sur**: Planning → Execution → Habilita →
+Review VDS → Certification → billing boundary.
 
-Circuito: **Planificación → Parte diario → Revisión VDS → Certificación del cliente**.
+This repo holds one Target Application, built as a modular monolith. It grew out of Juan's
+navigable prototype, which is preserved — unmodified — at `legacy/baseline/` as the product
+reference the new app is measured against.
 
-> Es un prototipo de interfaz: no tiene backend. Los datos son de ejemplo y se guardan en el navegador (`localStorage`). El botón "Reiniciar demo" vuelve a los datos iniciales.
+> **Status: W0 (foundations).** The build plan runs W0–W6 with typed ports and TEST/fixture
+> providers for every external system. W7 — real connections, providers, contractual
+> configuration, deployment — is a later, explicit stage. Nothing here is approved for
+> production operation.
 
-## Usuarios de prueba
+## Authority
 
-Clave para todos: `vds2026`
+Decisions trace to fixed sources, never to preference. `full-implementation-pack/00_MISSION.md`
+holds the authority map:
 
-| Rol | Usuario | Qué hace |
+| | Source | Governs |
 |---|---|---|
-| Administrador | `sherrera` | Ve y cambia todo: trabajos, estados de partes, habilitaciones y catálogo de tareas |
-| Planner | `lmendez` | Planifica trabajos por contrato (Gantt, por recurso, mes), prioridad, duración y permiso de la operadora; aprueba pedidos de más días |
-| Operador | `darce` | Completa el parte diario en campo (Cuadrilla 03) y cierra el trabajo |
-| Validador VDS | `msosa` | Responsable técnico: aprueba o devuelve partes |
-| Cliente | `grivas` | Austral Petróleo: dashboard del servicio y certificación de partes aprobados |
+| **S0** | `references/mission_usuario.txt` | the current request; supersedes earlier targets |
+| **S1** | `legacy/baseline/` @ `0c117aa` | product baseline: structure, navigation, hierarchy |
+| **S2** | `references/Diccionario_Canonico_v3.0_…FROZEN_VDS.xlsx` | functional logic: 87 entities, 75 relations, 36 invariants, 74 rules, 11 state machines, 33 forbidden transitions, 56 golden scenarios, 14 inter-domain contracts |
+| **S3** | Blueprint | functional navigation, not target UI |
+| **S4** | audit + addendum in `references/` | evidence and reconciliation |
 
-## Qué incluye
+Ambiguity is resolved with source + sheet + row and recorded as change control — never
+silently. `npm run verify:sources` proves the pinned sources are byte-identical to the
+manifest.
 
-- Planificación por contrato: el contrato define operadora, centro de costos, recursos y catálogo de tareas.
-- Indicador de si el trabajo requiere permiso de trabajo firmado por el supervisor de la operadora.
-- Vistas Gantt, calendario por recurso y calendario mensual, con ocupación en %.
-- Trabajos de varios días: un parte por día. El último día (o antes, si se terminó) el jefe de cuadrilla hace el cierre total del trabajo. Si necesita más días, lo pide desde el parte y el planner lo aprueba.
-- En el Gantt los trabajos se estiran, acortan o mueven arrastrando la barra.
-- Parte diario estándar en 5 pasos: inicio (llegada a instalación, permiso, clima y checklist), personal (ingreso a base, llegada a zona y salida), equipos (km actual y observación), tareas y tiempos en una sola hoja, y cierre.
-- Habilitaciones de ingreso a yacimiento por operadora para personal y vehículos.
-- Controles automáticos antes de enviar y en la revisión.
-- Dashboard del cliente: horas hombre, tiempos, producción, recursos y estado de partes y trabajos.
-- Resumen del parte y descarga en PDF.
-- Menú lateral que se contrae.
-- Modo sin señal simulado.
-
-## Correrlo localmente
-
-Es un único archivo estático. Abrí `index.html` en el navegador, o levantá un servidor local:
+## Quick start
 
 ```bash
-npx serve .
+npm install
+npm run verify          # sources + generated artefacts + boundaries + types + tests
+npm run legacy          # Juan's frozen prototype at http://127.0.0.1:4178 for comparison
+npm run db:up           # PostgreSQL 18 + MinIO (dev only)
 ```
 
-## Publicarlo en Vercel
-
-1. En [vercel.com](https://vercel.com), **Add New → Project** e importá este repositorio.
-2. Framework preset: **Other**. Sin comando de build. Output directory: la raíz del repo.
-3. **Deploy**. Cada push a `main` vuelve a publicar.
-
-## Estructura
+## Layout
 
 ```
-index.html   # toda la app: estilos, datos de ejemplo y lógica
-README.md
+apps/web                React + Vite, PWA
+apps/api                Node + Fastify
+apps/worker             same code, own entrypoint: outbox, expiries, reconcile, ERP
+packages/domain/*       kernel, rules, and one package per owning module
+packages/contracts      TypeBox schemas — one source for types and runtime validation
+packages/sync           command envelope, outbox, cursor, conflict resolution
+packages/ui             design system (DS-01): tokens, primitives, patterns
+packages/adapters       typed ports + fixtures; real providers arrive in W7
+db/migrations           forward-only SQL; special constraints stay explicit
+tests/*                 domain, rules, state, api, db, permissions, offline, e2e, visual
+legacy/baseline         S1, frozen and servable — never imported
+full-implementation-pack  the sources themselves
 ```
 
-Las librerías de PDF (jsPDF y jspdf-autotable) y las fuentes se cargan desde CDN.
+**Enforced boundaries** (`npm run arch:check`): the domain imports no React, Fastify, SQL
+driver, browser storage or adapter, so the same rules run in api, worker and web; no provider
+SDK reaches the browser; nothing imports `legacy/baseline`; the dependency graph stays
+acyclic and directional.
 
-## Cómo modificar
+## Generated artefacts
 
-- **Datos de ejemplo** (contratos, recursos, personal, habilitaciones, trabajos): en `index.html`, constantes `CONTRATOS`, `RECURSOS`, `CREW`, `EQ`, `HAB` y la función `seedTrabajos()`.
-- **Reglas del parte**: función `checks(p)`.
-- **Pantallas**: funciones `vPlan`, `vGantt`, `vWeek`, `vMonth`, `vDay`, `vEdit`, `vInbox`, `detail`, `vDash` y `vConf`.
-- **PDF**: función `buildPdf(p)`.
+Anything derived from S2 is generated, carries `source_sheet` / `source_row`, and is
+drift-checked by `npm run gen:check`:
 
-Si cambiás la estructura de los datos, subí la versión en la constante `KEY` para que los navegadores no carguen datos viejos guardados.
+| Artefact | From | Script |
+|---|---|---|
+| `packages/domain/kernel/src/generated/state-machines.json` | sheets 48–56 | `gen:state-machines` |
+| `packages/ui/src/tokens.css` | `packages/ui/src/tokens.ts` | `gen:tokens` |
+| `references/canonical/{36,39,45,46,47,59–62}.json` | the workbook | `scripts/extract-canonical.py` |
+
+Generating rather than transcribing is deliberate: a hand-copied state machine that diverges
+from S2 is a domain defect, not a typo. The generators refuse to emit when the parse stops
+matching the source — the 11 machine count, the per-machine state counts from sheet 48, and
+the 33 prohibitions are all gates.
+
+## Design
+
+`DESIGN_SYSTEM.md` (DS-01). The product structure of the prototype is preserved; the visual
+identity is the application's own. Colour is **measured, not asserted**: WCAG contrast for
+legibility, OKLab ΔE for distinguishability, over every token pair — because rendering an
+overrideable warning like a hard block is a domain error, not a cosmetic one.
+
+## Working here
+
+`CLAUDE.md` holds the rules that apply to every change. The ones that bite most often:
+
+- Planning records intention, Execution records reality; neither overwrites the other.
+- Operational ≠ Review VDS ≠ Commercial ≠ Delivery. Five dimensions, persisted separately.
+- Hard gates run **before** Start/Restart, never after the fact.
+- Closed operational data is corrected with an amendment; commercial disagreement with an
+  adjustment. History is never overwritten.
+- Missing integration → typed port + fixture. Missing configuration → explicit
+  `PENDING_CONFIGURATION`, never an invented default.
+- A functional PASS in the workbook is evidence, **never** a software test result.
+
+`legacy/baseline/FROZEN.md` lists the thirteen mutations in the prototype that are
+deliberately **not** ported, each with its line and its regression test.

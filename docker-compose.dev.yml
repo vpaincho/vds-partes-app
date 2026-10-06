@@ -1,0 +1,53 @@
+# Local development dependencies only. Hosting is deliberately NOT decided here:
+# 03_TARGET_ARCHITECTURE defers deployment topology, and 18_TECHNICAL_ADR requires the
+# storage provider to be chosen later. This file exists so the app can run against a real
+# PostgreSQL and a real S3-compatible store instead of in-memory fakes.
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: vds-postgres
+    environment:
+      POSTGRES_USER: vds
+      POSTGRES_PASSWORD: vds_dev_only
+      POSTGRES_DB: vds_partes
+      # Operational timezone lives in application config, not in the server: the domain
+      # stores timestamptz in UTC plus an explicit operational_date and shift.
+      TZ: UTC
+      PGTZ: UTC
+    command:
+      # Deferred constraint triggers and EXCLUDE constraints are load-bearing in this
+      # schema (C-009, C-012); fail loudly rather than silently degrade.
+      - postgres
+      - -c
+      - log_min_messages=warning
+      - -c
+      - log_statement=none
+    ports:
+      - '5433:5432'
+    volumes:
+      - ./.data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U vds -d vds_partes']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Evidence (photos, signatures, documents) must live outside business rows, with hash
+  # and metadata in PostgreSQL. MinIO stands in for the eventual provider behind FilesPort.
+  storage:
+    image: minio/minio:latest
+    container_name: vds-storage
+    command: server /data --console-address ":9011"
+    environment:
+      MINIO_ROOT_USER: vds
+      MINIO_ROOT_PASSWORD: vds_dev_only
+    ports:
+      - '9010:9000'
+      - '9011:9011'
+    volumes:
+      - ./.data/minio:/data
+    healthcheck:
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 5s
+      timeout: 3s
+      retries: 20

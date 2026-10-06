@@ -1,0 +1,14 @@
+{
+  "name": "@vds/kernel",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Domain kernel: ids, operational time, Result, DecisionEnvelope, state machines. No React, no Fastify, no SQL.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./state-machines": "./src/state-machine.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  }
+}

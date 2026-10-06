@@ -2,7 +2,7 @@
   "name": "vds-partes",
   "private": true,
   "version": "0.0.0",
-  "description": "VDS Partes — Target Application (modular monolith: web + api + worker)",
+  "description": "VDS Partes \u2014 Target Application (modular monolith: web + api + worker)",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {
@@ -10,16 +10,23 @@
   },
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "packages/domain/*"
   ],
   "scripts": {
+    "verify": "npm run verify:sources && npm run gen:check && npm run arch:check && npm run typecheck && npm test",
     "verify:baseline": "node scripts/verify-baseline.mjs",
     "verify:sources": "node scripts/verify-baseline.mjs --all",
-    "legacy": "node scripts/serve-legacy.mjs",
-    "typecheck": "tsc --build --verbose",
-    "lint": "eslint .",
+    "gen": "npm run gen:state-machines && npm run gen:tokens",
+    "gen:state-machines": "node scripts/gen-state-machines.mjs",
+    "gen:tokens": "node scripts/gen-tokens.mjs",
+    "gen:check": "node scripts/gen-state-machines.mjs --check && node scripts/gen-tokens.mjs --check && python scripts/extract-canonical.py --check",
+    "arch:check": "node scripts/arch-check.mjs",
+    "typecheck": "tsc --build",
     "test": "vitest run",
-    "arch:check": "node scripts/arch-check.mjs"
+    "legacy": "node scripts/serve-legacy.mjs",
+    "db:up": "docker compose -f docker-compose.dev.yml up -d",
+    "db:down": "docker compose -f docker-compose.dev.yml down"
   },
   "devDependencies": {
     "typescript": "7.0.2",

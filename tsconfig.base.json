@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "moduleDetection": "force",
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+
+    // erasableSyntaxOnly + allowImportingTsExtensions + rewriteRelativeImportExtensions:
+    // sources import each other with explicit ".ts" extensions and contain no runtime-only
+    // TypeScript syntax, so Node can execute them directly via type stripping — which is
+    // how scripts/gen-tokens.mjs reads the token source without a bundler, and why the
+    // generated CSS and the contrast tests are guaranteed to read the same values.
+    // rewriteRelativeImportExtensions rewrites ".ts" to ".js" on emit, so the declaration
+    // and JS output stay valid for consumers.
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "incremental": true,
+
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}

@@ -1,0 +1,2678 @@
+{
+  "$generated_by": "scripts/gen-state-machines.mjs",
+  "$source": "S2 — Diccionario Canonico v3.0 BASELINE FUNCIONAL 1.0 FROZEN",
+  "$note": "Do not edit by hand. Every record carries source_sheet/source_row so an assertion in code can be traced to a spreadsheet row. Regenerate with the script; CI runs --check.",
+  "master": [
+    {
+      "id": "SM-01",
+      "domain": "PLANIFICACIÓN",
+      "machine": "Planificacion",
+      "principle": "Contenedor de intención. Las versiones se congelan por PlanificacionVersion; el estado del Plan no prueba ejecución.",
+      "state_count": 4,
+      "terminals": [
+        "CERRADA",
+        "CANCELADA"
+      ],
+      "key_rule": "Versión aprobada activa el Plan; ejecutar trabajo no cambia directamente Planificacion.",
+      "parallel_submachine": "PlanificacionVersion",
+      "source_row": 5
+    },
+    {
+      "id": "SM-02",
+      "domain": "PLANIFICACIÓN",
+      "machine": "AsignacionPlanificada",
+      "principle": "Representa trabajo despachable previsto. Su estado nunca debe confundirse con el estado de Parte/UE real.",
+      "state_count": 7,
+      "terminals": [
+        "CUMPLIDA",
+        "NO_REALIZADA",
+        "CANCELADA",
+        "SUPERSEDIDA"
+      ],
+      "key_rule": "DESPACHADA no significa EN_EJECUCIÓN: el real vive en Parte/UE.",
+      "source_row": 6
+    },
+    {
+      "id": "SM-03",
+      "domain": "EJECUCIÓN",
+      "machine": "Parte",
+      "principle": "Contenedor operativo resuelto por TipoParte. Cierre operativo ≠ completitud documental ≠ certificación.",
+      "state_count": 5,
+      "terminals": [
+        "CERRADO_OPERATIVAMENTE",
+        "ANULADO"
+      ],
+      "key_rule": "CERRADO_OPERATIVAMENTE no significa documentalmente completo/certificado.",
+      "source_row": 7
+    },
+    {
+      "id": "SM-04",
+      "domain": "EJECUCIÓN",
+      "machine": "UnidadEjecucion",
+      "principle": "Grano operativo distinguible. Personas, recursos, ubicación, medición y tiempos se relacionan con la UE sin redefinir el Parte automáticamente.",
+      "state_count": 6,
+      "terminals": [
+        "CERRADA",
+        "NO_REALIZADA",
+        "ANULADA"
+      ],
+      "key_rule": "UE cerrada no se reabre; errores se corrigen con EnmiendaOperativa.",
+      "source_row": 8
+    },
+    {
+      "id": "SM-05",
+      "domain": "HABILITA",
+      "machine": "PermisoTrabajo",
+      "principle": "Autorización formal independiente del Parte. Timeout nunca equivale a cierre; handover puede exigir suspensión/revalidación.",
+      "state_count": 9,
+      "terminals": [
+        "CERRADO",
+        "RECHAZADO",
+        "VENCIDO",
+        "ANULADO"
+      ],
+      "key_rule": "VENCIDO ≠ CERRADO; timeout bloquea/alerta, nunca autocierra.",
+      "source_row": 9
+    },
+    {
+      "id": "SM-06",
+      "domain": "CONTROL PLANE",
+      "machine": "DirectivaOperativa",
+      "principle": "Instrucción post-despacho append-only. Emitida ≠ recibida ≠ reconocida ≠ aplicada.",
+      "state_count": 7,
+      "terminals": [
+        "APLICADA",
+        "RECHAZADA",
+        "CANCELADA",
+        "EXPIRADA"
+      ],
+      "key_rule": "EMITIDA ≠ RECIBIDA ≠ ACK ≠ APLICADA.",
+      "source_row": 10
+    },
+    {
+      "id": "SM-07",
+      "domain": "HABILITA",
+      "machine": "EventoHabilita",
+      "principle": "El evento es el hecho reportado. El triage puede reclasificarlo sin borrar el reporte inicial; CasoHabilita es lifecycle separado.",
+      "state_count": 6,
+      "terminals": [
+        "ESCALADO_A_CASO",
+        "CERRADO_SIN_CASO",
+        "DESCARTADO"
+      ],
+      "key_rule": "Reporte inicial se preserva; clasificación puede evolucionar.",
+      "source_row": 11
+    },
+    {
+      "id": "SM-08",
+      "domain": "HABILITA",
+      "machine": "CasoHabilita",
+      "principle": "Separa investigación, seguimiento de acciones y cierre global. Puede permanecer abierto después de normalizada la operación.",
+      "state_count": 5,
+      "terminals": [
+        "CERRADO"
+      ],
+      "key_rule": "Investigación, caso y acciones tienen lifecycles separados.",
+      "parallel_submachine": "AccionCorrectivaHabilita",
+      "source_row": 12
+    },
+    {
+      "id": "SM-09",
+      "domain": "CERTIFICACIÓN",
+      "machine": "UnidadComercial",
+      "principle": "Estado de certificación separado de la vigencia del lineage. Fuente operacional nunca se edita desde Certificación.",
+      "state_count": 6,
+      "terminals": [
+        "ACEPTADA",
+        "RECHAZADA"
+      ],
+      "key_rule": "Certificación y supersession son dimensiones paralelas.",
+      "parallel_submachine": "estado_supersession_comercial",
+      "source_row": 13
+    },
+    {
+      "id": "SM-10",
+      "domain": "CERTIFICACIÓN",
+      "machine": "PaqueteCertificacion",
+      "principle": "Agrupa UC por regla. La composición se versiona; observaciones no borran inclusiones históricas.",
+      "state_count": 9,
+      "terminals": [
+        "ACEPTADO_PARCIAL",
+        "ACEPTADO",
+        "RECHAZADO",
+        "SUSTITUIDO"
+      ],
+      "key_rule": "Aceptación parcial solo por regla configurada.",
+      "source_row": 14
+    },
+    {
+      "id": "SM-11",
+      "domain": "FACTURACIÓN",
+      "machine": "LoteFacturacion",
+      "principle": "Agrupación administrativa interna. El modelo funcional termina en el boundary ERP; no inventa estados fiscales específicos.",
+      "state_count": 6,
+      "terminals": [
+        "ACEPTADO_ERP",
+        "CANCELADO"
+      ],
+      "key_rule": "Termina en boundary ERP; no modela fiscalidad inventada.",
+      "source_row": 15
+    }
+  ],
+  "principles": [
+    {
+      "id": "P-01",
+      "title": "No mezclar estados",
+      "statement": "READY (plan) ≠ EN_EJECUCIÓN (real) ≠ VIGENTE (PTW) ≠ ACEPTADA (UC).",
+      "source_row": 20
+    },
+    {
+      "id": "P-02",
+      "title": "Eventos, no reversas mágicas",
+      "statement": "Una transición posterior no borra que el estado anterior existió; guardar actor, timestamp, causa y versión.",
+      "source_row": 21
+    },
+    {
+      "id": "P-03",
+      "title": "Terminal no significa borrable",
+      "statement": "Los estados terminales preservan el objeto y su historia; correcciones crean enmienda/versión/supersession.",
+      "source_row": 22
+    },
+    {
+      "id": "P-04",
+      "title": "Derivados no mandan al origen",
+      "statement": "Certificación, Facturación o Habilita no editan silenciosamente la verdad operacional.",
+      "source_row": 23
+    },
+    {
+      "id": "P-05",
+      "title": "Timeout no es decisión",
+      "statement": "Vencimientos disparan bloqueo/alerta; no convierten automáticamente un objeto a CERRADO/APLICADO/ACEPTADO.",
+      "source_row": 24
+    },
+    {
+      "id": "P-06",
+      "title": "Gates explícitos",
+      "statement": "Toda transición crítica debe saber qué regla/gate la habilitó y con qué versión.",
+      "source_row": 25
+    }
+  ],
+  "machines": [
+    {
+      "key": "Planificacion",
+      "domain": "PLANIFICACIÓN",
+      "kind": "machine",
+      "source_sheet": "49_SM_Planificacion",
+      "source_row": 4,
+      "description": "Contenedor de intención. Las versiones se congelan por PlanificacionVersion; el estado del Plan no prueba ejecución.",
+      "states": [
+        {
+          "state": "ABIERTA",
+          "kind": "Inicial",
+          "semantics": "Existe y admite nuevas versiones/borradores.",
+          "terminal": false,
+          "source_row": 9
+        },
+        {
+          "state": "ACTIVA",
+          "kind": "Operativa",
+          "semantics": "Existe una PlanificacionVersion aprobada con asignaciones vigentes.",
+          "terminal": false,
+          "source_row": 10
+        },
+        {
+          "state": "CERRADA",
+          "kind": "Terminal",
+          "semantics": "No quedan asignaciones abiertas ni trabajo pendiente bajo este plan.",
+          "terminal": true,
+          "source_row": 11
+        },
+        {
+          "state": "CANCELADA",
+          "kind": "Terminal",
+          "semantics": "Plan abandonado antes de materializar ejecución relevante.",
+          "terminal": true,
+          "source_row": 12
+        }
+      ],
+      "transitions": [
+        {
+          "id": "T-P01",
+          "from": [],
+          "from_verbatim": "—",
+          "from_is_creation": true,
+          "event": "CREAR_PLAN",
+          "to": "ABIERTA",
+          "gate": "Datos mínimos de contexto",
+          "actor": "Sistema/Planificación",
+          "effect": "Crear identidad del plan.",
+          "kind": "PERMITIDA",
+          "source_row": 16
+        },
+        {
+          "id": "T-P02",
+          "from": [
+            "ABIERTA"
+          ],
+          "from_verbatim": "ABIERTA",
+          "from_is_creation": false,
+          "event": "APROBAR_VERSION",
+          "to": "ACTIVA",
+          "gate": "PlanificacionVersion APROBADA + ≥1 AsignacionPlanificada",
+          "actor": "Planificación",
+          "effect": "Activar versión como intención vigente.",
+          "kind": "PERMITIDA",
+          "source_row": 17
+        },
+        {
+          "id": "T-P03",
+          "from": [
+            "ACTIVA"
+          ],
+          "from_verbatim": "ACTIVA",
+          "from_is_creation": false,
+          "event": "APROBAR_NUEVA_VERSION",
+          "to": "ACTIVA",
+          "gate": "Nueva versión válida; anterior pasa SUPERSEDIDA",
+          "actor": "Planificación",
+          "effect": "Replanificar sin reescribir versión anterior.",
+          "kind": "PERMITIDA",
+          "source_row": 18
+        },
+        {
+          "id": "T-P04",
+          "from": [
+            "ACTIVA"
+          ],
+          "from_verbatim": "ACTIVA",
+          "from_is_creation": false,
+          "event": "CERRAR_PLAN",
+          "to": "CERRADA",
+          "gate": "Todas las asignaciones terminales + sin directivas pendientes relevantes",
+          "actor": "Planificación",
+          "effect": "Cierre lógico del contenedor.",
+          "kind": "PERMITIDA",
+          "source_row": 19
+        },
+        {
+          "id": "T-P05",
+          "from": [
+            "ABIERTA"
+          ],
+          "from_verbatim": "ABIERTA",
+          "from_is_creation": false,
+          "event": "CANCELAR_PLAN",
+          "to": "CANCELADA",
+          "gate": "Sin ejecución materializada vinculada",
+          "actor": "Planificación",
+          "effect": "Cancelar antes de ejecución.",
+          "kind": "PERMITIDA",
+          "source_row": 20
+        },
+        {
+          "id": "T-P06",
+          "from": [
+            "ACTIVA"
+          ],
+          "from_verbatim": "ACTIVA",
+          "from_is_creation": false,
+          "event": "CANCELAR_PLAN_COMPLETO",
+          "to": "CANCELADA",
+          "gate": "Solo si ninguna ejecución comenzó; si comenzó, usar directivas/resultado de asignaciones",
+          "actor": "Planificación",
+          "effect": "Evitar cancelar historia ya ejecutada.",
+          "kind": "CONDICIONAL",
+          "source_row": 21
+        }
+      ],
+      "prohibited": [
+        {
+          "from": "CERRADA",
+          "to": "ACTIVA",
+          "forbidden": "Reabrir silenciosamente un plan cerrado",
+          "instead": "Crear nueva versión/plan según contexto; conservar cierre histórico.",
+          "source_row": 25
+        },
+        {
+          "from": "CANCELADA",
+          "to": "ACTIVA",
+          "forbidden": "Reactivar plan cancelado",
+          "instead": "Nueva Planificacion o versión explícita con trazabilidad.",
+          "source_row": 26
+        },
+        {
+          "from": "ACTIVA",
+          "to": "CANCELADA",
+          "forbidden": "Cancelar si ya existen ejecuciones iniciadas",
+          "instead": "Resolver asignaciones/directivas; no borrar materialización real.",
+          "source_row": 27
+        }
+      ]
+    },
+    {
+      "key": "PlanificacionVersion",
+      "domain": "SUBMÁQUINA / DIMENSIÓN PARALELA",
+      "kind": "submachine",
+      "source_sheet": "49_SM_Planificacion",
+      "source_row": 30,
+      "description": "",
+      "states": [],
+      "transitions": [],
+      "prohibited": [],
+      "parallel_dimension_note": "BORRADOR → EN_VALIDACION → APROBADA → SUPERSEDIDA. Alternativa: EN_VALIDACION → RECHAZADA. Una APROBADA no se edita."
+    },
+    {
+      "key": "AsignacionPlanificada",
+      "domain": "PLANIFICACIÓN",
+      "kind": "machine",
+      "source_sheet": "49_SM_Planificacion",
+      "source_row": 35,
+      "description": "Representa trabajo despachable previsto. Su estado nunca debe confundirse con el estado de Parte/UE real.",
+      "states": [
+        {
+          "state": "PROGRAMADA",
+          "kind": "Inicial aprobada",
+          "semantics": "Existe dentro de versión aprobada; aún puede no estar READY.",
+          "terminal": false,
+          "source_row": 40
+        },
+        {
+          "state": "READY",
+          "kind": "Operativa",
+          "semantics": "Readiness vigente y gates previos satisfechos.",
+          "terminal": false,
+          "source_row": 41
+        },
+        {
+          "state": "DESPACHADA",
+          "kind": "Operativa",
+          "semantics": "Contexto fue entregado a campo/dispositivo.",
+          "terminal": false,
+          "source_row": 42
+        },
+        {
+          "state": "CUMPLIDA",
+          "kind": "Terminal",
+          "semantics": "La intención fue materializada y cerrada suficientemente por ejecución real.",
+          "terminal": true,
+          "source_row": 43
+        },
+        {
+          "state": "NO_REALIZADA",
+          "kind": "Terminal",
+          "semantics": "La asignación venció/cerró sin ejecución efectiva, con causa.",
+          "terminal": true,
+          "source_row": 44
+        },
+        {
+          "state": "CANCELADA",
+          "kind": "Terminal",
+          "semantics": "Se canceló antes de inicio por decisión operativa.",
+          "terminal": true,
+          "source_row": 45
+        },
+        {
+          "state": "SUPERSEDIDA",
+          "kind": "Terminal versión",
+          "semantics": "Nueva PlanificacionVersion reemplazó esta asignación.",
+          "terminal": true,
+          "source_row": 46
+        }
+      ],
+      "transitions": [
+        {
+          "id": "T-A01",
+          "from": [],
+          "from_verbatim": "—",
+          "from_is_creation": true,
+          "event": "APROBAR_VERSION",
+          "to": "PROGRAMADA",
+          "gate": "Asignación incluida en PlanificacionVersion aprobada",
+          "actor": "Planificación",
+          "effect": "Crear asignación vigente.",
+          "kind": "PERMITIDA",
+          "source_row": 50
+        },
+        {
+          "id": "T-A02",
+          "from": [
+            "PROGRAMADA"
+          ],
+          "from_verbatim": "PROGRAMADA",
+          "from_is_creation": false,
+          "event": "READINESS_OK",
+          "to": "READY",
+          "gate": "EvaluacionPlanificacion vigente = READY",
+          "actor": "Sistema",
+          "effect": "Habilitar despacho.",
+          "kind": "PERMITIDA",
+          "source_row": 51
+        },
+        {
+          "id": "T-A03",
+          "from": [
+            "READY"
+          ],
+          "from_verbatim": "READY",
+          "from_is_creation": false,
+          "event": "INVALIDAR_READINESS",
+          "to": "PROGRAMADA",
+          "gate": "EventoInvalidacionReadiness",
+          "actor": "Sistema",
+          "effect": "Volver a requerir evaluación.",
+          "kind": "PERMITIDA",
+          "source_row": 52
+        },
+        {
+          "id": "T-A04",
+          "from": [
+            "READY"
+          ],
+          "from_verbatim": "READY",
+          "from_is_creation": false,
+          "event": "DESPACHAR",
+          "to": "DESPACHADA",
+          "gate": "ExecutionContextBundle/contexto emitido",
+          "actor": "Planificación",
+          "effect": "Entregar intención a campo.",
+          "kind": "PERMITIDA",
+          "source_row": 53
+        },
+        {
+          "id": "T-A05",
+          "from": [
+            "DESPACHADA"
+          ],
+          "from_verbatim": "DESPACHADA",
+          "from_is_creation": false,
+          "event": "MATERIALIZAR_EJECUCION",
+          "to": "DESPACHADA",
+          "gate": "Crear VinculoPlanEjecucion; el estado real vive en Parte/UE",
+          "actor": "Sistema",
+          "effect": "No duplicar EN_EJECUCION aquí.",
+          "kind": "PERMITIDA",
+          "source_row": 54
+        },
+        {
+          "id": "T-A06",
+          "from": [
+            "DESPACHADA"
+          ],
+          "from_verbatim": "DESPACHADA",
+          "from_is_creation": false,
+          "event": "EJECUCION_CERRADA_CUMPLE",
+          "to": "CUMPLIDA",
+          "gate": "Vínculo real satisface alcance según regla",
+          "actor": "Sistema/Planificación",
+          "effect": "Cerrar intención como cumplida.",
+          "kind": "PERMITIDA",
+          "source_row": 55
+        },
+        {
+          "id": "T-A07",
+          "from": [
+            "PROGRAMADA",
+            "READY",
+            "DESPACHADA"
+          ],
+          "from_verbatim": "PROGRAMADA/READY/DESPACHADA",
+          "from_is_creation": false,
+          "event": "CERRAR_NO_REALIZADA",
+          "to": "NO_REALIZADA",
+          "gate": "Causa estructurada; no existe ejecución efectiva que la cumpla",
+          "actor": "Planificación",
+          "effect": "Preservar desvío previsto vs real.",
+          "kind": "PERMITIDA",
+          "source_row": 56
+        },
+        {
+          "id": "T-A08",
+          "from": [
+            "PROGRAMADA",
+            "READY"
+          ],
+          "from_verbatim": "PROGRAMADA/READY",
+          "from_is_creation": false,
+          "event": "CANCELAR",
+          "to": "CANCELADA",
+          "gate": "Directiva/decisión antes de Start Work",
+          "actor": "Planificación",
+          "effect": "Cancelar intención.",
+          "kind": "PERMITIDA",
+          "source_row": 57
+        },
+        {
+          "id": "T-A09",
+          "from": [
+            "PROGRAMADA",
+            "READY",
+            "DESPACHADA"
+          ],
+          "from_verbatim": "PROGRAMADA/READY/DESPACHADA",
+          "from_is_creation": false,
+          "event": "SUPERSEDER",
+          "to": "SUPERSEDIDA",
+          "gate": "Nueva PlanificacionVersion reemplaza asignación",
+          "actor": "Sistema",
+          "effect": "Versionar, no editar.",
+          "kind": "PERMITIDA",
+          "source_row": 58
+        }
+      ],
+      "prohibited": [
+        {
+          "from": "DESPACHADA",
+          "to": "READY",
+          "forbidden": "Deshacer despacho borrando historia",
+          "instead": "Emitir nueva versión/directiva; el despacho original queda trazado.",
+          "source_row": 62
+        },
+        {
+          "from": "CUMPLIDA",
+          "to": "PROGRAMADA",
+          "forbidden": "Reabrir asignación cumplida",
+          "instead": "Nueva asignación/versión.",
+          "source_row": 63
+        },
+        {
+          "from": "CANCELADA",
+          "to": "CUMPLIDA",
+          "forbidden": "Marcar cancelada como cumplida sin ejecución",
+          "instead": "Solo mediante nueva evidencia y revisión explícita.",
+          "source_row": 64
+        }
+      ]
+    },
+    {
+      "key": "Parte",
+      "domain": "EJECUCIÓN",
+      "kind": "machine",
+      "source_sheet": "50_SM_Ejecucion",
+      "source_row": 4,
+      "description": "Contenedor operativo resuelto por TipoParte. Cierre operativo ≠ completitud documental ≠ certificación.",
+      "states": [
+        {
+          "state": "PREPARADO",
+          "kind": "Inicial",
+          "semantics": "Identidad resuelta; aún no inició ejecución.",
+          "terminal": false,
+          "source_row": 9
+        },
+        {
+          "state": "EN_EJECUCION",
+          "kind": "Operativa",
+          "semantics": "Al menos una UE está en ejecución.",
+          "terminal": false,
+          "source_row": 10
+        },
+        {
+          "state": "SUSPENDIDO",
+          "kind": "Operativa",
+          "semantics": "La ejecución del Parte está detenida temporalmente por control/operación/Habilita.",
+          "terminal": false,
+          "source_row": 11
+        },
+        {
+          "state": "CERRADO_OPERATIVAMENTE",
+          "kind": "Terminal operacional",
+          "semantics": "Todas las UE terminales y no queda trabajo activo.",
+          "terminal": true,
+          "terminal_note": "Sí operacional",
+          "source_row": 12
+        },
+        {
+          "state": "ANULADO",
+          "kind": "Terminal",
+          "semantics": "Parte creado por error/duplicado antes de ejecución real.",
+          "terminal": true,
+          "source_row": 13
+        }
+      ],
+      "transitions": [
+        {
+          "id": "T-PA01",
+          "from": [],
+          "from_verbatim": "—",
+          "from_is_creation": true,
+          "event": "CREAR_PARTE",
+          "to": "PREPARADO",
+          "gate": "TipoParte resuelto + contexto mínimo",
+          "actor": "Motor/Sistema",
+          "effect": "Crear Parte sin pedir selector manual.",
+          "kind": "PERMITIDA",
+          "source_row": 17
+        },
+        {
+          "id": "T-PA02",
+          "from": [
+            "PREPARADO"
+          ],
+          "from_verbatim": "PREPARADO",
+          "from_is_creation": false,
+          "event": "START_WORK",
+          "to": "EN_EJECUCION",
+          "gate": "Gates Habilita/PTW/documental aplicables satisfechos + UE iniciable",
+          "actor": "Campo/Sistema",
+          "effect": "Comenzar realidad.",
+          "kind": "PERMITIDA",
+          "source_row": 18
+        },
+        {
+          "id": "T-PA03",
+          "from": [
+            "EN_EJECUCION"
+          ],
+          "from_verbatim": "EN_EJECUCION",
+          "from_is_creation": false,
+          "event": "SUSPENDER",
+          "to": "SUSPENDIDO",
+          "gate": "DirectivaOperativa/PTW/Habilita/causa operacional",
+          "actor": "Sistema",
+          "effect": "Detener ejecución sin cerrar.",
+          "kind": "PERMITIDA",
+          "source_row": 19
+        },
+        {
+          "id": "T-PA04",
+          "from": [
+            "SUSPENDIDO"
+          ],
+          "from_verbatim": "SUSPENDIDO",
+          "from_is_creation": false,
+          "event": "REANUDAR",
+          "to": "EN_EJECUCION",
+          "gate": "Gates de reinicio satisfechos",
+          "actor": "Campo/Supervisión",
+          "effect": "Continuar mismo Parte si identidad se conserva.",
+          "kind": "PERMITIDA",
+          "source_row": 20
+        },
+        {
+          "id": "T-PA05",
+          "from": [
+            "EN_EJECUCION",
+            "SUSPENDIDO"
+          ],
+          "from_verbatim": "EN_EJECUCION/SUSPENDIDO",
+          "from_is_creation": false,
+          "event": "CERRAR_OPERATIVAMENTE",
+          "to": "CERRADO_OPERATIVAMENTE",
+          "gate": "Todas las UE terminales + tiempos cerrados + causa de no realizados",
+          "actor": "Supervisor/Sistema",
+          "effect": "Cerrar verdad operacional.",
+          "kind": "PERMITIDA",
+          "source_row": 21
+        },
+        {
+          "id": "T-PA06",
+          "from": [
+            "PREPARADO"
+          ],
+          "from_verbatim": "PREPARADO",
+          "from_is_creation": false,
+          "event": "ANULAR_DUPLICADO_ERROR",
+          "to": "ANULADO",
+          "gate": "No hubo Start Work ni evidencia de ejecución real",
+          "actor": "Rol autorizado",
+          "effect": "Eliminar uso, no identidad histórica.",
+          "kind": "PERMITIDA",
+          "source_row": 22
+        }
+      ],
+      "prohibited": [
+        {
+          "from": "CERRADO_OPERATIVAMENTE",
+          "to": "EN_EJECUCION",
+          "forbidden": "Reabrir y editar Parte cerrado",
+          "instead": "Corrección mediante EnmiendaOperativa/nueva ejecución.",
+          "source_row": 26
+        },
+        {
+          "from": "ANULADO",
+          "to": "EN_EJECUCION",
+          "forbidden": "Ejecutar Parte anulado",
+          "instead": "Crear Parte válido nuevo.",
+          "source_row": 27
+        },
+        {
+          "from": "PREPARADO",
+          "to": "CERRADO_OPERATIVAMENTE",
+          "forbidden": "Cerrar sin resolver UE",
+          "instead": "UE deben quedar cerradas/no realizadas/anuladas explícitamente.",
+          "source_row": 28
+        }
+      ]
+    },
+    {
+      "key": "UnidadEjecucion",
+      "domain": "EJECUCIÓN",
+      "kind": "machine",
+      "source_sheet": "50_SM_Ejecucion",
+      "source_row": 31,
+      "description": "Grano operativo distinguible. Personas, recursos, ubicación, medición y tiempos se relacionan con la UE sin redefinir el Parte automáticamente.",
+      "states": [
+        {
+          "state": "PENDIENTE",
+          "kind": "Inicial",
+          "semantics": "UE creada dentro del Parte; aún no comenzó.",
+          "terminal": false,
+          "source_row": 36
+        },
+        {
+          "state": "EN_EJECUCION",
+          "kind": "Operativa",
+          "semantics": "Trabajo real activo.",
+          "terminal": false,
+          "source_row": 37
+        },
+        {
+          "state": "SUSPENDIDA",
+          "kind": "Operativa",
+          "semantics": "Trabajo detenido temporalmente.",
+          "terminal": false,
+          "source_row": 38
+        },
+        {
+          "state": "CERRADA",
+          "kind": "Terminal operacional",
+          "semantics": "Trabajo completado/cerrado con resultado real.",
+          "terminal": true,
+          "source_row": 39
+        },
+        {
+          "state": "NO_REALIZADA",
+          "kind": "Terminal",
+          "semantics": "La unidad prevista/creada no se ejecutó, con causa.",
+          "terminal": true,
+          "source_row": 40
+        },
+        {
+          "state": "ANULADA",
+          "kind": "Terminal",
+          "semantics": "UE creada por error antes de ejecución.",
+          "terminal": true,
+          "source_row": 41
+        }
+      ],
+      "transitions": [
+        {
+          "id": "T-UE01",
+          "from": [],
+          "from_verbatim": "—",
+          "from_is_creation": true,
+          "event": "CREAR_UE",
+          "to": "PENDIENTE",
+          "gate": "Parte válido + regla de composición",
+          "actor": "Sistema/Campo",
+          "effect": "Crear unidad de trabajo.",
+          "kind": "PERMITIDA",
+          "source_row": 45
+        },
+        {
+          "id": "T-UE02",
+          "from": [
+            "PENDIENTE"
+          ],
+          "from_verbatim": "PENDIENTE",
+          "from_is_creation": false,
+          "event": "INICIAR",
+          "to": "EN_EJECUCION",
+          "gate": "Gates contextuales satisfechos",
+          "actor": "Campo/Sistema",
+          "effect": "Abrir timestamps/asignaciones.",
+          "kind": "PERMITIDA",
+          "source_row": 46
+        },
+        {
+          "id": "T-UE03",
+          "from": [
+            "EN_EJECUCION"
+          ],
+          "from_verbatim": "EN_EJECUCION",
+          "from_is_creation": false,
+          "event": "SUSPENDER",
+          "to": "SUSPENDIDA",
+          "gate": "Causa estructurada / directiva / PTW",
+          "actor": "Sistema",
+          "effect": "Cerrar intervalo activo.",
+          "kind": "PERMITIDA",
+          "source_row": 47
+        },
+        {
+          "id": "T-UE04",
+          "from": [
+            "SUSPENDIDA"
+          ],
+          "from_verbatim": "SUSPENDIDA",
+          "from_is_creation": false,
+          "event": "REANUDAR",
+          "to": "EN_EJECUCION",
+          "gate": "Revalidación aplicable",
+          "actor": "Campo/Supervisión",
+          "effect": "Abrir nuevo intervalo.",
+          "kind": "PERMITIDA",
+          "source_row": 48
+        },
+        {
+          "id": "T-UE05",
+          "from": [
+            "EN_EJECUCION",
+            "SUSPENDIDA"
+          ],
+          "from_verbatim": "EN_EJECUCION/SUSPENDIDA",
+          "from_is_creation": false,
+          "event": "CERRAR",
+          "to": "CERRADA",
+          "gate": "Resultado + tiempos consistentes; mediciones obligatorias si aplica",
+          "actor": "Campo/Supervisión",
+          "effect": "Cerrar UE.",
+          "kind": "PERMITIDA",
+          "source_row": 49
+        },
+        {
+          "id": "T-UE06",
+          "from": [
+            "PENDIENTE"
+          ],
+          "from_verbatim": "PENDIENTE",
+          "from_is_creation": false,
+          "event": "MARCAR_NO_REALIZADA",
+          "to": "NO_REALIZADA",
+          "gate": "Causa estructurada",
+          "actor": "Campo/Supervisión",
+          "effect": "Preservar intento/no ejecución.",
+          "kind": "PERMITIDA",
+          "source_row": 50
+        },
+        {
+          "id": "T-UE07",
+          "from": [
+            "PENDIENTE"
+          ],
+          "from_verbatim": "PENDIENTE",
+          "from_is_creation": false,
+          "event": "ANULAR_ERROR",
+          "to": "ANULADA",
+          "gate": "No hubo trabajo real",
+          "actor": "Rol autorizado",
+          "effect": "Corregir creación errónea.",
+          "kind": "PERMITIDA",
+          "source_row": 51
+        }
+      ],
+      "prohibited": [
+        {
+          "from": "CERRADA",
+          "to": "EN_EJECUCION",
+          "forbidden": "Reabrir UE para editar realidad",
+          "instead": "Usar EnmiendaOperativa o nueva UE.",
+          "source_row": 55
+        },
+        {
+          "from": "NO_REALIZADA",
+          "to": "CERRADA",
+          "forbidden": "Inventar ejecución después",
+          "instead": "Nueva evidencia requiere revisión/new UE.",
+          "source_row": 56
+        },
+        {
+          "from": "ANULADA",
+          "to": "EN_EJECUCION",
+          "forbidden": "Ejecutar UE anulada",
+          "instead": "Crear nueva UE válida.",
+          "source_row": 57
+        }
+      ]
+    },
+    {
+      "key": "PermisoTrabajo",
+      "domain": "HABILITA",
+      "kind": "machine",
+      "source_sheet": "51_SM_Habilita_PTW",
+      "source_row": 4,
+      "description": "Autorización formal independiente del Parte. Timeout nunca equivale a cierre; handover puede exigir suspensión/revalidación.",
+      "states": [
+        {
+          "state": "BORRADOR",
+          "kind": "Inicial",
+          "semantics": "Permiso en preparación.",
+          "terminal": false,
+          "source_row": 9
+        },
+        {
+          "state": "PENDIENTE_APROBACION",
+          "kind": "Pre-work",
+          "semantics": "Listo para revisión/aprobación.",
+          "terminal": false,
+          "source_row": 10
+        },
+        {
+          "state": "APROBADO",
+          "kind": "Pre-work",
+          "semantics": "Aprobado pero todavía no activado/vigente en campo.",
+          "terminal": false,
+          "source_row": 11
+        },
+        {
+          "state": "VIGENTE",
+          "kind": "Operativa",
+          "semantics": "Habilita trabajo dentro de alcance/ventana.",
+          "terminal": false,
+          "source_row": 12
+        },
+        {
+          "state": "SUSPENDIDO",
+          "kind": "Operativa",
+          "semantics": "Permiso temporalmente no habilitante.",
+          "terminal": false,
+          "source_row": 13
+        },
+        {
+          "state": "CERRADO",
+          "kind": "Terminal",
+          "semantics": "Permiso cerrado formalmente.",
+          "terminal": true,
+          "source_row": 14
+        },
+        {
+          "state": "RECHAZADO",
+          "kind": "Terminal",
+          "semantics": "No fue aprobado.",
+          "terminal": true,
+          "source_row": 15
+        },
+        {
+          "state": "VENCIDO",
+          "kind": "Terminal/control",
+          "semantics": "Expiró sin cierre normal; requiere tratamiento administrativo, nunca autocierre.",
+          "terminal": true,
+          "source_row": 16
+        },
+        {
+          "state": "ANULADO",
+          "kind": "Terminal",
+          "semantics": "Permiso invalidado antes de uso.",
+          "terminal": true,
+          "source_row": 17
+        }
+      ],
+      "transitions": [
+        {
+          "id": "T-PTW01",
+          "from": [],
+          "from_verbatim": "—",
+          "from_is_creation": true,
+          "event": "CREAR",
+          "to": "BORRADOR",
+          "gate": "Alcance/tipo/contexto identificado",
+          "actor": "Supervisor/Habilita",
+          "effect": "Crear PTW.",
+          "kind": "PERMITIDA",
+          "source_row": 21
+        },
+        {
+          "id": "T-PTW02",
+          "from": [
+            "BORRADOR"
+          ],
+          "from_verbatim": "BORRADOR",
+          "from_is_creation": false,
+          "event": "ENVIAR_APROBACION",
+          "to": "PENDIENTE_APROBACION",
+          "gate": "Campos/requisitos mínimos completos",
+          "actor": "Campo/Supervisor",
+          "effect": "Solicitar aprobación.",
+          "kind": "PERMITIDA",
+          "source_row": 22
+        },
+        {
+          "id": "T-PTW03",
+          "from": [
+            "PENDIENTE_APROBACION"
+          ],
+          "from_verbatim": "PENDIENTE_APROBACION",
+          "from_is_creation": false,
+          "event": "APROBAR",
+          "to": "APROBADO",
+          "gate": "Autoridad competente + controles satisfechos",
+          "actor": "Habilita/Supervisor",
+          "effect": "Aprobar.",
+          "kind": "PERMITIDA",
+          "source_row": 23
+        },
+        {
+          "id": "T-PTW04",
+          "from": [
+            "PENDIENTE_APROBACION"
+          ],
+          "from_verbatim": "PENDIENTE_APROBACION",
+          "from_is_creation": false,
+          "event": "RECHAZAR",
+          "to": "RECHAZADO",
+          "gate": "Causa",
+          "actor": "Habilita/Supervisor",
+          "effect": "No habilitar.",
+          "kind": "PERMITIDA",
+          "source_row": 24
+        },
+        {
+          "id": "T-PTW05",
+          "from": [
+            "APROBADO"
+          ],
+          "from_verbatim": "APROBADO",
+          "from_is_creation": false,
+          "event": "ACTIVAR",
+          "to": "VIGENTE",
+          "gate": "Ventana/contexto real válidos",
+          "actor": "Supervisor/Campo",
+          "effect": "Habilitar Start Work.",
+          "kind": "PERMITIDA",
+          "source_row": 25
+        },
+        {
+          "id": "T-PTW06",
+          "from": [
+            "VIGENTE"
+          ],
+          "from_verbatim": "VIGENTE",
+          "from_is_creation": false,
+          "event": "SUSPENDER",
+          "to": "SUSPENDIDO",
+          "gate": "Cambio condición/handover/evento/orden",
+          "actor": "Supervisor/Habilita",
+          "effect": "Detener cobertura.",
+          "kind": "PERMITIDA",
+          "source_row": 26
+        },
+        {
+          "id": "T-PTW07",
+          "from": [
+            "SUSPENDIDO"
+          ],
+          "from_verbatim": "SUSPENDIDO",
+          "from_is_creation": false,
+          "event": "REVALIDAR_REANUDAR",
+          "to": "VIGENTE",
+          "gate": "Condiciones nuevamente válidas + autoridad",
+          "actor": "Supervisor/Habilita",
+          "effect": "Recuperar vigencia.",
+          "kind": "PERMITIDA",
+          "source_row": 27
+        },
+        {
+          "id": "T-PTW08",
+          "from": [
+            "VIGENTE",
+            "SUSPENDIDO"
+          ],
+          "from_verbatim": "VIGENTE/SUSPENDIDO",
+          "from_is_creation": false,
+          "event": "CERRAR",
+          "to": "CERRADO",
+          "gate": "Trabajo/alcance terminado + firmas/autoridad requeridas",
+          "actor": "Supervisor/Habilita",
+          "effect": "Cerrar formalmente.",
+          "kind": "PERMITIDA",
+          "source_row": 28
+        },
+        {
+          "id": "T-PTW09",
+          "from": [
+            "APROBADO",
+            "VIGENTE",
+            "SUSPENDIDO"
+          ],
+          "from_verbatim": "APROBADO/VIGENTE/SUSPENDIDO",
+          "from_is_creation": false,
+          "event": "EXPIRAR",
+          "to": "VENCIDO",
+          "gate": "Se superó vigencia sin cierre",
+          "actor": "Sistema",
+          "effect": "Bloquear nuevas tareas + alertar; NO cerrar.",
+          "kind": "PERMITIDA",
+          "source_row": 29
+        },
+        {
+          "id": "T-PTW10",
+          "from": [
+            "BORRADOR",
+            "APROBADO"
+          ],
+          "from_verbatim": "BORRADOR/APROBADO",
+          "from_is_creation": false,
+          "event": "ANULAR",
+          "to": "ANULADO",
+          "gate": "No se usó / error / cambio alcance",
+          "actor": "Rol autorizado",
+          "effect": "Invalidar.",
+          "kind": "PERMITIDA",
+          "source_row": 30
+        }
+      ],
+      "prohibited": [
+        {
+          "from": "VENCIDO",
+          "to": "CERRADO",
+          "forbidden": "Autocerrar por timeout",
+          "instead": "Exige EventoCierreAdministrativoPTW o cierre autorizado.",
+          "source_row": 34
+        },
+        {
+          "from": "RECHAZADO",
+          "to": "VIGENTE",
+          "forbidden": "Activar permiso rechazado",
+          "instead": "Crear/revisar nueva solicitud.",
+          "source_row": 35
+        },
+        {
+          "from": "CERRADO",
+          "to": "VIGENTE",
+          "forbidden": "Reabrir PTW cerrado",
+          "instead": "Emitir nuevo PTW.",
+          "source_row": 36
+        }
+      ]
+    },
+    {
+      "key": "DirectivaOperativa",
+      "domain": "CONTROL PLANE",
+      "kind": "machine",
+      "source_sheet": "52_SM_Directiva_Operativa",
+      "source_row": 4,
+      "description": "Instrucción post-despacho append-only. Emitida ≠ recibida ≠ reconocida ≠ aplicada.",
+      "states": [
+        {
+          "state": "EMITIDA",
+          "kind": "Inicial",
+          "semantics": "Creada en origen; puede estar pendiente de recepción offline.",
+          "terminal": false,
+          "source_row": 9
+        },
+        {
+          "state": "RECIBIDA",
+          "kind": "Tránsito",
+          "semantics": "El receptor/dispositivo confirmó recepción técnica.",
+          "terminal": false,
+          "source_row": 10
+        },
+        {
+          "state": "RECONOCIDA",
+          "kind": "Tránsito",
+          "semantics": "Actor/sistema emitió ACK semántico.",
+          "terminal": false,
+          "source_row": 11
+        },
+        {
+          "state": "APLICADA",
+          "kind": "Terminal",
+          "semantics": "La directiva fue ejecutada y su efecto quedó registrado.",
+          "terminal": true,
+          "source_row": 12
+        },
+        {
+          "state": "RECHAZADA",
+          "kind": "Terminal",
+          "semantics": "No pudo/debió aplicarse; causa obligatoria.",
+          "terminal": true,
+          "source_row": 13
+        },
+        {
+          "state": "CANCELADA",
+          "kind": "Terminal",
+          "semantics": "Emisor retiró directiva antes de aplicación.",
+          "terminal": true,
+          "source_row": 14
+        },
+        {
+          "state": "EXPIRADA",
+          "kind": "Terminal",
+          "semantics": "Perdió vigencia antes de aplicación.",
+          "terminal": true,
+          "source_row": 15
+        }
+      ],
+      "transitions": [
+        {
+          "id": "T-D01",
+          "from": [],
+          "from_verbatim": "—",
+          "from_is_creation": true,
+          "event": "EMITIR",
+          "to": "EMITIDA",
+          "gate": "Tipo + target + motivo + versión/contexto",
+          "actor": "Planificación/Supervisión/Habilita",
+          "effect": "Publicar hecho.",
+          "kind": "PERMITIDA",
+          "source_row": 19
+        },
+        {
+          "id": "T-D02",
+          "from": [
+            "EMITIDA"
+          ],
+          "from_verbatim": "EMITIDA",
+          "from_is_creation": false,
+          "event": "RECIBIR",
+          "to": "RECIBIDA",
+          "gate": "Entrega técnica confirmada",
+          "actor": "Sistema/dispositivo",
+          "effect": "Registrar received_at.",
+          "kind": "PERMITIDA",
+          "source_row": 20
+        },
+        {
+          "id": "T-D03",
+          "from": [
+            "RECIBIDA"
+          ],
+          "from_verbatim": "RECIBIDA",
+          "from_is_creation": false,
+          "event": "ACK",
+          "to": "RECONOCIDA",
+          "gate": "Receptor comprende/acepta procesar",
+          "actor": "Actor/Sistema",
+          "effect": "Registrar ack_at.",
+          "kind": "PERMITIDA",
+          "source_row": 21
+        },
+        {
+          "id": "T-D04",
+          "from": [
+            "RECIBIDA",
+            "RECONOCIDA"
+          ],
+          "from_verbatim": "RECIBIDA/RECONOCIDA",
+          "from_is_creation": false,
+          "event": "APLICAR",
+          "to": "APLICADA",
+          "gate": "Efecto realizado y trazado",
+          "actor": "Campo/Sistema",
+          "effect": "Cerrar lifecycle positivo.",
+          "kind": "PERMITIDA",
+          "source_row": 22
+        },
+        {
+          "id": "T-D05",
+          "from": [
+            "RECIBIDA",
+            "RECONOCIDA"
+          ],
+          "from_verbatim": "RECIBIDA/RECONOCIDA",
+          "from_is_creation": false,
+          "event": "RECHAZAR",
+          "to": "RECHAZADA",
+          "gate": "Causa estructurada",
+          "actor": "Campo/Sistema",
+          "effect": "Cerrar sin aplicación.",
+          "kind": "PERMITIDA",
+          "source_row": 23
+        },
+        {
+          "id": "T-D06",
+          "from": [
+            "EMITIDA",
+            "RECIBIDA"
+          ],
+          "from_verbatim": "EMITIDA/RECIBIDA",
+          "from_is_creation": false,
+          "event": "CANCELAR",
+          "to": "CANCELADA",
+          "gate": "Aún no aplicada",
+          "actor": "Emisor autorizado",
+          "effect": "Retirar instrucción.",
+          "kind": "PERMITIDA",
+          "source_row": 24
+        },
+        {
+          "id": "T-D07",
+          "from": [
+            "EMITIDA",
+            "RECIBIDA",
+            "RECONOCIDA"
+          ],
+          "from_verbatim": "EMITIDA/RECIBIDA/RECONOCIDA",
+          "from_is_creation": false,
+          "event": "EXPIRAR",
+          "to": "EXPIRADA",
+          "gate": "valid_until superado",
+          "actor": "Sistema",
+          "effect": "Evitar aplicar orden obsoleta.",
+          "kind": "PERMITIDA",
+          "source_row": 25
+        }
+      ],
+      "prohibited": [
+        {
+          "from": "EMITIDA",
+          "to": "APLICADA",
+          "forbidden": "Marcar aplicada sin trazabilidad de recepción/efecto",
+          "instead": "Debe existir evidencia de recepción/aplicación; ACK puede ser implícito solo si regla lo permite.",
+          "source_row": 29
+        },
+        {
+          "from": "APLICADA",
+          "to": "CANCELADA",
+          "forbidden": "Cancelar retroactivamente",
+          "instead": "Emitir nueva directiva compensatoria.",
+          "source_row": 30
+        },
+        {
+          "from": "RECHAZADA",
+          "to": "APLICADA",
+          "forbidden": "Aplicar la misma directiva rechazada",
+          "instead": "Emitir nueva versión/directiva.",
+          "source_row": 31
+        }
+      ]
+    },
+    {
+      "key": "EventoHabilita",
+      "domain": "HABILITA",
+      "kind": "machine",
+      "source_sheet": "53_SM_Habilita_Eventos",
+      "source_row": 4,
+      "description": "El evento es el hecho reportado. El triage puede reclasificarlo sin borrar el reporte inicial; CasoHabilita es lifecycle separado.",
+      "states": [
+        {
+          "state": "REPORTADO",
+          "kind": "Inicial",
+          "semantics": "Flash Report creado.",
+          "terminal": false,
+          "source_row": 9
+        },
+        {
+          "state": "EN_TRIAGE",
+          "kind": "Habilita",
+          "semantics": "Evento bajo clasificación/evaluación inicial.",
+          "terminal": false,
+          "source_row": 10
+        },
+        {
+          "state": "CLASIFICADO",
+          "kind": "Habilita",
+          "semantics": "Tipo/severidad/contexto suficientes para ejecutar escalamiento.",
+          "terminal": false,
+          "source_row": 11
+        },
+        {
+          "state": "ESCALADO_A_CASO",
+          "kind": "Terminal del evento",
+          "semantics": "Regla exige CasoHabilita; el hecho queda estable y seguimiento continúa en Caso.",
+          "terminal": true,
+          "terminal_note": "Sí del workflow evento",
+          "source_row": 12
+        },
+        {
+          "state": "CERRADO_SIN_CASO",
+          "kind": "Terminal",
+          "semantics": "Triage concluyó que no requiere caso formal.",
+          "terminal": true,
+          "source_row": 13
+        },
+        {
+          "state": "DESCARTADO",
+          "kind": "Terminal excepcional",
+          "semantics": "Duplicado/no evento/error de reporte, con causa y vínculo si corresponde.",
+          "terminal": true,
+          "source_row": 14
+        }
+      ],
+      "transitions": [
+        {
+          "id": "T-EH01",
+          "from": [],
+          "from_verbatim": "—",
+          "from_is_creation": true,
+          "event": "FLASH_REPORT",
+          "to": "REPORTADO",
+          "gate": "Payload mínimo",
+          "actor": "Campo/Sistema",
+          "effect": "Preservar reporte original.",
+          "kind": "PERMITIDA",
+          "source_row": 18
+        },
+        {
+          "id": "T-EH02",
+          "from": [
+            "REPORTADO"
+          ],
+          "from_verbatim": "REPORTADO",
+          "from_is_creation": false,
+          "event": "INICIAR_TRIAGE",
+          "to": "EN_TRIAGE",
+          "gate": "Responsable asignado/cola",
+          "actor": "Habilita",
+          "effect": "Iniciar clasificación.",
+          "kind": "PERMITIDA",
+          "source_row": 19
+        },
+        {
+          "id": "T-EH03",
+          "from": [
+            "EN_TRIAGE"
+          ],
+          "from_verbatim": "EN_TRIAGE",
+          "from_is_creation": false,
+          "event": "CLASIFICAR",
+          "to": "CLASIFICADO",
+          "gate": "Categoría + información suficiente para ReglaEscalamiento",
+          "actor": "Habilita",
+          "effect": "Persistir clasificación vigente.",
+          "kind": "PERMITIDA",
+          "source_row": 20
+        },
+        {
+          "id": "T-EH04",
+          "from": [
+            "CLASIFICADO"
+          ],
+          "from_verbatim": "CLASIFICADO",
+          "from_is_creation": false,
+          "event": "EVALUAR_ESCALAMIENTO_ABRE_CASO",
+          "to": "ESCALADO_A_CASO",
+          "gate": "EvaluacionEscalamientoHabilita exige Caso",
+          "actor": "Motor/Habilita",
+          "effect": "Crear CasoHabilita.",
+          "kind": "PERMITIDA",
+          "source_row": 21
+        },
+        {
+          "id": "T-EH05",
+          "from": [
+            "CLASIFICADO"
+          ],
+          "from_verbatim": "CLASIFICADO",
+          "from_is_creation": false,
+          "event": "CERRAR_SIN_CASO",
+          "to": "CERRADO_SIN_CASO",
+          "gate": "Regla no exige seguimiento formal + mínimos completos",
+          "actor": "Habilita",
+          "effect": "Cerrar workflow de evento.",
+          "kind": "PERMITIDA",
+          "source_row": 22
+        },
+        {
+          "id": "T-EH06",
+          "from": [
+            "REPORTADO",
+            "EN_TRIAGE"
+          ],
+          "from_verbatim": "REPORTADO/EN_TRIAGE",
+          "from_is_creation": false,
+          "event": "DESCARTAR_DUPLICADO_NO_EVENTO",
+          "to": "DESCARTADO",
+          "gate": "Causa + referencia al evento correcto si duplicado",
+          "actor": "Habilita",
+          "effect": "Preservar reporte pero quitarlo de flujo.",
+          "kind": "PERMITIDA",
+          "source_row": 23
+        },
+        {
+          "id": "T-EH07",
+          "from": [
+            "CLASIFICADO"
+          ],
+          "from_verbatim": "CLASIFICADO",
+          "from_is_creation": false,
+          "event": "RECLASIFICAR",
+          "to": "CLASIFICADO",
+          "gate": "Nueva Evaluacion/justificación; no borrar historia",
+          "actor": "Habilita",
+          "effect": "Actualizar clasificación mediante versión/evento.",
+          "kind": "PERMITIDA",
+          "source_row": 24
+        }
+      ],
+      "prohibited": [
+        {
+          "from": "REPORTADO",
+          "to": "CERRADO_SIN_CASO",
+          "forbidden": "Cerrar sin triage/clasificación mínima",
+          "instead": "Debe existir decisión Habilita.",
+          "source_row": 28
+        },
+        {
+          "from": "ESCALADO_A_CASO",
+          "to": "CERRADO_SIN_CASO",
+          "forbidden": "Cerrar evento ignorando Caso abierto",
+          "instead": "Caso debe resolverse en su máquina.",
+          "source_row": 29
+        },
+        {
+          "from": "DESCARTADO",
+          "to": "ESCALADO_A_CASO",
+          "forbidden": "Reusar evento descartado",
+          "instead": "Reactivar mediante revisión explícita o crear evento válido.",
+          "source_row": 30
+        }
+      ]
+    },
+    {
+      "key": "CasoHabilita",
+      "domain": "HABILITA",
+      "kind": "machine",
+      "source_sheet": "53_SM_Habilita_Eventos",
+      "source_row": 33,
+      "description": "Separa investigación, seguimiento de acciones y cierre global. Puede permanecer abierto después de normalizada la operación.",
+      "states": [
+        {
+          "state": "ABIERTO",
+          "kind": "Inicial",
+          "semantics": "Caso creado desde EventoHabilita.",
+          "terminal": false,
+          "source_row": 38
+        },
+        {
+          "state": "EN_INVESTIGACION",
+          "kind": "Investigación",
+          "semantics": "Investigación activa.",
+          "terminal": false,
+          "source_row": 39
+        },
+        {
+          "state": "SEGUIMIENTO_ACCIONES",
+          "kind": "Mejora",
+          "semantics": "Investigación finalizada; existen acciones/compromisos a seguir.",
+          "terminal": false,
+          "source_row": 40
+        },
+        {
+          "state": "LISTO_PARA_CIERRE",
+          "kind": "Pre-terminal",
+          "semantics": "Gates de cierre cumplidos según configuración.",
+          "terminal": false,
+          "source_row": 41
+        },
+        {
+          "state": "CERRADO",
+          "kind": "Terminal",
+          "semantics": "Caso formalmente cerrado.",
+          "terminal": true,
+          "source_row": 42
+        }
+      ],
+      "transitions": [
+        {
+          "id": "T-CH01",
+          "from": [],
+          "from_verbatim": "—",
+          "from_is_creation": true,
+          "event": "ABRIR_CASO",
+          "to": "ABIERTO",
+          "gate": "EventoHabilita escalado + owner",
+          "actor": "Habilita",
+          "effect": "Crear caso.",
+          "kind": "PERMITIDA",
+          "source_row": 46
+        },
+        {
+          "id": "T-CH02",
+          "from": [
+            "ABIERTO"
+          ],
+          "from_verbatim": "ABIERTO",
+          "from_is_creation": false,
+          "event": "INICIAR_INVESTIGACION",
+          "to": "EN_INVESTIGACION",
+          "gate": "Responsable + scope",
+          "actor": "Habilita",
+          "effect": "Iniciar investigación.",
+          "kind": "PERMITIDA",
+          "source_row": 47
+        },
+        {
+          "id": "T-CH03",
+          "from": [
+            "EN_INVESTIGACION"
+          ],
+          "from_verbatim": "EN_INVESTIGACION",
+          "from_is_creation": false,
+          "event": "FINALIZAR_INVESTIGACION",
+          "to": "SEGUIMIENTO_ACCIONES",
+          "gate": "estado_investigacion=FINALIZADA + acciones definidas o decisión de no acciones",
+          "actor": "Habilita",
+          "effect": "Separar investigación de acciones.",
+          "kind": "PERMITIDA",
+          "source_row": 48
+        },
+        {
+          "id": "T-CH04",
+          "from": [
+            "SEGUIMIENTO_ACCIONES"
+          ],
+          "from_verbatim": "SEGUIMIENTO_ACCIONES",
+          "from_is_creation": false,
+          "event": "EVALUAR_CIERRE_OK",
+          "to": "LISTO_PARA_CIERRE",
+          "gate": "Notificaciones requeridas resueltas + no acciones bloqueantes sin verificar",
+          "actor": "Sistema/Habilita",
+          "effect": "Habilitar cierre.",
+          "kind": "PERMITIDA",
+          "source_row": 49
+        },
+        {
+          "id": "T-CH05",
+          "from": [
+            "LISTO_PARA_CIERRE"
+          ],
+          "from_verbatim": "LISTO_PARA_CIERRE",
+          "from_is_creation": false,
+          "event": "CERRAR",
+          "to": "CERRADO",
+          "gate": "Autoridad/gate de cierre",
+          "actor": "Habilita",
+          "effect": "Cerrar formalmente.",
+          "kind": "PERMITIDA",
+          "source_row": 50
+        },
+        {
+          "id": "T-CH06",
+          "from": [
+            "CERRADO"
+          ],
+          "from_verbatim": "CERRADO",
+          "from_is_creation": false,
+          "event": "REABRIR_POR_NUEVA_EVIDENCIA",
+          "to": "EN_INVESTIGACION",
+          "gate": "Nueva evidencia material + autorización",
+          "actor": "Habilita",
+          "effect": "Reabrir con evento auditable.",
+          "kind": "CONDICIONAL",
+          "source_row": 51
+        }
+      ],
+      "prohibited": [
+        {
+          "from": "ABIERTO",
+          "to": "CERRADO",
+          "forbidden": "Cerrar sin investigación/decisión de triage suficiente",
+          "instead": "Debe pasar por gates definidos.",
+          "source_row": 55
+        },
+        {
+          "from": "EN_INVESTIGACION",
+          "to": "CERRADO",
+          "forbidden": "Cerrar con investigación abierta",
+          "instead": "Finalizar investigación primero.",
+          "source_row": 56
+        },
+        {
+          "from": "SEGUIMIENTO_ACCIONES",
+          "to": "CERRADO",
+          "forbidden": "Cerrar con acciones bloqueantes no verificadas",
+          "instead": "Solo si configuración marca acciones como no bloqueantes.",
+          "source_row": 57
+        }
+      ]
+    },
+    {
+      "key": "AccionCorrectivaHabilita",
+      "domain": "SUBMÁQUINA / DIMENSIÓN PARALELA",
+      "kind": "submachine",
+      "source_sheet": "53_SM_Habilita_Eventos",
+      "source_row": 60,
+      "description": "",
+      "states": [],
+      "transitions": [],
+      "prohibited": [],
+      "parallel_dimension_note": "PENDIENTE → EN_PROGRESO → IMPLEMENTADA → EN_VERIFICACION → VERIFICADA. CANCELADA solo con causa/autoridad."
+    },
+    {
+      "key": "UnidadComercial",
+      "domain": "CERTIFICACIÓN",
+      "kind": "machine",
+      "source_sheet": "54_SM_Certificacion",
+      "source_row": 4,
+      "description": "Estado de certificación separado de la vigencia del lineage. Fuente operacional nunca se edita desde Certificación.",
+      "states": [
+        {
+          "state": "INCOMPLETA",
+          "kind": "Inicial",
+          "semantics": "Falta evidencia, mapping o dato requerido.",
+          "terminal": false,
+          "source_row": 9
+        },
+        {
+          "state": "ELEGIBLE",
+          "kind": "Pre-cert",
+          "semantics": "Cumple requisitos para revisión/certificación.",
+          "terminal": false,
+          "source_row": 10
+        },
+        {
+          "state": "EN_REVISION",
+          "kind": "Certificación",
+          "semantics": "Está siendo revisada.",
+          "terminal": false,
+          "source_row": 11
+        },
+        {
+          "state": "OBSERVADA",
+          "kind": "Certificación",
+          "semantics": "Requiere aclaración/evidencia/ajuste comercial permitido.",
+          "terminal": false,
+          "source_row": 12
+        },
+        {
+          "state": "ACEPTADA",
+          "kind": "Terminal comercial",
+          "semantics": "Cliente/proceso la acepta.",
+          "terminal": true,
+          "terminal_note": "Sí respecto de esa versión",
+          "source_row": 13
+        },
+        {
+          "state": "RECHAZADA",
+          "kind": "Terminal comercial",
+          "semantics": "No aceptada bajo esa versión.",
+          "terminal": true,
+          "source_row": 14
+        }
+      ],
+      "transitions": [
+        {
+          "id": "T-UC01",
+          "from": [],
+          "from_verbatim": "—",
+          "from_is_creation": true,
+          "event": "GENERAR_UC",
+          "to": "INCOMPLETA",
+          "gate": "ReglaGrano aplicada + lineage fuente creado",
+          "actor": "Motor contractual",
+          "effect": "Crear derivado comercial.",
+          "kind": "PERMITIDA",
+          "source_row": 18
+        },
+        {
+          "id": "T-UC02",
+          "from": [
+            "INCOMPLETA"
+          ],
+          "from_verbatim": "INCOMPLETA",
+          "from_is_creation": false,
+          "event": "COMPLETAR_REQUISITOS",
+          "to": "ELEGIBLE",
+          "gate": "Completitud/evidencia/mapping OK",
+          "actor": "Sistema/Backoffice",
+          "effect": "Habilitar revisión.",
+          "kind": "PERMITIDA",
+          "source_row": 19
+        },
+        {
+          "id": "T-UC03",
+          "from": [
+            "ELEGIBLE"
+          ],
+          "from_verbatim": "ELEGIBLE",
+          "from_is_creation": false,
+          "event": "INGRESAR_REVISION",
+          "to": "EN_REVISION",
+          "gate": "Incluida en proceso/paquete o revisión directa",
+          "actor": "Certificación",
+          "effect": "Tomar UC.",
+          "kind": "PERMITIDA",
+          "source_row": 20
+        },
+        {
+          "id": "T-UC04",
+          "from": [
+            "EN_REVISION"
+          ],
+          "from_verbatim": "EN_REVISION",
+          "from_is_creation": false,
+          "event": "OBSERVAR",
+          "to": "OBSERVADA",
+          "gate": "Motivo estructurado",
+          "actor": "Certificación/Cliente",
+          "effect": "Solicitar resolución.",
+          "kind": "PERMITIDA",
+          "source_row": 21
+        },
+        {
+          "id": "T-UC05",
+          "from": [
+            "OBSERVADA"
+          ],
+          "from_verbatim": "OBSERVADA",
+          "from_is_creation": false,
+          "event": "RESOLVER_OBSERVACION",
+          "to": "ELEGIBLE",
+          "gate": "Evidencia/ajuste permitido completado",
+          "actor": "Certificación",
+          "effect": "Volver elegible.",
+          "kind": "PERMITIDA",
+          "source_row": 22
+        },
+        {
+          "id": "T-UC06",
+          "from": [
+            "EN_REVISION"
+          ],
+          "from_verbatim": "EN_REVISION",
+          "from_is_creation": false,
+          "event": "ACEPTAR",
+          "to": "ACEPTADA",
+          "gate": "Conformidad/regla aplicable",
+          "actor": "Cliente/Certificación",
+          "effect": "Aceptar versión.",
+          "kind": "PERMITIDA",
+          "source_row": 23
+        },
+        {
+          "id": "T-UC07",
+          "from": [
+            "EN_REVISION"
+          ],
+          "from_verbatim": "EN_REVISION",
+          "from_is_creation": false,
+          "event": "RECHAZAR",
+          "to": "RECHAZADA",
+          "gate": "Causa",
+          "actor": "Cliente/Certificación",
+          "effect": "Rechazar versión.",
+          "kind": "PERMITIDA",
+          "source_row": 24
+        }
+      ],
+      "prohibited": [
+        {
+          "from": "ACEPTADA",
+          "to": "ELEGIBLE",
+          "forbidden": "Editar/reabrir misma UC aceptada por cambio en campo",
+          "instead": "Usar supersession: nueva UC/version; anterior permanece.",
+          "source_row": 28
+        },
+        {
+          "from": "RECHAZADA",
+          "to": "ACEPTADA",
+          "forbidden": "Cambiar rechazo a aceptación sin nueva revisión/version",
+          "instead": "Nueva versión/revisión explícita.",
+          "source_row": 29
+        },
+        {
+          "from": "INCOMPLETA",
+          "to": "ACEPTADA",
+          "forbidden": "Aceptar saltando elegibilidad/revisión",
+          "instead": "Debe satisfacer gates.",
+          "source_row": 30
+        }
+      ]
+    },
+    {
+      "key": "estado_supersession_comercial",
+      "domain": "SUBMÁQUINA / DIMENSIÓN PARALELA",
+      "kind": "submachine",
+      "source_sheet": "54_SM_Certificacion",
+      "source_row": 33,
+      "description": "",
+      "states": [],
+      "transitions": [],
+      "prohibited": [],
+      "parallel_dimension_note": "VIGENTE → REQUIERE_RECALCULO → EN_REVISION → SUSTITUIDA/INVALIDADA. Esta dimensión corre en paralelo al estado de certificación."
+    },
+    {
+      "key": "PaqueteCertificacion",
+      "domain": "CERTIFICACIÓN",
+      "kind": "machine",
+      "source_sheet": "54_SM_Certificacion",
+      "source_row": 38,
+      "description": "Agrupa UC por regla. La composición se versiona; observaciones no borran inclusiones históricas.",
+      "states": [
+        {
+          "state": "BORRADOR",
+          "kind": "Inicial",
+          "semantics": "Paquete en armado.",
+          "terminal": false,
+          "source_row": 43
+        },
+        {
+          "state": "LISTO_PARA_ENVIO",
+          "kind": "Pre-envío",
+          "semantics": "Composición válida y reglas de completitud satisfechas.",
+          "terminal": false,
+          "source_row": 44
+        },
+        {
+          "state": "ENVIADO",
+          "kind": "Tránsito",
+          "semantics": "Paquete enviado al cliente/circuito.",
+          "terminal": false,
+          "source_row": 45
+        },
+        {
+          "state": "EN_REVISION",
+          "kind": "Certificación",
+          "semantics": "Bajo revisión/conformidad.",
+          "terminal": false,
+          "source_row": 46
+        },
+        {
+          "state": "OBSERVADO",
+          "kind": "Certificación",
+          "semantics": "Requiere resolución.",
+          "terminal": false,
+          "source_row": 47
+        },
+        {
+          "state": "ACEPTADO_PARCIAL",
+          "kind": "Terminal/condicional",
+          "semantics": "Parte de las UC aceptadas y regla permite parcialidad.",
+          "terminal": true,
+          "terminal_note": "Sí de esa versión",
+          "source_row": 48
+        },
+        {
+          "state": "ACEPTADO",
+          "kind": "Terminal",
+          "semantics": "Paquete aceptado.",
+          "terminal": true,
+          "source_row": 49
+        },
+        {
+          "state": "RECHAZADO",
+          "kind": "Terminal",
+          "semantics": "Paquete rechazado.",
+          "terminal": true,
+          "source_row": 50
+        },
+        {
+          "state": "SUSTITUIDO",
+          "kind": "Terminal versión",
+          "semantics": "Nueva versión/paquete reemplaza éste.",
+          "terminal": true,
+          "source_row": 51
+        }
+      ],
+      "transitions": [
+        {
+          "id": "T-PC01",
+          "from": [],
+          "from_verbatim": "—",
+          "from_is_creation": true,
+          "event": "CREAR_PAQUETE",
+          "to": "BORRADOR",
+          "gate": "ReglaAgrupacion + UC candidatas",
+          "actor": "Sistema/Certificación",
+          "effect": "Crear contenedor.",
+          "kind": "PERMITIDA",
+          "source_row": 55
+        },
+        {
+          "id": "T-PC02",
+          "from": [
+            "BORRADOR"
+          ],
+          "from_verbatim": "BORRADOR",
+          "from_is_creation": false,
+          "event": "VALIDAR_COMPLETITUD",
+          "to": "LISTO_PARA_ENVIO",
+          "gate": "Todas las UC/inclusiones cumplen reglas del paquete",
+          "actor": "Sistema",
+          "effect": "Habilitar envío.",
+          "kind": "PERMITIDA",
+          "source_row": 56
+        },
+        {
+          "id": "T-PC03",
+          "from": [
+            "LISTO_PARA_ENVIO"
+          ],
+          "from_verbatim": "LISTO_PARA_ENVIO",
+          "from_is_creation": false,
+          "event": "ENVIAR",
+          "to": "ENVIADO",
+          "gate": "Canal/cliente resuelto",
+          "actor": "Certificación",
+          "effect": "Registrar envío.",
+          "kind": "PERMITIDA",
+          "source_row": 57
+        },
+        {
+          "id": "T-PC04",
+          "from": [
+            "ENVIADO"
+          ],
+          "from_verbatim": "ENVIADO",
+          "from_is_creation": false,
+          "event": "INICIAR_REVISION",
+          "to": "EN_REVISION",
+          "gate": "Recepción/revisión confirmada",
+          "actor": "Cliente/Certificación",
+          "effect": "Entrar revisión.",
+          "kind": "PERMITIDA",
+          "source_row": 58
+        },
+        {
+          "id": "T-PC05",
+          "from": [
+            "EN_REVISION"
+          ],
+          "from_verbatim": "EN_REVISION",
+          "from_is_creation": false,
+          "event": "OBSERVAR",
+          "to": "OBSERVADO",
+          "gate": "Observación documentada",
+          "actor": "Cliente/Certificación",
+          "effect": "Bloquear/condicionar.",
+          "kind": "PERMITIDA",
+          "source_row": 59
+        },
+        {
+          "id": "T-PC06",
+          "from": [
+            "OBSERVADO"
+          ],
+          "from_verbatim": "OBSERVADO",
+          "from_is_creation": false,
+          "event": "RESOLVER_Y_REENVIAR",
+          "to": "ENVIADO",
+          "gate": "Nueva versión/inclusión/evidencia según corresponda",
+          "actor": "Certificación",
+          "effect": "No borrar versión previa.",
+          "kind": "PERMITIDA",
+          "source_row": 60
+        },
+        {
+          "id": "T-PC07",
+          "from": [
+            "EN_REVISION"
+          ],
+          "from_verbatim": "EN_REVISION",
+          "from_is_creation": false,
+          "event": "ACEPTAR_COMPLETO",
+          "to": "ACEPTADO",
+          "gate": "Todas las UC pertinentes aceptadas",
+          "actor": "Cliente/Certificación",
+          "effect": "Aceptar.",
+          "kind": "PERMITIDA",
+          "source_row": 61
+        },
+        {
+          "id": "T-PC08",
+          "from": [
+            "EN_REVISION"
+          ],
+          "from_verbatim": "EN_REVISION",
+          "from_is_creation": false,
+          "event": "ACEPTAR_PARCIAL",
+          "to": "ACEPTADO_PARCIAL",
+          "gate": "ReglaParcialidadCertificacion lo permite",
+          "actor": "Cliente/Certificación",
+          "effect": "Aceptar subset explícito.",
+          "kind": "CONDICIONAL",
+          "source_row": 62
+        },
+        {
+          "id": "T-PC09",
+          "from": [
+            "EN_REVISION"
+          ],
+          "from_verbatim": "EN_REVISION",
+          "from_is_creation": false,
+          "event": "RECHAZAR",
+          "to": "RECHAZADO",
+          "gate": "Causa",
+          "actor": "Cliente/Certificación",
+          "effect": "Rechazar.",
+          "kind": "PERMITIDA",
+          "source_row": 63
+        },
+        {
+          "id": "T-PC10",
+          "from": [
+            "BORRADOR",
+            "LISTO_PARA_ENVIO",
+            "OBSERVADO"
+          ],
+          "from_verbatim": "BORRADOR/LISTO/OBSERVADO",
+          "from_is_creation": false,
+          "event": "SUPERSEDER",
+          "to": "SUSTITUIDO",
+          "gate": "Nueva versión sustituye composición anterior",
+          "actor": "Sistema/Certificación",
+          "effect": "Preservar histórico.",
+          "kind": "PERMITIDA",
+          "source_row": 64
+        }
+      ],
+      "prohibited": [
+        {
+          "from": "ACEPTADO",
+          "to": "BORRADOR",
+          "forbidden": "Editar paquete aceptado",
+          "instead": "Crear nueva versión/ajuste.",
+          "source_row": 68
+        },
+        {
+          "from": "EN_REVISION",
+          "to": "ACEPTADO_PARCIAL",
+          "forbidden": "Aceptar parcial si regla lo prohíbe",
+          "instead": "Debe respetar ReglaParcialidad.",
+          "source_row": 69
+        },
+        {
+          "from": "ENVIADO",
+          "to": "BORRADOR",
+          "forbidden": "Volver atrás borrando envío",
+          "instead": "Crear versión nueva o registrar observación.",
+          "source_row": 70
+        }
+      ]
+    },
+    {
+      "key": "LoteFacturacion",
+      "domain": "FACTURACIÓN",
+      "kind": "machine",
+      "source_sheet": "55_SM_Facturacion",
+      "source_row": 4,
+      "description": "Agrupación administrativa interna. El modelo funcional termina en el boundary ERP; no inventa estados fiscales específicos.",
+      "states": [
+        {
+          "state": "BORRADOR",
+          "kind": "Inicial",
+          "semantics": "Líneas facturables seleccionadas.",
+          "terminal": false,
+          "source_row": 9
+        },
+        {
+          "state": "VALIDADO",
+          "kind": "Pre-ERP",
+          "semantics": "Lote cumple reglas internas y no contiene líneas inválidas/sustituidas.",
+          "terminal": false,
+          "source_row": 10
+        },
+        {
+          "state": "ENVIADO_ERP",
+          "kind": "Boundary",
+          "semantics": "Solicitud/documento enviado al sistema administrativo.",
+          "terminal": false,
+          "source_row": 11
+        },
+        {
+          "state": "ACEPTADO_ERP",
+          "kind": "Terminal interno",
+          "semantics": "ERP confirmó recepción/emisión válida.",
+          "terminal": true,
+          "terminal_note": "Sí interno",
+          "source_row": 12
+        },
+        {
+          "state": "ERROR_ERP",
+          "kind": "Excepción",
+          "semantics": "ERP rechazó/observó payload.",
+          "terminal": false,
+          "source_row": 13
+        },
+        {
+          "state": "CANCELADO",
+          "kind": "Terminal",
+          "semantics": "Lote cancelado antes de aceptación ERP.",
+          "terminal": true,
+          "source_row": 14
+        }
+      ],
+      "transitions": [
+        {
+          "id": "T-LF01",
+          "from": [],
+          "from_verbatim": "—",
+          "from_is_creation": true,
+          "event": "CREAR_LOTE",
+          "to": "BORRADOR",
+          "gate": "ReglaFacturacion + LineasFacturables vigentes",
+          "actor": "Facturación",
+          "effect": "Crear lote.",
+          "kind": "PERMITIDA",
+          "source_row": 18
+        },
+        {
+          "id": "T-LF02",
+          "from": [
+            "BORRADOR"
+          ],
+          "from_verbatim": "BORRADOR",
+          "from_is_creation": false,
+          "event": "VALIDAR",
+          "to": "VALIDADO",
+          "gate": "Checks de completitud/duplicidad/vigencia",
+          "actor": "Sistema/Facturación",
+          "effect": "Preparar boundary.",
+          "kind": "PERMITIDA",
+          "source_row": 19
+        },
+        {
+          "id": "T-LF03",
+          "from": [
+            "VALIDADO"
+          ],
+          "from_verbatim": "VALIDADO",
+          "from_is_creation": false,
+          "event": "ENVIAR_ERP",
+          "to": "ENVIADO_ERP",
+          "gate": "Adapter disponible + payload válido",
+          "actor": "Sistema",
+          "effect": "Entregar al ERP.",
+          "kind": "PERMITIDA",
+          "source_row": 20
+        },
+        {
+          "id": "T-LF04",
+          "from": [
+            "ENVIADO_ERP"
+          ],
+          "from_verbatim": "ENVIADO_ERP",
+          "from_is_creation": false,
+          "event": "ERP_ACEPTA",
+          "to": "ACEPTADO_ERP",
+          "gate": "Referencia externa devuelta",
+          "actor": "ERP/Adapter",
+          "effect": "Cerrar lifecycle interno exitoso.",
+          "kind": "PERMITIDA",
+          "source_row": 21
+        },
+        {
+          "id": "T-LF05",
+          "from": [
+            "ENVIADO_ERP"
+          ],
+          "from_verbatim": "ENVIADO_ERP",
+          "from_is_creation": false,
+          "event": "ERP_ERROR",
+          "to": "ERROR_ERP",
+          "gate": "Error/rechazo estructurado",
+          "actor": "ERP/Adapter",
+          "effect": "Conservar error.",
+          "kind": "PERMITIDA",
+          "source_row": 22
+        },
+        {
+          "id": "T-LF06",
+          "from": [
+            "ERROR_ERP"
+          ],
+          "from_verbatim": "ERROR_ERP",
+          "from_is_creation": false,
+          "event": "CORREGIR_REENVIAR",
+          "to": "ENVIADO_ERP",
+          "gate": "Corrección administrativa permitida",
+          "actor": "Facturación",
+          "effect": "Reintentar con trazabilidad.",
+          "kind": "PERMITIDA",
+          "source_row": 23
+        },
+        {
+          "id": "T-LF07",
+          "from": [
+            "BORRADOR",
+            "VALIDADO"
+          ],
+          "from_verbatim": "BORRADOR/VALIDADO",
+          "from_is_creation": false,
+          "event": "CANCELAR",
+          "to": "CANCELADO",
+          "gate": "Aún no aceptado por ERP",
+          "actor": "Facturación",
+          "effect": "Cancelar lote.",
+          "kind": "PERMITIDA",
+          "source_row": 24
+        }
+      ],
+      "prohibited": [
+        {
+          "from": "ACEPTADO_ERP",
+          "to": "BORRADOR",
+          "forbidden": "Editar/reusar lote aceptado",
+          "instead": "Crear ajuste/reversión mediante proceso administrativo externo.",
+          "source_row": 28
+        },
+        {
+          "from": "ENVIADO_ERP",
+          "to": "CANCELADO",
+          "forbidden": "Cancelar unilateralmente después de aceptación potencial",
+          "instead": "Esperar respuesta/usar operación compensatoria.",
+          "source_row": 29
+        },
+        {
+          "from": "BORRADOR",
+          "to": "ACEPTADO_ERP",
+          "forbidden": "Saltar validación/envío",
+          "instead": "Debe cruzar boundary explícitamente.",
+          "source_row": 30
+        }
+      ]
+    }
+  ],
+  "prohibited_transitions": [
+    {
+      "id": "TPR-001",
+      "machine": "Planificacion",
+      "from": "CERRADA",
+      "to": "ACTIVA",
+      "forbidden": "Reabrir silenciosamente un plan cerrado",
+      "instead": "Crear nueva versión/plan según contexto; conservar cierre histórico.",
+      "severity": "CRÍTICA",
+      "source_row": 5
+    },
+    {
+      "id": "TPR-002",
+      "machine": "Planificacion",
+      "from": "CANCELADA",
+      "to": "ACTIVA",
+      "forbidden": "Reactivar plan cancelado",
+      "instead": "Nueva Planificacion o versión explícita con trazabilidad.",
+      "severity": "CRÍTICA",
+      "source_row": 6
+    },
+    {
+      "id": "TPR-003",
+      "machine": "Planificacion",
+      "from": "ACTIVA",
+      "to": "CANCELADA",
+      "forbidden": "Cancelar si ya existen ejecuciones iniciadas",
+      "instead": "Resolver asignaciones/directivas; no borrar materialización real.",
+      "severity": "CRÍTICA",
+      "source_row": 7
+    },
+    {
+      "id": "TPR-004",
+      "machine": "AsignacionPlanificada",
+      "from": "DESPACHADA",
+      "to": "READY",
+      "forbidden": "Deshacer despacho borrando historia",
+      "instead": "Emitir nueva versión/directiva; el despacho original queda trazado.",
+      "severity": "CRÍTICA",
+      "source_row": 8
+    },
+    {
+      "id": "TPR-005",
+      "machine": "AsignacionPlanificada",
+      "from": "CUMPLIDA",
+      "to": "PROGRAMADA",
+      "forbidden": "Reabrir asignación cumplida",
+      "instead": "Nueva asignación/versión.",
+      "severity": "CRÍTICA",
+      "source_row": 9
+    },
+    {
+      "id": "TPR-006",
+      "machine": "AsignacionPlanificada",
+      "from": "CANCELADA",
+      "to": "CUMPLIDA",
+      "forbidden": "Marcar cancelada como cumplida sin ejecución",
+      "instead": "Solo mediante nueva evidencia y revisión explícita.",
+      "severity": "CRÍTICA",
+      "source_row": 10
+    },
+    {
+      "id": "TPR-007",
+      "machine": "Parte",
+      "from": "CERRADO_OPERATIVAMENTE",
+      "to": "EN_EJECUCION",
+      "forbidden": "Reabrir y editar Parte cerrado",
+      "instead": "Corrección mediante EnmiendaOperativa/nueva ejecución.",
+      "severity": "CRÍTICA",
+      "source_row": 11
+    },
+    {
+      "id": "TPR-008",
+      "machine": "Parte",
+      "from": "ANULADO",
+      "to": "EN_EJECUCION",
+      "forbidden": "Ejecutar Parte anulado",
+      "instead": "Crear Parte válido nuevo.",
+      "severity": "CRÍTICA",
+      "source_row": 12
+    },
+    {
+      "id": "TPR-009",
+      "machine": "Parte",
+      "from": "PREPARADO",
+      "to": "CERRADO_OPERATIVAMENTE",
+      "forbidden": "Cerrar sin resolver UE",
+      "instead": "UE deben quedar cerradas/no realizadas/anuladas explícitamente.",
+      "severity": "CRÍTICA",
+      "source_row": 13
+    },
+    {
+      "id": "TPR-010",
+      "machine": "UnidadEjecucion",
+      "from": "CERRADA",
+      "to": "EN_EJECUCION",
+      "forbidden": "Reabrir UE para editar realidad",
+      "instead": "Usar EnmiendaOperativa o nueva UE.",
+      "severity": "CRÍTICA",
+      "source_row": 14
+    },
+    {
+      "id": "TPR-011",
+      "machine": "UnidadEjecucion",
+      "from": "NO_REALIZADA",
+      "to": "CERRADA",
+      "forbidden": "Inventar ejecución después",
+      "instead": "Nueva evidencia requiere revisión/new UE.",
+      "severity": "CRÍTICA",
+      "source_row": 15
+    },
+    {
+      "id": "TPR-012",
+      "machine": "UnidadEjecucion",
+      "from": "ANULADA",
+      "to": "EN_EJECUCION",
+      "forbidden": "Ejecutar UE anulada",
+      "instead": "Crear nueva UE válida.",
+      "severity": "CRÍTICA",
+      "source_row": 16
+    },
+    {
+      "id": "TPR-013",
+      "machine": "PermisoTrabajo",
+      "from": "VENCIDO",
+      "to": "CERRADO",
+      "forbidden": "Autocerrar por timeout",
+      "instead": "Exige EventoCierreAdministrativoPTW o cierre autorizado.",
+      "severity": "CRÍTICA",
+      "source_row": 17
+    },
+    {
+      "id": "TPR-014",
+      "machine": "PermisoTrabajo",
+      "from": "RECHAZADO",
+      "to": "VIGENTE",
+      "forbidden": "Activar permiso rechazado",
+      "instead": "Crear/revisar nueva solicitud.",
+      "severity": "CRÍTICA",
+      "source_row": 18
+    },
+    {
+      "id": "TPR-015",
+      "machine": "PermisoTrabajo",
+      "from": "CERRADO",
+      "to": "VIGENTE",
+      "forbidden": "Reabrir PTW cerrado",
+      "instead": "Emitir nuevo PTW.",
+      "severity": "CRÍTICA",
+      "source_row": 19
+    },
+    {
+      "id": "TPR-016",
+      "machine": "DirectivaOperativa",
+      "from": "EMITIDA",
+      "to": "APLICADA",
+      "forbidden": "Marcar aplicada sin trazabilidad de recepción/efecto",
+      "instead": "Debe existir evidencia de recepción/aplicación; ACK puede ser implícito solo si regla lo permite.",
+      "severity": "CRÍTICA",
+      "source_row": 20
+    },
+    {
+      "id": "TPR-017",
+      "machine": "DirectivaOperativa",
+      "from": "APLICADA",
+      "to": "CANCELADA",
+      "forbidden": "Cancelar retroactivamente",
+      "instead": "Emitir nueva directiva compensatoria.",
+      "severity": "CRÍTICA",
+      "source_row": 21
+    },
+    {
+      "id": "TPR-018",
+      "machine": "DirectivaOperativa",
+      "from": "RECHAZADA",
+      "to": "APLICADA",
+      "forbidden": "Aplicar la misma directiva rechazada",
+      "instead": "Emitir nueva versión/directiva.",
+      "severity": "CRÍTICA",
+      "source_row": 22
+    },
+    {
+      "id": "TPR-019",
+      "machine": "EventoHabilita",
+      "from": "REPORTADO",
+      "to": "CERRADO_SIN_CASO",
+      "forbidden": "Cerrar sin triage/clasificación mínima",
+      "instead": "Debe existir decisión Habilita.",
+      "severity": "CRÍTICA",
+      "source_row": 23
+    },
+    {
+      "id": "TPR-020",
+      "machine": "EventoHabilita",
+      "from": "ESCALADO_A_CASO",
+      "to": "CERRADO_SIN_CASO",
+      "forbidden": "Cerrar evento ignorando Caso abierto",
+      "instead": "Caso debe resolverse en su máquina.",
+      "severity": "CRÍTICA",
+      "source_row": 24
+    },
+    {
+      "id": "TPR-021",
+      "machine": "EventoHabilita",
+      "from": "DESCARTADO",
+      "to": "ESCALADO_A_CASO",
+      "forbidden": "Reusar evento descartado",
+      "instead": "Reactivar mediante revisión explícita o crear evento válido.",
+      "severity": "CRÍTICA",
+      "source_row": 25
+    },
+    {
+      "id": "TPR-022",
+      "machine": "CasoHabilita",
+      "from": "ABIERTO",
+      "to": "CERRADO",
+      "forbidden": "Cerrar sin investigación/decisión de triage suficiente",
+      "instead": "Debe pasar por gates definidos.",
+      "severity": "CRÍTICA",
+      "source_row": 26
+    },
+    {
+      "id": "TPR-023",
+      "machine": "CasoHabilita",
+      "from": "EN_INVESTIGACION",
+      "to": "CERRADO",
+      "forbidden": "Cerrar con investigación abierta",
+      "instead": "Finalizar investigación primero.",
+      "severity": "CRÍTICA",
+      "source_row": 27
+    },
+    {
+      "id": "TPR-024",
+      "machine": "CasoHabilita",
+      "from": "SEGUIMIENTO_ACCIONES",
+      "to": "CERRADO",
+      "forbidden": "Cerrar con acciones bloqueantes no verificadas",
+      "instead": "Solo si configuración marca acciones como no bloqueantes.",
+      "severity": "CRÍTICA",
+      "source_row": 28
+    },
+    {
+      "id": "TPR-025",
+      "machine": "UnidadComercial",
+      "from": "ACEPTADA",
+      "to": "ELEGIBLE",
+      "forbidden": "Editar/reabrir misma UC aceptada por cambio en campo",
+      "instead": "Usar supersession: nueva UC/version; anterior permanece.",
+      "severity": "CRÍTICA",
+      "source_row": 29
+    },
+    {
+      "id": "TPR-026",
+      "machine": "UnidadComercial",
+      "from": "RECHAZADA",
+      "to": "ACEPTADA",
+      "forbidden": "Cambiar rechazo a aceptación sin nueva revisión/version",
+      "instead": "Nueva versión/revisión explícita.",
+      "severity": "CRÍTICA",
+      "source_row": 30
+    },
+    {
+      "id": "TPR-027",
+      "machine": "UnidadComercial",
+      "from": "INCOMPLETA",
+      "to": "ACEPTADA",
+      "forbidden": "Aceptar saltando elegibilidad/revisión",
+      "instead": "Debe satisfacer gates.",
+      "severity": "CRÍTICA",
+      "source_row": 31
+    },
+    {
+      "id": "TPR-028",
+      "machine": "PaqueteCertificacion",
+      "from": "ACEPTADO",
+      "to": "BORRADOR",
+      "forbidden": "Editar paquete aceptado",
+      "instead": "Crear nueva versión/ajuste.",
+      "severity": "CRÍTICA",
+      "source_row": 32
+    },
+    {
+      "id": "TPR-029",
+      "machine": "PaqueteCertificacion",
+      "from": "EN_REVISION",
+      "to": "ACEPTADO_PARCIAL",
+      "forbidden": "Aceptar parcial si regla lo prohíbe",
+      "instead": "Debe respetar ReglaParcialidad.",
+      "severity": "CRÍTICA",
+      "source_row": 33
+    },
+    {
+      "id": "TPR-030",
+      "machine": "PaqueteCertificacion",
+      "from": "ENVIADO",
+      "to": "BORRADOR",
+      "forbidden": "Volver atrás borrando envío",
+      "instead": "Crear versión nueva o registrar observación.",
+      "severity": "CRÍTICA",
+      "source_row": 34
+    },
+    {
+      "id": "TPR-031",
+      "machine": "LoteFacturacion",
+      "from": "ACEPTADO_ERP",
+      "to": "BORRADOR",
+      "forbidden": "Editar/reusar lote aceptado",
+      "instead": "Crear ajuste/reversión mediante proceso administrativo externo.",
+      "severity": "CRÍTICA",
+      "source_row": 35
+    },
+    {
+      "id": "TPR-032",
+      "machine": "LoteFacturacion",
+      "from": "ENVIADO_ERP",
+      "to": "CANCELADO",
+      "forbidden": "Cancelar unilateralmente después de aceptación potencial",
+      "instead": "Esperar respuesta/usar operación compensatoria.",
+      "severity": "CRÍTICA",
+      "source_row": 36
+    },
+    {
+      "id": "TPR-033",
+      "machine": "LoteFacturacion",
+      "from": "BORRADOR",
+      "to": "ACEPTADO_ERP",
+      "forbidden": "Saltar validación/envío",
+      "instead": "Debe cruzar boundary explícitamente.",
+      "severity": "CRÍTICA",
+      "source_row": 37
+    }
+  ]
+}

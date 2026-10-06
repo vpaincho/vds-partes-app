@@ -1,0 +1,192 @@
+/*
+ * DS-01 tokens — GENERATED from packages/ui/src/tokens.ts by scripts/gen-tokens.mjs.
+ * Do not edit by hand: the contrast and ΔE tests run against the TypeScript source, so an
+ * edit here would ship values that nothing verifies. Run `npm run gen:tokens`.
+ *
+ * Components reference these variables and never a literal colour.
+ */
+
+:root {
+  color-scheme: light;
+  /* semantic */
+  --vds-brand: #C21F35;
+  --vds-action: #15608F;
+  --vds-critical: #C21F35;
+  --vds-warn: #A05F00;
+  --vds-ok: #1C7A52;
+  --vds-pending: #5E5E5E;
+  /* domain */
+  --vds-domain-plan: #365DB8;
+  --vds-domain-exec: #037E3F;
+  --vds-domain-review: #7B41A1;
+  --vds-domain-commercial: #118A95;
+  --vds-domain-habilita: #AF4803;
+  --vds-domain-delivery: #404952;
+  /* surface */
+  --vds-surface-canvas: #E9EDF1;
+  --vds-surface-surface: #F4F6F8;
+  --vds-surface-panel: #FFFFFF;
+  --vds-surface-raised: #FFFFFF;
+  --vds-surface-border: #D8DEE5;
+  --vds-surface-border-strong: #BCC6D0;
+  /* ink */
+  --vds-ink: #0E1620;
+  --vds-muted: #4D5B6A;
+  --vds-faint: #6B7A8A;
+  --vds-on-accent: #FFFFFF;
+
+  /* type */
+  --vds-font-body: 'Barlow', 'Segoe UI', Roboto, Arial, sans-serif;
+  --vds-font-display: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+  --vds-font-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  --vds-text-xs: 12px;
+  --vds-text-sm: 13px;
+  --vds-text-md: 14px;
+  --vds-text-lg: 16px;
+  --vds-text-xl: 20px;
+  --vds-text-2xl: 24px;
+  --vds-text-3xl: 32px;
+  /* space */
+  --vds-space-0: 0;
+  --vds-space-1: 2px;
+  --vds-space-2: 4px;
+  --vds-space-3: 8px;
+  --vds-space-4: 12px;
+  --vds-space-5: 16px;
+  --vds-space-6: 24px;
+  --vds-space-7: 32px;
+  --vds-space-8: 48px;
+  /* radius */
+  --vds-radius-sm: 3px;
+  --vds-radius-md: 5px;
+  --vds-radius-lg: 8px;
+  --vds-radius-pill: 999px;
+}
+
+/* Dark by system preference, unless an explicit light theme is set. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    /* semantic */
+    --vds-brand: #E8495F;
+    --vds-action: #58A6DC;
+    --vds-critical: #F2586C;
+    --vds-warn: #E09B3D;
+    --vds-ok: #3DB184;
+    --vds-pending: #9B9B9B;
+    /* domain */
+    --vds-domain-plan: #89B0FF;
+    --vds-domain-exec: #69D98D;
+    --vds-domain-review: #C88EF1;
+    --vds-domain-commercial: #55E1F0;
+    --vds-domain-habilita: #FF9A6B;
+    --vds-domain-delivery: #89939E;
+    /* surface */
+    --vds-surface-canvas: #0F1620;
+    --vds-surface-surface: #151E2A;
+    --vds-surface-panel: #1C2733;
+    --vds-surface-raised: #243140;
+    --vds-surface-border: #2C3A49;
+    --vds-surface-border-strong: #3C4C5C;
+    /* ink */
+    --vds-ink: #E6ECF2;
+    --vds-muted: #9BA8B5;
+    --vds-faint: #74828F;
+    --vds-on-accent: #0F1620;
+  }
+}
+
+/* Dark by explicit choice. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  /* semantic */
+  --vds-brand: #E8495F;
+  --vds-action: #58A6DC;
+  --vds-critical: #F2586C;
+  --vds-warn: #E09B3D;
+  --vds-ok: #3DB184;
+  --vds-pending: #9B9B9B;
+  /* domain */
+  --vds-domain-plan: #89B0FF;
+  --vds-domain-exec: #69D98D;
+  --vds-domain-review: #C88EF1;
+  --vds-domain-commercial: #55E1F0;
+  --vds-domain-habilita: #FF9A6B;
+  --vds-domain-delivery: #89939E;
+  /* surface */
+  --vds-surface-canvas: #0F1620;
+  --vds-surface-surface: #151E2A;
+  --vds-surface-panel: #1C2733;
+  --vds-surface-raised: #243140;
+  --vds-surface-border: #2C3A49;
+  --vds-surface-border-strong: #3C4C5C;
+  /* ink */
+  --vds-ink: #E6ECF2;
+  --vds-muted: #9BA8B5;
+  --vds-faint: #74828F;
+  --vds-on-accent: #0F1620;
+}
+
+/*
+ * Density. Set data-density on a container; it is inherited.
+ * Field never inherits analysis: the prototype scaled a 1366x1024 frame to fit, which made
+ * controls physically small on a tablet. That is a finding to fix, not to reproduce.
+ */
+/* field — Mi Jornada, Trabajo activo, Flash Report, Start Work */
+[data-density='field'] {
+  --vds-row-height: 56px;
+  --vds-touch-target: 44px;
+  --vds-body-size: 16px;
+  --vds-line-height: 1.45;
+  --vds-gutter: 16px;
+}
+
+/* operations — Planning, inboxes, Habilita matrix, configuration */
+[data-density='operations'] {
+  --vds-row-height: 38px;
+  --vds-touch-target: 32px;
+  --vds-body-size: 14px;
+  --vds-line-height: 1.4;
+  --vds-gutter: 12px;
+}
+
+/* analysis — dashboards, trace, lineage, coverage */
+[data-density='analysis'] {
+  --vds-row-height: 30px;
+  --vds-touch-target: 28px;
+  --vds-body-size: 13px;
+  --vds-line-height: 1.35;
+  --vds-gutter: 8px;
+}
+
+body {
+  background: var(--vds-surface-canvas);
+  color: var(--vds-ink);
+  font-family: var(--vds-font-body);
+  font-size: var(--vds-body-size, var(--vds-text-md));
+  line-height: var(--vds-line-height, 1.4);
+}
+
+/* IDs, timestamps, quantities, versions: monospace with tabular figures so a column of
+   PD-0394 / 07:20 / 1 200 m² lines up and can be scanned for difference. */
+.vds-numeric {
+  font-family: var(--vds-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus must be visible on every interactive element: the prototype had this and it is kept. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--vds-action);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,4 +1,26 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+*.tsbuildinfo
+.vite/
+coverage/
+
+# local env — never commit credentials; .env.example is the versioned contract
+.env
+.env.*
+!.env.example
+
+# test artefacts
+playwright-report/
+test-results/
+tests/visual/__screenshots__/*.actual.png
+
+# local data volumes (docker compose)
+.data/
+
+# platform
 .vercel
 .DS_Store
 Thumbs.db
-node_modules/
