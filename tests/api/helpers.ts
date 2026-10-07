@@ -161,6 +161,10 @@ export function nextInstant(): string {
   return new Date(Date.now() + clockOffsetMs).toISOString().replace(/\.\d+Z$/, 'Z');
 }
 
+/** An instant N hours from now, in the Instant format the envelope expects. */
+export const hoursFromNow = (hours: number): string =>
+  new Date(Date.now() + hours * 3_600_000).toISOString().replace(/\.\d+Z$/, 'Z');
+
 /** The standard command envelope, with a fresh command id unless one is supplied. */
 export function envelope(input: {
   commandId?: string;
@@ -208,7 +212,16 @@ export interface Scenario {
  * block; with a permit activated only later, it must still block for the earlier instant.
  */
 export async function makeScenario(
-  options: { requiresWorkPermit?: boolean; expectedPartType?: 'TP-01' | 'TP-02' | 'TP-03' } = {},
+  options: {
+    requiresWorkPermit?: boolean;
+    expectedPartType?: 'TP-01' | 'TP-02' | 'TP-03';
+    /**
+     * The approved window. Set it here, never with a later UPDATE: an assignment under an APROBADA
+     * version has an immutable scope (R-022), so the trigger refuses to move it afterwards.
+     */
+    windowStart?: Date;
+    windowEnd?: Date;
+  } = {},
 ): Promise<Scenario> {
   const suffix = token(8);
   const clientId = uuid();
@@ -282,9 +295,19 @@ export async function makeScenario(
     `INSERT INTO planning.planned_assignments
        (id, plan_version_id, state, window_start, window_end, operational_date,
         expected_part_type_id, crew_id, requires_work_permit, dispatched_at)
-     VALUES ($1, $2, 'DESPACHADA', now() - interval '2 hours', now() + interval '8 hours',
+     VALUES ($1, $2, 'DESPACHADA',
+             coalesce($6::timestamptz, now() - interval '2 hours'),
+             coalesce($7::timestamptz, now() + interval '8 hours'),
              current_date, $3, $4, $5, now() - interval '3 hours')`,
-    [assignmentId, planVersionId, partTypeId, crewId, options.requiresWorkPermit ?? false],
+    [
+      assignmentId,
+      planVersionId,
+      partTypeId,
+      crewId,
+      options.requiresWorkPermit ?? false,
+      options.windowStart ?? null,
+      options.windowEnd ?? null,
+    ],
   );
   await sql(
     `INSERT INTO planning.planned_units
@@ -307,6 +330,26 @@ export async function makeScenario(
     crewId,
     personId,
   };
+}
+
+/**
+ * A second scenario whose approved window starts where another one's ends.
+ *
+ * For overlap tests: an extension of the first assignment runs into the second one's window. Built
+ * at insert time because the scope of an approved assignment cannot be moved afterwards.
+ */
+export async function makeAdjacentScenario(
+  after: Scenario,
+  options: { days?: number } = {},
+): Promise<Scenario> {
+  const [anchor] = await sql<{ window_end: Date }>(
+    'SELECT window_end FROM planning.planned_assignments WHERE id = $1',
+    [after.assignmentId],
+  );
+  if (!anchor) throw new Error(`no assignment ${after.assignmentId}`);
+  const start = anchor.window_end;
+  const end = new Date(start.getTime() + (options.days ?? 3) * 86_400_000);
+  return makeScenario({ windowStart: start, windowEnd: end });
 }
 
 /** Prepare a Parte and create one UE through the API, returning both ids. */
