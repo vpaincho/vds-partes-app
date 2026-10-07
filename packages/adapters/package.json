@@ -1,0 +1,10 @@
+{
+  "name": "@vds/adapters",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Typed ports and their fixture implementations. Real providers arrive in W7 behind the same contracts.",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": { "@vds/kernel": "*" },
+  "scripts": { "test": "vitest run" }
+}
