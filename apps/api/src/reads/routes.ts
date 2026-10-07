@@ -245,63 +245,6 @@ export async function registerReadRoutes(app: FastifyInstance): Promise<void> {
       return sendReadError(reply, request, error);
     }
   });
-
-  /**
-   * Planning timeline — the single projection the Gantt, resource and month views all read (07:
-   * "Gantt, recurso y mes leen la misma projection y cambian período explícito").
-   */
-  app.get('/planning/timeline', async (request, reply) => {
-    const actor = request.actor;
-    if (!actor) return reply.code(401).send({ error: unauthenticated().toJSON().error, meta: meta(request) });
-
-    try {
-      const query = request.query as { from?: string; to?: string };
-      // Scope from grants, not from the query string.
-      const contractIds = readableContractIds(actor, 'planning.read');
-
-      const data = await withConnection(async (db) => {
-        const { rows } = await db.query(
-          `SELECT a.id, a.code, a.state::text AS state, a.window_start, a.window_end,
-                  a.operational_date::text AS operational_date, a.priority,
-                  a.requires_work_permit, a.dispatched_at,
-                  pt.code AS expected_part_type,
-                  cr.name AS crew_name, r.code AS resource_code,
-                  pv.version_no, pv.state::text AS plan_version_state,
-                  -- Current readiness, which is temporal and can be invalidated (C-015).
-                  re.result AS readiness, re.evaluated_at AS readiness_at, re.valid_until AS readiness_until
-           FROM planning.planned_assignments a
-           JOIN planning.plan_versions pv ON pv.id = a.plan_version_id
-           LEFT JOIN config.part_types pt ON pt.id = a.expected_part_type_id
-           LEFT JOIN config.crews cr ON cr.id = a.crew_id
-           LEFT JOIN config.resources r ON r.id = a.resource_id
-           LEFT JOIN LATERAL (
-             SELECT result, evaluated_at, valid_until
-             FROM planning.readiness_evaluations
-             WHERE planned_assignment_id = a.id AND invalidated_at IS NULL
-             ORDER BY evaluated_at DESC LIMIT 1
-           ) re ON true
-           WHERE ($1::timestamptz IS NULL OR a.window_end >= $1::timestamptz)
-             AND ($2::timestamptz IS NULL OR a.window_start <= $2::timestamptz)
-           ORDER BY a.window_start
-           LIMIT 500`,
-          [query.from ?? null, query.to ?? null],
-        );
-        void contractIds;
-        return rows;
-      });
-
-      return {
-        data,
-        meta: {
-          ...meta(request),
-          asOf: instantNow(),
-          source: 'planning.planned_assignments + readiness_evaluations',
-        },
-      };
-    } catch (error) {
-      return sendReadError(reply, request, error);
-    }
-  });
 }
 
 function sendReadError(reply: FastifyReply, request: FastifyRequest, error: unknown) {
