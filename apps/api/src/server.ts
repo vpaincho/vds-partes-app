@@ -24,7 +24,11 @@ import { closeDb, initDb, withConnection } from './platform/db.ts';
 import { resolveActor, touchSession, unauthenticated, type AuthenticatedActor } from './platform/authz.ts';
 import { execute, registeredCommands } from './platform/pipeline.ts';
 import { registerExecutionCommands } from './commands/execution.ts';
+import { registerPlanningCommands } from './commands/planning.ts';
+import { registerControlCommands } from './commands/control.ts';
+import { registerHabilitaCommands } from './commands/habilita.ts';
 import { registerReadRoutes } from './reads/routes.ts';
+import { registerPlanningReadRoutes } from './reads/planning.ts';
 
 export interface ServerOptions {
   readonly databaseUrl: string;
@@ -45,6 +49,49 @@ declare module 'fastify' {
  * saying how its subject is addressed.
  */
 const SUBJECT_ROUTES: Record<string, { path: string; idParam?: string }> = {
+  // planning
+  'planning.versions.approve': {
+    path: '/planning/versions/:planVersionId/approve',
+    idParam: 'planVersionId',
+  },
+  'planning.assignments.evaluate-readiness': {
+    path: '/planning/assignments/:assignmentId/evaluate-readiness',
+    idParam: 'assignmentId',
+  },
+  'planning.assignments.dispatch': {
+    path: '/planning/assignments/:assignmentId/dispatch',
+    idParam: 'assignmentId',
+  },
+  'planning.assignments.nominate': {
+    path: '/planning/assignments/:assignmentId/nominate',
+    idParam: 'assignmentId',
+  },
+  'planning.assignments.request-extension': {
+    path: '/planning/assignments/:assignmentId/request-extension',
+    idParam: 'assignmentId',
+  },
+  'planning.assignments.resolve-extension': {
+    path: '/planning/assignments/:assignmentId/resolve-extension',
+    idParam: 'assignmentId',
+  },
+  'planning.assignments.mark-not-performed': {
+    path: '/planning/assignments/:assignmentId/mark-not-performed',
+    idParam: 'assignmentId',
+  },
+  // control plane
+  'control.directives.emit': { path: '/control/directives/emit' },
+  'control.directives.ack': { path: '/control/directives/:directiveId/ack', idParam: 'directiveId' },
+  'control.directives.apply': { path: '/control/directives/:directiveId/apply', idParam: 'directiveId' },
+  'control.directives.reject': { path: '/control/directives/:directiveId/reject', idParam: 'directiveId' },
+  // habilita
+  'habilita.permits.create': { path: '/habilita/permits' },
+  'habilita.permits.submit': { path: '/habilita/permits/:permitId/submit', idParam: 'permitId' },
+  'habilita.permits.approve': { path: '/habilita/permits/:permitId/approve', idParam: 'permitId' },
+  'habilita.permits.activate': { path: '/habilita/permits/:permitId/activate', idParam: 'permitId' },
+  'habilita.permits.suspend': { path: '/habilita/permits/:permitId/suspend', idParam: 'permitId' },
+  'habilita.permits.close': { path: '/habilita/permits/:permitId/close', idParam: 'permitId' },
+  'habilita.events.flash-report': { path: '/habilita/events/flash-report' },
+  // execution
   'execution.parts.prepare': { path: '/execution/parts/prepare' },
   'execution.units.create': { path: '/execution/units' },
   'execution.units.start': { path: '/execution/units/:executionUnitId/start', idParam: 'executionUnitId' },
@@ -55,6 +102,9 @@ const SUBJECT_ROUTES: Record<string, { path: string; idParam?: string }> = {
 export async function buildServer(options: ServerOptions): Promise<FastifyInstance> {
   initDb({ connectionString: options.databaseUrl });
   registerExecutionCommands();
+  registerPlanningCommands();
+  registerControlCommands();
+  registerHabilitaCommands();
 
   const app = Fastify({
     logger: options.logger ?? false,
@@ -190,6 +240,7 @@ export async function buildServer(options: ServerOptions): Promise<FastifyInstan
   }
 
   await registerReadRoutes(app);
+  await registerPlanningReadRoutes(app);
 
   app.setNotFoundHandler(async (request, reply) =>
     sendError(

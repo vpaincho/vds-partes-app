@@ -199,6 +199,28 @@ export function readableContractIds(
   return [...new Set(grants.map((g) => g.contractId as Uuid))];
 }
 
+/**
+ * Contract scope for a read that several capabilities can legitimately open.
+ *
+ * The directive inbox is the case this exists for: a planner reaches it through `control.emit` and a
+ * crew through `control.apply`, and inventing a `control.read` capability nobody is granted would
+ * lock both out. The scope is still the union of the matching grants — widening *who* may read does
+ * not widen *what* they may read.
+ */
+export function readableContractIdsAny(
+  actor: AuthenticatedActor,
+  capabilities: readonly string[],
+): readonly Uuid[] | null {
+  const grants = actor.grants.filter((g) => capabilities.some((c) => g.capabilities.includes(c)));
+  if (grants.length === 0) {
+    throw forbiddenScope(`leer con ${capabilities.join(' | ')}`, {
+      message: `La identidad no tiene ninguna de las capabilities ${capabilities.join(', ')}.`,
+    });
+  }
+  if (grants.some((g) => g.contractId === null)) return null;
+  return [...new Set(grants.map((g) => g.contractId as Uuid))];
+}
+
 export const unauthenticated = (): DomainError =>
   new DomainError({
     code: 'UNAUTHENTICATED',
