@@ -14,7 +14,7 @@
     "packages/domain/*"
   ],
   "scripts": {
-    "verify": "npm run verify:sources && npm run gen:check && npm run arch:check && npm run typecheck && npm test",
+    "verify": "npm run verify:sources && npm run gen:check && npm run arch:check && npm run typecheck && npm test && npm run test:db",
     "verify:baseline": "node scripts/verify-baseline.mjs",
     "verify:sources": "node scripts/verify-baseline.mjs --all",
     "gen": "npm run gen:state-machines && npm run gen:rules && npm run gen:tokens",
@@ -27,10 +27,16 @@
     "legacy": "node scripts/serve-legacy.mjs",
     "db:up": "docker compose -f docker-compose.dev.yml up -d",
     "db:down": "docker compose -f docker-compose.dev.yml down",
-    "gen:rules": "node scripts/gen-rules.mjs"
+    "gen:rules": "node scripts/gen-rules.mjs",
+    "db:migrate": "node scripts/migrate.mjs",
+    "db:status": "node scripts/migrate.mjs --status",
+    "db:reset": "node scripts/migrate.mjs --reset",
+    "test:db": "vitest run --config vitest.db.config.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",
+    "@types/pg": "^8.23.1",
+    "pg": "^8.23.1",
     "typescript": "7.0.2",
     "vitest": "5.0.3"
   }

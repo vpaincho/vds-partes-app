@@ -1,0 +1,9 @@
+{
+  "name": "@vds/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Migrations, seed and the migration runner. Forward-only, reviewable SQL.",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": { "pg": "8.23.1" }
+}

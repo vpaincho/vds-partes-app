@@ -23,9 +23,12 @@ services:
       - -c
       - log_statement=none
     ports:
-      - '5433:5432'
+      - '5434:5432'   # 5433 is taken by an unrelated project's postgres on this machine
     volumes:
-      - ./.data/postgres:/var/lib/postgresql/data
+      # PostgreSQL 18+ expects a single mount at /var/lib/postgresql, with the cluster in a
+      # major-version subdirectory, so that pg_upgrade --link works without crossing a mount
+      # boundary. Mounting /var/lib/postgresql/data directly makes the 18 image refuse to start.
+      - ./.data/postgres:/var/lib/postgresql
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U vds -d vds_partes']
       interval: 5s
@@ -35,7 +38,7 @@ services:
   # Evidence (photos, signatures, documents) must live outside business rows, with hash
   # and metadata in PostgreSQL. MinIO stands in for the eventual provider behind FilesPort.
   storage:
-    image: minio/minio:latest
+    image: quay.io/minio/minio:latest
     container_name: vds-storage
     command: server /data --console-address ":9011"
     environment:
