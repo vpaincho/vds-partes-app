@@ -156,12 +156,106 @@ export const EvaluateReadinessPayload = Type.Object(
   { additionalProperties: false },
 );
 
+/**
+ * An extension request over an existing assignment.
+ *
+ * This is the PL-093 shape. The payload names the assignment being extended, which is what lets
+ * conflict detection exclude it from its own comparison — the prototype evaluated a *copy* of the
+ * job and excluded by object reference, so the copy collided with the original (RGT-01).
+ */
+export const RequestExtensionPayload = Type.Object(
+  {
+    additionalDays: Type.Integer({ minimum: 1, maximum: 30 }),
+    reason: Type.String({ minLength: 3 }),
+  },
+  { additionalProperties: false },
+);
+
+export const ResolveExtensionPayload = Type.Object(
+  {
+    decision: Type.Union([Type.Literal('APROBAR'), Type.Literal('RECHAZAR')]),
+    note: Type.Optional(Type.String()),
+  },
+  { additionalProperties: false },
+);
+
+export const NominatePayload = Type.Object(
+  {
+    personIds: Type.Optional(Type.Array(UuidSchema)),
+    resourceIds: Type.Optional(Type.Array(UuidSchema)),
+    role: Type.Optional(Type.String()),
+  },
+  { additionalProperties: false },
+);
+
+export const MarkNotPerformedPayload = Type.Object(
+  {
+    // RUL-019: what was planned and not done is never deleted; it is explained.
+    reason: Type.String({ minLength: 3 }),
+  },
+  { additionalProperties: false },
+);
+
 export const DispatchPayload = Type.Object(
   {
     deviceId: Type.Optional(UuidSchema),
     identityId: Type.Optional(UuidSchema),
     bundleTtlMinutes: Type.Optional(Type.Integer({ minimum: 1 })),
   },
+  { additionalProperties: false },
+);
+
+/* ------------------------------------------------------------------------ control */
+
+export const EmitDirectivePayload = Type.Object(
+  {
+    directiveType: Type.Union([
+      Type.Literal('CANCELAR'),
+      Type.Literal('SUSPENDER'),
+      Type.Literal('REPROGRAMAR'),
+      Type.Literal('REPRIORIZAR'),
+      Type.Literal('CAMBIO_ALCANCE'),
+    ]),
+    reason: Type.String({ minLength: 5 }),
+    validUntil: Type.Optional(InstantSchema),
+    targets: Type.Array(
+      Type.Object(
+        {
+          targetKind: Type.Union([
+            Type.Literal('PLANNED_ASSIGNMENT'),
+            Type.Literal('PLANNED_UNIT'),
+            Type.Literal('PLAN'),
+            Type.Literal('PART'),
+            Type.Literal('EXECUTION_UNIT'),
+            Type.Literal('WORK_PERMIT'),
+          ]),
+          targetId: UuidSchema,
+        },
+        { additionalProperties: false },
+      ),
+      { minItems: 1 },
+    ),
+  },
+  { additionalProperties: false },
+);
+
+export const ApplyDirectivePayload = Type.Object(
+  {
+    // RUL-057: application must be auditable, so the effect is referenced, never assumed.
+    effectRef: Type.Object(
+      {
+        kind: Type.String({ minLength: 1 }),
+        id: Type.Optional(UuidSchema),
+        note: Type.Optional(Type.String()),
+      },
+      { additionalProperties: false },
+    ),
+  },
+  { additionalProperties: false },
+);
+
+export const RejectDirectivePayload = Type.Object(
+  { reason: Type.String({ minLength: 5 }) },
   { additionalProperties: false },
 );
 
@@ -181,6 +275,39 @@ export const FlashReportPayload = Type.Object(
     personIds: Type.Optional(Type.Array(UuidSchema)),
     resourceIds: Type.Optional(Type.Array(UuidSchema)),
     evidenceIds: Type.Optional(Type.Array(UuidSchema)),
+  },
+  { additionalProperties: false },
+);
+
+export const CreatePermitPayload = Type.Object(
+  {
+    permitType: Type.String({ minLength: 1 }),
+    scopeDescription: Type.String({ minLength: 5 }),
+    technicalLocationId: Type.Optional(UuidSchema),
+    clientId: Type.Optional(UuidSchema),
+    executionUnitIds: Type.Optional(Type.Array(UuidSchema)),
+  },
+  { additionalProperties: false },
+);
+
+export const ApprovePermitPayload = Type.Object(
+  {
+    externalAuthority: Type.Optional(Type.String()),
+    note: Type.Optional(Type.String()),
+  },
+  { additionalProperties: false },
+);
+
+export const SuspendPermitPayload = Type.Object(
+  { reason: Type.String({ minLength: 5 }) },
+  { additionalProperties: false },
+);
+
+export const ClosePermitPayload = Type.Object(
+  {
+    // RUL-046: closure needs the authority the policy requires. A VENCIDO permit cannot be closed
+    // this way at all — that needs an authorised administrative closure (sheet 51 row 34).
+    note: Type.Optional(Type.String()),
   },
   { additionalProperties: false },
 );
@@ -227,6 +354,94 @@ export const COMMANDS: readonly CommandDefinition[] = [
     payload: DispatchPayload,
     previewable: true,
     description: 'RUL-016/017. Builds the context bundle. DESPACHADA is not EN_EJECUCION.',
+  },
+
+  {
+    name: 'planning.assignments.request-extension',
+    module: 'planning',
+    capability: 'execution.capture',
+    trigger: 'POST_DISPATCH_CHANGE',
+    subjectKind: 'AsignacionPlanificada',
+    payload: RequestExtensionPayload,
+    previewable: true,
+    description:
+      'Pedido de mas dias desde campo. PL-093 / RGT-01: evaluar la extension no debe hacer que la ' +
+      'asignacion choque consigo misma.',
+  },
+  {
+    name: 'planning.assignments.resolve-extension',
+    module: 'planning',
+    capability: 'planning.result',
+    trigger: 'POST_DISPATCH_CHANGE',
+    subjectKind: 'AsignacionPlanificada',
+    payload: ResolveExtensionPayload,
+    previewable: true,
+    description:
+      'RUL-020: el cambio post-despacho produce una version nueva o una directiva; nunca muta el ' +
+      'snapshot aprobado (RGT-03).',
+  },
+  {
+    name: 'planning.assignments.nominate',
+    module: 'planning',
+    capability: 'planning.nominate',
+    trigger: 'NOMINATE',
+    subjectKind: 'AsignacionPlanificada',
+    payload: NominatePayload,
+    previewable: true,
+    description:
+      'RUL-012 hard gate: no se nomina un sujeto inelegible, y un solapamiento se evalua por regla.',
+  },
+  {
+    name: 'planning.assignments.mark-not-performed',
+    module: 'planning',
+    capability: 'planning.result',
+    trigger: 'WINDOW_CLOSED_NO_EXECUTION',
+    subjectKind: 'AsignacionPlanificada',
+    payload: MarkNotPerformedPayload,
+    previewable: false,
+    description: 'RUL-019: preserva el desvio previsto vs real con causa estructurada.',
+  },
+
+  // --- control plane
+  {
+    name: 'control.directives.emit',
+    module: 'control',
+    capability: 'control.emit',
+    trigger: 'POST_DISPATCH_COMMAND',
+    subjectKind: 'DirectivaOperativa',
+    payload: EmitDirectivePayload,
+    previewable: false,
+    description: 'RUL-054: publica el hecho con target y motivo. Emitir no es aplicar (C-017).',
+  },
+  {
+    name: 'control.directives.ack',
+    module: 'control',
+    capability: 'control.apply',
+    trigger: 'ACK',
+    subjectKind: 'DirectivaOperativa',
+    payload: empty,
+    previewable: false,
+    description: 'RUL-056: ACK semantico. No significa aplicada.',
+  },
+  {
+    name: 'control.directives.apply',
+    module: 'control',
+    capability: 'control.apply',
+    trigger: 'EFFECT_EXECUTED',
+    subjectKind: 'DirectivaOperativa',
+    payload: ApplyDirectivePayload,
+    previewable: true,
+    description: 'RUL-057: exige evidencia del efecto y los gates del target (TPR-016).',
+  },
+  {
+    name: 'control.directives.reject',
+    module: 'control',
+    capability: 'control.apply',
+    trigger: 'EFFECT_EXECUTED',
+    subjectKind: 'DirectivaOperativa',
+    payload: RejectDirectivePayload,
+    previewable: false,
+    description: 'T-D05: cierra el lifecycle sin aplicacion, con causa estructurada.',
   },
 
   // --- execution
@@ -335,6 +550,56 @@ export const COMMANDS: readonly CommandDefinition[] = [
     description: 'RUL-047. Minimum input, context auto-derived, may be standalone (GS-033).',
   },
   {
+    name: 'habilita.permits.create',
+    module: 'habilita',
+    capability: 'habilita.permit.manage',
+    trigger: 'CREAR',
+    subjectKind: 'PermisoTrabajo',
+    payload: CreatePermitPayload,
+    previewable: false,
+    description: 'T-PTW01. El PTW es una autorizacion formal independiente del Parte (C-019).',
+  },
+  {
+    name: 'habilita.permits.submit',
+    module: 'habilita',
+    capability: 'habilita.permit.manage',
+    trigger: 'ENVIAR_APROBACION',
+    subjectKind: 'PermisoTrabajo',
+    payload: empty,
+    previewable: false,
+    description: 'T-PTW02: solicita aprobacion con los campos minimos completos.',
+  },
+  {
+    name: 'habilita.permits.approve',
+    module: 'habilita',
+    capability: 'habilita.permit.approve',
+    trigger: 'APROBAR',
+    subjectKind: 'PermisoTrabajo',
+    payload: ApprovePermitPayload,
+    previewable: true,
+    description: 'T-PTW03. Aprobado NO es vigente: activar es un acto autorizado aparte (RUL-043).',
+  },
+  {
+    name: 'habilita.permits.suspend',
+    module: 'habilita',
+    capability: 'habilita.permit.activate',
+    trigger: 'CONDITION_CHANGED',
+    subjectKind: 'PermisoTrabajo',
+    payload: SuspendPermitPayload,
+    previewable: false,
+    description: 'RUL-044: retira cobertura y bloquea el trabajo cubierto. No cierra el permiso.',
+  },
+  {
+    name: 'habilita.permits.close',
+    module: 'habilita',
+    capability: 'habilita.permit.activate',
+    trigger: 'CLOSE',
+    subjectKind: 'PermisoTrabajo',
+    payload: ClosePermitPayload,
+    previewable: true,
+    description: 'RUL-046 hard gate. Un permiso VENCIDO no se cierra por aca (TPR-013).',
+  },
+  {
     name: 'habilita.permits.activate',
     module: 'habilita',
     capability: 'habilita.permit.activate',
@@ -376,3 +641,16 @@ export type CaptureMeasurementInput = Static<typeof CaptureMeasurementPayload>;
 export type CreateAmendmentInput = Static<typeof CreateAmendmentPayload>;
 export type ActivatePermitInput = Static<typeof ActivatePermitPayload>;
 export type DispatchInput = Static<typeof DispatchPayload>;
+export type ApprovePlanVersionInput = Static<typeof ApprovePlanVersionPayload>;
+export type EvaluateReadinessInput = Static<typeof EvaluateReadinessPayload>;
+export type RequestExtensionInput = Static<typeof RequestExtensionPayload>;
+export type ResolveExtensionInput = Static<typeof ResolveExtensionPayload>;
+export type NominateInput = Static<typeof NominatePayload>;
+export type MarkNotPerformedInput = Static<typeof MarkNotPerformedPayload>;
+export type EmitDirectiveInput = Static<typeof EmitDirectivePayload>;
+export type ApplyDirectiveInput = Static<typeof ApplyDirectivePayload>;
+export type RejectDirectiveInput = Static<typeof RejectDirectivePayload>;
+export type CreatePermitInput = Static<typeof CreatePermitPayload>;
+export type ApprovePermitInput = Static<typeof ApprovePermitPayload>;
+export type SuspendPermitInput = Static<typeof SuspendPermitPayload>;
+export type ClosePermitInput = Static<typeof ClosePermitPayload>;
