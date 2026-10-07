@@ -228,12 +228,30 @@ export interface TimelineRow {
   readonly window_start: string;
   readonly window_end: string;
   readonly operational_date: string;
+  readonly shift_id: string | null;
   readonly priority: string;
   readonly requires_work_permit: boolean;
+  readonly dispatched_at: string | null;
+  readonly not_performed_reason: string | null;
+  readonly version: number;
   readonly expected_part_type: string | null;
+  readonly crew_id: string | null;
   readonly crew_name: string | null;
+  readonly resource_id: string | null;
+  readonly resource_code: string | null;
+  readonly resource_name: string | null;
+  readonly plan_id: string;
+  readonly plan_name: string | null;
+  readonly plan_version_id: string;
+  readonly version_no: number;
+  readonly plan_version_state: string;
   readonly readiness: string | null;
+  readonly readiness_at: string | null;
   readonly readiness_until: string | null;
+  readonly readiness_cause_count: number;
+  readonly directives_open: string;
+  readonly extension_pending: string;
+  readonly linked_parts: string;
 }
 
 export const fetchTimeline = (from?: string, to?: string) => {
@@ -242,6 +260,171 @@ export const fetchTimeline = (from?: string, to?: string) => {
   if (to) params.set('to', to);
   const query = params.toString();
   return read<TimelineRow[]>(`/planning/timeline${query ? `?${query}` : ''}`);
+};
+
+/**
+ * Occupancy, as two named metrics.
+ *
+ * Both are returned by the server and neither is combined here. 15 records that the prototype's
+ * single "ocupación" silently mixed resource-days with hour utilisation; the client must not
+ * reintroduce that by averaging them into a percentage.
+ */
+export interface OccupancyRow {
+  readonly subject_kind: 'RECURSO' | 'CUADRILLA';
+  readonly subject_id: string;
+  readonly subject_code: string | null;
+  readonly subject_name: string | null;
+  readonly assignments: string;
+  readonly occupied_days: string;
+  readonly planned_hours: string;
+}
+
+export const fetchOccupancy = (from: string, to: string) =>
+  read<OccupancyRow[]>(`/planning/occupancy?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+
+export interface AssignmentDetail {
+  readonly assignment: Record<string, unknown>;
+  readonly units: readonly Record<string, unknown>[];
+  readonly people: readonly Record<string, unknown>[];
+  readonly resources: readonly Record<string, unknown>[];
+  readonly readiness: readonly {
+    readonly id: string;
+    readonly result: string;
+    readonly causes: readonly { ruleId?: string; reason?: string; instead?: string }[];
+    readonly dependencies: unknown;
+    readonly evaluated_at: string;
+    readonly valid_until: string | null;
+    readonly invalidated_at: string | null;
+  }[];
+  readonly directives: readonly DirectiveRow[];
+  readonly extensions: readonly {
+    readonly id: string;
+    readonly state: string;
+    readonly additional_days: number;
+    readonly reason: string;
+    readonly approved_window_end: string;
+    readonly proposed_window_end: string;
+    readonly requested_at: string;
+    readonly resolved_at: string | null;
+    readonly resolution_note: string | null;
+    readonly resulting_assignment_id: string | null;
+  }[];
+  readonly versions: readonly {
+    readonly id: string;
+    readonly version_no: number;
+    readonly state: string;
+    readonly approved_at: string | null;
+    readonly superseded_at: string | null;
+    readonly assignments: string;
+    readonly window_in_version: { windowStart: string; windowEnd: string } | null;
+  }[];
+  readonly links: readonly Record<string, unknown>[];
+  readonly permits: readonly PermitRow[];
+}
+
+export const fetchAssignment = (assignmentId: string) =>
+  read<AssignmentDetail>(`/planning/assignments/${assignmentId}`);
+
+export interface NomineePerson {
+  readonly id: string;
+  readonly code: string;
+  readonly first_name: string;
+  readonly last_name: string;
+  readonly affiliation: string;
+  readonly already_nominated: boolean;
+  readonly in_crew: boolean;
+  readonly overlapping: string;
+  readonly unmet_requirements:
+    | readonly {
+        readonly requirementCode: string;
+        readonly requirementName: string;
+        readonly severity: string;
+        readonly overrideableVia: string | null;
+        readonly status: string;
+      }[]
+    | null;
+}
+
+export interface NomineeResource {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly resource_type: string | null;
+  readonly already_nominated: boolean;
+  readonly overlapping: string;
+}
+
+export const fetchNominees = (assignmentId: string, q = '') =>
+  read<{ people: readonly NomineePerson[]; resources: readonly NomineeResource[] }>(
+    `/planning/assignments/${assignmentId}/nominees${q ? `?q=${encodeURIComponent(q)}` : ''}`,
+  );
+
+export interface DirectiveLifecycleEvent {
+  readonly eventType: string;
+  readonly occurredAt: string;
+  readonly fromState: string | null;
+  readonly toState: string | null;
+}
+
+export interface DirectiveRow {
+  readonly id: string;
+  readonly code: string | null;
+  readonly directive_type: string;
+  readonly state: string;
+  readonly reason: string;
+  readonly issued_at: string;
+  readonly valid_until: string | null;
+  readonly received_at: string | null;
+  readonly acknowledged_at: string | null;
+  readonly applied_at: string | null;
+  readonly applied_effect_ref: Record<string, unknown> | null;
+  readonly rejected_at: string | null;
+  readonly rejection_reason: string | null;
+  readonly issued_by_name?: string | null;
+  readonly targets?: readonly {
+    readonly targetKind: string;
+    readonly plannedAssignmentId: string | null;
+    readonly assignmentCode: string | null;
+  }[];
+  readonly lifecycle: readonly DirectiveLifecycleEvent[] | null;
+}
+
+export const fetchDirectives = (options: { state?: string; open?: boolean } = {}) => {
+  const params = new URLSearchParams();
+  if (options.state) params.set('state', options.state);
+  if (options.open) params.set('open', 'true');
+  const query = params.toString();
+  return read<DirectiveRow[]>(`/control/directives${query ? `?${query}` : ''}`);
+};
+
+export interface PermitRow {
+  readonly id: string;
+  readonly code: string | null;
+  readonly permit_type: string;
+  readonly state: string;
+  readonly scope_description: string | null;
+  readonly external_authority: string | null;
+  readonly valid_from: string | null;
+  readonly valid_until: string | null;
+  readonly activated_at: string | null;
+  readonly suspended_at: string | null;
+  readonly closed_at: string | null;
+  readonly expired_at: string | null;
+  readonly location_code?: string | null;
+  readonly location_name?: string | null;
+  readonly client_name?: string | null;
+  readonly requested_by_name?: string | null;
+  readonly approved_by_name?: string | null;
+  readonly covered_units?: string;
+  readonly lifecycle?: readonly DirectiveLifecycleEvent[] | null;
+}
+
+export const fetchPermits = (options: { state?: string; locationId?: string } = {}) => {
+  const params = new URLSearchParams();
+  if (options.state) params.set('state', options.state);
+  if (options.locationId) params.set('locationId', options.locationId);
+  const query = params.toString();
+  return read<PermitRow[]>(`/habilita/permits${query ? `?${query}` : ''}`);
 };
 
 export interface TraceEntry {

@@ -2,7 +2,9 @@ import { useEffect, useState, type JSX } from 'react';
 import { AppShell, type SurfaceId } from './shell/AppShell.tsx';
 import { SignIn } from './shell/SignIn.tsx';
 import { MyDay } from './modules/field/MyDay.tsx';
-import { Timeline } from './modules/planning/Timeline.tsx';
+import { Planning } from './modules/planning/Planning.tsx';
+import { Directives } from './modules/control/Directives.tsx';
+import { Permits } from './modules/habilita/Permits.tsx';
 import { Trace } from './modules/trace/Trace.tsx';
 import { fetchCommands, hasSession, setSession, type CommandInfo } from './api/client.ts';
 
@@ -33,6 +35,15 @@ export function App(): JSX.Element {
   const [actor, setActor] = useState<Actor | null>(null);
   const [commands, setCommands] = useState<readonly CommandInfo[]>([]);
   const [surface, setSurface] = useState<SurfaceId>('field.my-day');
+  // Set when another surface hands over to the trace, so "ver trazabilidad" lands on the subject
+  // instead of an empty form. A decision that cannot be reached from the thing it affected is a
+  // decision nobody will read.
+  const [traceSubject, setTraceSubject] = useState<{ kind: string; id: string } | null>(null);
+
+  const showTrace = (kind: string, id: string) => {
+    setTraceSubject({ kind, id });
+    setSurface('trace');
+  };
 
   useEffect(() => {
     if (!actor || !hasSession()) return;
@@ -70,9 +81,17 @@ export function App(): JSX.Element {
       fixtureProviders={['masters', 'identity', 'documentary', 'erp', 'weather', 'notification', 'files', 'client']}
     >
       {surface === 'field.my-day' && <MyDay />}
-      {surface === 'planning.timeline' && <Timeline />}
+      {surface === 'planning.timeline' && (
+        <Planning capabilities={actor.capabilities} onShowTrace={showTrace} />
+      )}
       {surface === 'execution.parts' && <MyDay />}
-      {surface === 'trace' && <Trace />}
+      {surface === 'control.directives' && (
+        <Directives capabilities={actor.capabilities} onShowTrace={showTrace} />
+      )}
+      {surface === 'habilita.permits' && (
+        <Permits capabilities={actor.capabilities} onShowTrace={showTrace} />
+      )}
+      {surface === 'trace' && <Trace {...(traceSubject ? { subject: traceSubject } : {})} />}
     </AppShell>
   );
 }

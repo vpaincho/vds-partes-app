@@ -20,6 +20,8 @@ export type SurfaceId =
   | 'field.my-day'
   | 'planning.timeline'
   | 'execution.parts'
+  | 'control.directives'
+  | 'habilita.permits'
   | 'habilita.matrix'
   | 'review.queue'
   | 'commercial.queue'
@@ -50,8 +52,10 @@ export const SURFACES: readonly Surface[] = [
   { id: 'field.my-day', label: 'Mi jornada', capability: 'execution.read', density: 'field', icon: '◉', status: 'built' },
   { id: 'planning.timeline', label: 'Planificación', capability: 'planning.read', density: 'operations', icon: '▤', status: 'built' },
   { id: 'execution.parts', label: 'Partes', capability: 'execution.read', density: 'operations', icon: '▦', status: 'built' },
+  { id: 'control.directives', label: 'Directivas', capability: 'control.apply', density: 'operations', icon: '⇄', status: 'built' },
+  { id: 'habilita.permits', label: 'Permisos', capability: 'habilita.read', density: 'operations', icon: '⬢', status: 'built' },
   { id: 'trace', label: 'Trazabilidad', capability: 'trace.read', density: 'analysis', icon: '◈', status: 'built' },
-  { id: 'habilita.matrix', label: 'Habilita', capability: 'habilita.read', density: 'operations', icon: '⬢', status: 'planned' },
+  { id: 'habilita.matrix', label: 'Habilita', capability: 'habilita.documental', density: 'operations', icon: '◉', status: 'planned' },
   { id: 'review.queue', label: 'Revisión VDS', capability: 'review.read', density: 'operations', icon: '▷', status: 'planned' },
   { id: 'commercial.queue', label: 'Certificación', capability: 'commercial.read', density: 'operations', icon: '◫', status: 'planned' },
   { id: 'dashboard', label: 'Dashboard', capability: 'commercial.client.read', density: 'analysis', icon: '▚', status: 'planned' },
@@ -209,14 +213,15 @@ function PlannedSurface({ surface }: { readonly surface: Surface }): JSX.Element
   const CONTENT: Record<string, { summary: string; wave: string; items: readonly string[] }> = {
     'habilita.matrix': {
       summary:
-        'Matriz de requisitos por persona y recurso, permisos de trabajo con su ciclo de vida, y el ' +
-        'circuito de eventos: Flash Report, triage, caso, acciones y notificaciones.',
-      wave: 'W2 (Prevent y PTW) y W4 (Respond & Learn)',
+        'Matriz documental de requisitos por persona y recurso, y el circuito de eventos: Flash ' +
+        'Report, triage, caso, acciones y notificaciones. Los permisos de trabajo ya tienen su ' +
+        'propia superficie.',
+      wave: 'W4 (Respond & Learn); la administración documental, en W4 junto al circuito',
       items: [
         'Matriz como projection sobre requisitos, documentos, cumplimientos y evaluaciones',
-        'PTW: aprobar, activar, suspender, revalidar, cerrar; vencido no es cerrado',
         'Flash Report en ≤2 min con contexto autoderivado, standalone si hace falta',
         'Caso con investigación y acciones de ciclo propio',
+        'Notificación como obligación persistida, no como envío optimista',
       ],
     },
     'review.queue': {

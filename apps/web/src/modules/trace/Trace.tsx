@@ -12,42 +12,61 @@
  *  - **The rules that lost.** Sheet 58 step 8 requires the discarded candidates with the reason, which
  *    is the only way a past conflict can be explained once configuration has moved on.
  */
-import { useState, type JSX } from 'react';
+import { useCallback, useEffect, useState, type JSX } from 'react';
 import { ApiError, fetchTrace, type TraceEntry } from '../../api/client.ts';
 
 const SUBJECT_KINDS = [
   'UnidadEjecucion',
   'Parte',
   'AsignacionPlanificada',
+  'DirectivaOperativa',
   'PermisoTrabajo',
   'EventoHabilita',
   'UnidadComercial',
 ] as const;
 
-export function Trace(): JSX.Element {
-  const [subjectKind, setSubjectKind] = useState<string>('UnidadEjecucion');
-  const [subjectId, setSubjectId] = useState('');
+export interface TraceProps {
+  /** Handed over by another surface, so "ver trazabilidad" lands on the subject it came from. */
+  readonly subject?: { readonly kind: string; readonly id: string };
+}
+
+export function Trace({ subject }: TraceProps = {}): JSX.Element {
+  const [subjectKind, setSubjectKind] = useState<string>(subject?.kind ?? 'UnidadEjecucion');
+  const [subjectId, setSubjectId] = useState(subject?.id ?? '');
   const [entries, setEntries] = useState<readonly TraceEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  const lookup = useCallback(async (kind: string, id: string) => {
+    setBusy(true);
+    setError(null);
+    try {
+      const result = await fetchTrace(kind, id.trim());
+      setEntries(result.data);
+    } catch (cause) {
+      setError(cause instanceof ApiError ? cause.message : 'No se pudo consultar la traza.');
+      setEntries(null);
+    } finally {
+      setBusy(false);
+    }
+  }, []);
+
+  // Arriving with a subject means the question was already asked elsewhere; asking it again by hand
+  // would be busywork.
+  useEffect(() => {
+    if (!subject) return;
+    setSubjectKind(subject.kind);
+    setSubjectId(subject.id);
+    void lookup(subject.kind, subject.id);
+  }, [subject, lookup]);
 
   return (
     <div className="vds-trace">
       <form
         className="vds-trace__form"
-        onSubmit={async (event) => {
+        onSubmit={(event) => {
           event.preventDefault();
-          setBusy(true);
-          setError(null);
-          try {
-            const result = await fetchTrace(subjectKind, subjectId.trim());
-            setEntries(result.data);
-          } catch (cause) {
-            setError(cause instanceof ApiError ? cause.message : 'No se pudo consultar la traza.');
-            setEntries(null);
-          } finally {
-            setBusy(false);
-          }
+          void lookup(subjectKind, subjectId);
         }}
       >
         <label htmlFor="trace-kind">Tipo de objeto</label>

@@ -832,6 +832,919 @@ textarea.vds-input,
 
 /* The prototype scaled a 1366x1024 frame to fit, which shrank every control. This is real
    responsive: the rail collapses to a bar and the gutter holds at 16px. */
+/* ===================================================================== planning
+   Gantt, resource calendar, month and the drawer.
+
+   DS-01 §5: each surface declares its density tier and the tokens follow. Planning is `operations`
+   and `analysis`; it never inherits the field tier's 56px rows, because a planner reading a week
+   needs the week on one screen.
+
+   Severity carries shape as well as colour throughout — the ▲ ■ ✓ glyphs come from the components —
+   so a bar still reads in sunlight and with colour-blindness. */
+
+.vds-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.vds-planning {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--vds-space-5);
+  align-items: start;
+}
+
+.vds-planning[data-drawer='open'] {
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 460px);
+}
+
+.vds-planning__main {
+  min-width: 0;
+}
+
+.vds-planning__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vds-space-4);
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--vds-space-4);
+}
+
+.vds-planning__period {
+  display: flex;
+  gap: var(--vds-space-2);
+  align-items: center;
+}
+
+.vds-planning__period strong {
+  min-width: 14ch;
+  text-align: center;
+  font-family: var(--vds-font-display);
+  text-transform: capitalize;
+}
+
+.vds-planning__views {
+  display: inline-flex;
+  border: 1px solid var(--vds-surface-border-strong);
+  border-radius: var(--vds-radius-md);
+  overflow: hidden;
+}
+
+.vds-planning__view {
+  min-height: 34px;
+  padding: 0 var(--vds-space-4);
+  border: 0;
+  border-right: 1px solid var(--vds-surface-border);
+  background: var(--vds-surface-surface);
+  color: var(--vds-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.vds-planning__view:last-child {
+  border-right: 0;
+}
+
+.vds-planning__view[aria-current='true'] {
+  background: var(--vds-action);
+  color: var(--vds-on-accent);
+}
+
+/* Six counts side by side, never a sum. A zero is dimmed rather than hidden: "0 bloqueos" is
+   information, and an absent row would leave the reader guessing. */
+.vds-planning__counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vds-space-2) var(--vds-space-5);
+  margin: 0 0 var(--vds-space-4);
+  padding: var(--vds-space-3) var(--vds-space-4);
+  list-style: none;
+  background: var(--vds-surface-panel);
+  border: 1px solid var(--vds-surface-border);
+  border-radius: var(--vds-radius-md);
+  font-size: var(--vds-text-sm);
+}
+
+.vds-planning__counts li[data-tone='critical'] strong { color: var(--vds-critical); }
+.vds-planning__counts li[data-tone='warn'] strong { color: var(--vds-warn); }
+.vds-planning__counts li[data-tone='pending'] strong { color: var(--vds-pending); }
+.vds-planning__counts li[data-zero='true'] { color: var(--vds-faint); }
+.vds-planning__counts li[data-zero='true'] strong { color: var(--vds-faint); }
+
+/* ------------------------------------------------------------------------- gantt */
+
+.vds-gantt {
+  --vds-lane-label: 190px;
+  border: 1px solid var(--vds-surface-border);
+  border-radius: var(--vds-radius-md);
+  background: var(--vds-surface-surface);
+  overflow: hidden;
+}
+
+.vds-gantt__head,
+.vds-gantt__lane {
+  display: grid;
+  grid-template-columns: var(--vds-lane-label) minmax(0, 1fr);
+}
+
+.vds-gantt__head {
+  background: var(--vds-surface-raised);
+  border-bottom: 1px solid var(--vds-surface-border-strong);
+}
+
+.vds-gantt__scale {
+  display: flex;
+}
+
+.vds-gantt__day {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--vds-space-2) 0;
+  border-left: 1px solid var(--vds-surface-border);
+  font-family: var(--vds-font-display);
+  font-size: var(--vds-text-xs);
+  text-transform: uppercase;
+  color: var(--vds-muted);
+}
+
+.vds-gantt__day[data-weekend='true'] {
+  background: color-mix(in oklab, var(--vds-surface-panel) 70%, transparent);
+}
+
+.vds-gantt__dow {
+  letter-spacing: 0.06em;
+}
+
+.vds-gantt__lanes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vds-gantt__lane {
+  border-bottom: 1px solid var(--vds-surface-border);
+}
+
+.vds-gantt__lane-label {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--vds-space-2) var(--vds-space-3);
+  border-right: 1px solid var(--vds-surface-border-strong);
+  font-size: var(--vds-text-sm);
+}
+
+.vds-gantt__lane-label small {
+  color: var(--vds-muted);
+  font-size: var(--vds-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.vds-gantt__track {
+  position: relative;
+  min-height: 46px;
+  padding: var(--vds-space-2) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vds-gantt__gridline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--vds-surface-border);
+}
+
+/* One gridline per day of the week, positioned by its order in the track. */
+.vds-gantt__track > .vds-gantt__gridline:nth-of-type(1) { left: 0%; }
+.vds-gantt__track > .vds-gantt__gridline:nth-of-type(2) { left: 14.2857%; }
+.vds-gantt__track > .vds-gantt__gridline:nth-of-type(3) { left: 28.5714%; }
+.vds-gantt__track > .vds-gantt__gridline:nth-of-type(4) { left: 42.8571%; }
+.vds-gantt__track > .vds-gantt__gridline:nth-of-type(5) { left: 57.1428%; }
+.vds-gantt__track > .vds-gantt__gridline:nth-of-type(6) { left: 71.4285%; }
+.vds-gantt__track > .vds-gantt__gridline:nth-of-type(7) { left: 85.7142%; }
+
+/* A bar is a button: it opens the detail, and it is reachable by keyboard. Dragging it would be the
+   RGT-03 defect — a window rewritten in place. */
+.vds-gantt__bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--vds-space-2);
+  min-height: 30px;
+  padding: 0 var(--vds-space-2);
+  border: 1px solid var(--vds-surface-border-strong);
+  border-left-width: 4px;
+  border-radius: var(--vds-radius-sm);
+  background: var(--vds-surface-raised);
+  color: var(--vds-ink);
+  font: inherit;
+  font-size: var(--vds-text-sm);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.vds-gantt__bar[data-tone='ok'] { border-left-color: var(--vds-ok); }
+.vds-gantt__bar[data-tone='warn'] { border-left-color: var(--vds-warn); }
+.vds-gantt__bar[data-tone='critical'] { border-left-color: var(--vds-critical); }
+.vds-gantt__bar[data-tone='pending'] { border-left-color: var(--vds-pending); }
+.vds-gantt__bar[data-tone='neutral'] { border-left-color: var(--vds-domain-plan); }
+
+.vds-gantt__bar[data-readiness='NOT_READY'] {
+  background: color-mix(in oklab, var(--vds-critical) 14%, var(--vds-surface-raised));
+}
+
+.vds-gantt__bar[data-readiness='EXPIRED'] {
+  background: color-mix(in oklab, var(--vds-warn) 16%, var(--vds-surface-raised));
+}
+
+.vds-gantt__bar[data-selected] {
+  outline: 2px solid var(--vds-action);
+  outline-offset: 1px;
+}
+
+.vds-gantt__bar-label {
+  flex: 1;
+  display: flex;
+  gap: var(--vds-space-2);
+  align-items: baseline;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--vds-font-mono);
+}
+
+.vds-gantt__tp {
+  color: var(--vds-muted);
+  font-size: var(--vds-text-xs);
+}
+
+.vds-gantt__flags {
+  font-size: var(--vds-text-xs);
+  letter-spacing: 0.12em;
+}
+
+/* A clipped bar keeps an arrow: work that runs past the edge must not look finished. */
+.vds-gantt__clip {
+  color: var(--vds-muted);
+  font-weight: 700;
+}
+
+/* ----------------------------------------------------------------------- recurso */
+
+.vds-resource__table th[scope='row'] {
+  position: static;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--vds-text-sm);
+  color: var(--vds-ink);
+  white-space: nowrap;
+}
+
+.vds-resource__subject small {
+  display: block;
+  color: var(--vds-muted);
+  font-size: var(--vds-text-xs);
+  text-transform: uppercase;
+}
+
+.vds-resource__dayhead {
+  text-align: center;
+  min-width: 46px;
+}
+
+.vds-resource__dayhead[data-weekend='true'] {
+  background: color-mix(in oklab, var(--vds-surface-panel) 70%, var(--vds-surface-raised));
+}
+
+.vds-resource__dow {
+  display: block;
+  color: var(--vds-faint);
+}
+
+.vds-resource__cell {
+  position: relative;
+  text-align: center;
+  vertical-align: top;
+}
+
+.vds-resource__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  min-height: 22px;
+  margin: 1px;
+  padding: 0 var(--vds-space-1);
+  border: 1px solid var(--vds-surface-border-strong);
+  border-bottom-width: 3px;
+  border-radius: var(--vds-radius-sm);
+  background: var(--vds-surface-raised);
+  color: var(--vds-ink);
+  font: inherit;
+  font-family: var(--vds-font-mono);
+  font-size: var(--vds-text-xs);
+  cursor: pointer;
+}
+
+.vds-resource__chip[data-tone='ok'] { border-bottom-color: var(--vds-ok); }
+.vds-resource__chip[data-tone='warn'] { border-bottom-color: var(--vds-warn); }
+.vds-resource__chip[data-tone='critical'] { border-bottom-color: var(--vds-critical); }
+.vds-resource__chip[data-tone='pending'] { border-bottom-color: var(--vds-pending); }
+
+.vds-resource__chip[data-readiness='NOT_READY'] {
+  background: color-mix(in oklab, var(--vds-critical) 16%, var(--vds-surface-raised));
+}
+
+.vds-resource__chip[data-selected] {
+  outline: 2px solid var(--vds-action);
+  outline-offset: 1px;
+}
+
+.vds-resource__multi {
+  display: block;
+  color: var(--vds-warn);
+  font-size: var(--vds-text-xs);
+}
+
+.vds-resource__metric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The two occupancy metrics are spelled out under the table, because a column header cannot hold
+   the difference between committed days and window hours. */
+.vds-metricdef {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--vds-space-2) var(--vds-space-4);
+  margin: var(--vds-space-4) 0 0;
+  font-size: var(--vds-text-sm);
+}
+
+.vds-metricdef dt {
+  font-family: var(--vds-font-display);
+  color: var(--vds-muted);
+  text-transform: uppercase;
+  font-size: var(--vds-text-xs);
+  letter-spacing: 0.04em;
+}
+
+.vds-metricdef dd {
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------- mes */
+
+.vds-month__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--vds-space-1);
+  margin-bottom: var(--vds-space-1);
+  font-family: var(--vds-font-display);
+  font-size: var(--vds-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--vds-muted);
+  text-align: center;
+}
+
+.vds-month__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--vds-space-1);
+}
+
+.vds-month__pad {
+  background: color-mix(in oklab, var(--vds-surface-panel) 50%, transparent);
+  border-radius: var(--vds-radius-sm);
+}
+
+.vds-month__cell {
+  min-height: 96px;
+  padding: var(--vds-space-2);
+  border: 1px solid var(--vds-surface-border);
+  border-radius: var(--vds-radius-sm);
+  background: var(--vds-surface-surface);
+}
+
+.vds-month__cell[data-empty] { background: var(--vds-surface-panel); }
+
+.vds-month__cell[data-today] {
+  border-color: var(--vds-action);
+  border-width: 2px;
+}
+
+.vds-month__date {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: var(--vds-text-sm);
+}
+
+.vds-month__counts {
+  display: flex;
+  gap: var(--vds-space-2);
+  font-size: var(--vds-text-xs);
+  font-family: var(--vds-font-mono);
+}
+
+.vds-month__counts span[data-tone='critical'] { color: var(--vds-critical); }
+.vds-month__counts span[data-tone='warn'] { color: var(--vds-warn); }
+.vds-month__counts span[data-tone='pending'] { color: var(--vds-pending); }
+.vds-month__counts span[data-tone='neutral'] { color: var(--vds-muted); }
+
+.vds-month__items {
+  margin: var(--vds-space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vds-month__item {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 2px var(--vds-space-2);
+  border: 0;
+  border-left: 3px solid var(--vds-domain-plan);
+  border-radius: var(--vds-radius-sm);
+  background: var(--vds-surface-raised);
+  color: var(--vds-ink);
+  font: inherit;
+  font-size: var(--vds-text-xs);
+  text-align: left;
+  cursor: pointer;
+}
+
+.vds-month__item[data-tone='ok'] { border-left-color: var(--vds-ok); }
+.vds-month__item[data-tone='warn'] { border-left-color: var(--vds-warn); }
+.vds-month__item[data-tone='critical'] { border-left-color: var(--vds-critical); }
+
+.vds-month__item[data-readiness='NOT_READY'] {
+  background: color-mix(in oklab, var(--vds-critical) 14%, var(--vds-surface-raised));
+}
+
+.vds-month__item[data-selected] { outline: 2px solid var(--vds-action); }
+.vds-month__item small { color: var(--vds-muted); }
+
+.vds-month__more {
+  margin: var(--vds-space-1) 0 0;
+  color: var(--vds-muted);
+  font-size: var(--vds-text-xs);
+}
+
+/* ------------------------------------------------------------------------ drawer */
+
+.vds-drawer {
+  position: sticky;
+  top: var(--vds-space-4);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 7rem);
+  border: 1px solid var(--vds-surface-border-strong);
+  border-radius: var(--vds-radius-lg);
+  background: var(--vds-surface-panel);
+  overflow: hidden;
+}
+
+.vds-drawer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vds-space-3);
+  padding: var(--vds-space-3) var(--vds-space-4);
+  border-bottom: 1px solid var(--vds-surface-border-strong);
+  background: var(--vds-surface-raised);
+}
+
+.vds-drawer__head h2 {
+  margin: 0;
+  font-size: var(--vds-text-lg);
+}
+
+.vds-drawer__summary {
+  padding: var(--vds-space-3) var(--vds-space-4);
+  border-bottom: 1px solid var(--vds-surface-border);
+}
+
+.vds-drawer__facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--vds-space-1) var(--vds-space-4);
+  margin: var(--vds-space-3) 0 0;
+  font-size: var(--vds-text-sm);
+}
+
+.vds-drawer__facts dt {
+  font-family: var(--vds-font-display);
+  font-size: var(--vds-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--vds-muted);
+}
+
+.vds-drawer__facts dd { margin: 0; }
+
+.vds-drawer__facts dd small {
+  display: block;
+  color: var(--vds-faint);
+  font-size: var(--vds-text-xs);
+}
+
+.vds-drawer__tabs {
+  display: flex;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--vds-surface-border-strong);
+  background: var(--vds-surface-surface);
+}
+
+.vds-drawer__tab {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 var(--vds-space-3);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--vds-muted);
+  font: inherit;
+  font-size: var(--vds-text-sm);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.vds-drawer__tab[aria-current='true'] {
+  color: var(--vds-ink);
+  border-bottom-color: var(--vds-action);
+}
+
+.vds-drawer__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--vds-space-4);
+}
+
+.vds-drawer__body h3 {
+  margin: var(--vds-space-4) 0 var(--vds-space-2);
+  font-size: var(--vds-text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vds-muted);
+}
+
+.vds-drawer__body h3:first-child { margin-top: 0; }
+
+.vds-drawer__action {
+  margin-top: var(--vds-space-5);
+  padding: var(--vds-space-3);
+  border: 1px solid var(--vds-surface-border);
+  border-radius: var(--vds-radius-md);
+  background: var(--vds-surface-surface);
+}
+
+.vds-drawer__action label {
+  display: block;
+  margin: var(--vds-space-2) 0 var(--vds-space-1);
+  font-size: var(--vds-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--vds-muted);
+}
+
+.vds-drawer__buttons {
+  display: flex;
+  gap: var(--vds-space-2);
+  flex-wrap: wrap;
+}
+
+.vds-drawer__foot {
+  padding: var(--vds-space-3) var(--vds-space-4);
+  border-top: 1px solid var(--vds-surface-border-strong);
+  background: var(--vds-surface-raised);
+}
+
+/* ---------------------------------------------------------------- drawer content */
+
+.vds-candidates {
+  margin: var(--vds-space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--vds-space-2);
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.vds-candidates li {
+  padding: var(--vds-space-2);
+  border: 1px solid var(--vds-surface-border);
+  border-radius: var(--vds-radius-sm);
+  background: var(--vds-surface-panel);
+}
+
+/* A candidate with a hard documentary block is marked before the attempt, because the gate runs
+   before the action. It is still only context: the command re-evaluates (RGT-17). */
+.vds-candidates li[data-blocked] {
+  border-left: 4px solid var(--vds-critical);
+}
+
+.vds-candidates__who {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vds-space-2);
+  align-items: baseline;
+  font-size: var(--vds-text-sm);
+}
+
+.vds-candidates__block {
+  margin: var(--vds-space-1) 0;
+  color: var(--vds-critical);
+  font-size: var(--vds-text-xs);
+}
+
+.vds-candidates__warn {
+  margin: var(--vds-space-1) 0;
+  color: var(--vds-warn);
+  font-size: var(--vds-text-xs);
+}
+
+.vds-readiness,
+.vds-directives,
+.vds-extensions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--vds-space-3);
+}
+
+.vds-readiness li,
+.vds-directives li,
+.vds-extensions li {
+  padding: var(--vds-space-3);
+  border: 1px solid var(--vds-surface-border);
+  border-left-width: 4px;
+  border-radius: var(--vds-radius-sm);
+  background: var(--vds-surface-surface);
+}
+
+.vds-readiness li[data-result='READY'] { border-left-color: var(--vds-ok); }
+.vds-readiness li[data-result='NOT_READY'] { border-left-color: var(--vds-critical); }
+
+/* An invalidated evaluation stays visible and visibly past: RUL-015 invalidates, it does not erase,
+   and "it was ready and then stopped being ready" is the useful fact. */
+.vds-readiness li[data-invalidated] {
+  border-left-color: var(--vds-pending);
+  background: var(--vds-surface-panel);
+  opacity: 0.86;
+}
+
+.vds-readiness__head,
+.vds-directives__head,
+.vds-extensions__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vds-space-2);
+  align-items: center;
+  font-size: var(--vds-text-sm);
+}
+
+.vds-readiness__invalid {
+  margin: var(--vds-space-2) 0 0;
+  color: var(--vds-muted);
+  font-size: var(--vds-text-xs);
+}
+
+.vds-readiness__causes {
+  margin: var(--vds-space-2) 0 0;
+  padding-left: var(--vds-space-4);
+  font-size: var(--vds-text-sm);
+}
+
+.vds-readiness__causes em { color: var(--vds-muted); }
+
+/* Four instants as four rows. A blank is blank, not "probably yes". */
+.vds-directives__steps {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 2px var(--vds-space-3);
+  margin: var(--vds-space-2) 0;
+  font-size: var(--vds-text-xs);
+}
+
+.vds-directives__steps dt {
+  color: var(--vds-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.vds-directives__steps dd { margin: 0; }
+
+.vds-directives li[data-state='APLICADA'] { border-left-color: var(--vds-ok); }
+.vds-directives li[data-state='RECONOCIDA'] { border-left-color: var(--vds-warn); }
+.vds-directives li[data-state='RECHAZADA'],
+.vds-directives li[data-state='EXPIRADA'] { border-left-color: var(--vds-critical); }
+.vds-directives li[data-state='EMITIDA'],
+.vds-directives li[data-state='RECIBIDA'] { border-left-color: var(--vds-pending); }
+
+.vds-directives__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vds-space-2);
+  align-items: center;
+  margin-top: var(--vds-space-2);
+}
+
+.vds-directives__actions .vds-input {
+  flex: 1 1 14ch;
+  min-width: 12ch;
+}
+
+.vds-directives__targets,
+.vds-directives__effect {
+  margin: var(--vds-space-1) 0;
+  color: var(--vds-muted);
+  font-size: var(--vds-text-xs);
+}
+
+.vds-extensions li[data-state='APROBADA'] { border-left-color: var(--vds-ok); }
+.vds-extensions li[data-state='RECHAZADA'] { border-left-color: var(--vds-critical); }
+.vds-extensions li[data-state='PENDIENTE'] { border-left-color: var(--vds-warn); }
+
+.vds-extensions__windows {
+  color: var(--vds-muted);
+  font-size: var(--vds-text-xs);
+}
+
+.vds-table tr[data-current] td {
+  background: color-mix(in oklab, var(--vds-ok) 10%, transparent);
+}
+
+/* ====================================================================== permisos
+   Treated as signage (DS-01): a blocking state is never a quiet grey chip, and the meaning of each
+   state is written out rather than implied by colour. */
+
+.vds-permits__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vds-space-3);
+  align-items: center;
+  margin-bottom: var(--vds-space-4);
+}
+
+.vds-permits__filters {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--vds-space-1);
+}
+
+.vds-permits__filter {
+  min-height: 32px;
+  padding: 0 var(--vds-space-3);
+  border: 1px solid var(--vds-surface-border-strong);
+  border-radius: var(--vds-radius-pill);
+  background: var(--vds-surface-surface);
+  color: var(--vds-ink);
+  font: inherit;
+  font-size: var(--vds-text-xs);
+  cursor: pointer;
+}
+
+.vds-permits__filter[aria-current='true'] {
+  background: var(--vds-action);
+  border-color: var(--vds-action);
+  color: var(--vds-on-accent);
+}
+
+.vds-permits__toggle {
+  display: inline-flex;
+  gap: var(--vds-space-2);
+  align-items: center;
+  font-size: var(--vds-text-sm);
+}
+
+.vds-permits__list,
+.vds-directives-inbox .vds-directives {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--vds-space-3);
+}
+
+.vds-permits__list li {
+  padding: var(--vds-space-3) var(--vds-space-4);
+  border: 1px solid var(--vds-surface-border);
+  border-left-width: 5px;
+  border-radius: var(--vds-radius-md);
+  background: var(--vds-surface-surface);
+}
+
+.vds-permits__list li[data-tone='ok'] { border-left-color: var(--vds-ok); }
+.vds-permits__list li[data-tone='warn'] { border-left-color: var(--vds-warn); }
+.vds-permits__list li[data-tone='critical'] { border-left-color: var(--vds-critical); }
+.vds-permits__list li[data-tone='pending'] { border-left-color: var(--vds-pending); }
+.vds-permits__list li[data-tone='neutral'] { border-left-color: var(--vds-surface-border-strong); }
+
+/* A VENCIDO permit is loud on purpose: it blocks starts and it does not resolve itself (C-021). */
+.vds-permits__list li[data-state='VENCIDO'] {
+  background: color-mix(in oklab, var(--vds-critical) 10%, var(--vds-surface-surface));
+}
+
+.vds-permits__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vds-space-3);
+  align-items: center;
+}
+
+.vds-permits__code { font-weight: 600; }
+
+.vds-permits__type {
+  color: var(--vds-muted);
+  font-size: var(--vds-text-sm);
+}
+
+.vds-permits__window {
+  color: var(--vds-muted);
+  font-size: var(--vds-text-xs);
+  margin-left: auto;
+}
+
+.vds-permits__meaning {
+  margin: var(--vds-space-2) 0 0;
+  font-size: var(--vds-text-sm);
+  color: var(--vds-muted);
+}
+
+.vds-permits__detail {
+  margin-top: var(--vds-space-3);
+  padding-top: var(--vds-space-3);
+  border-top: 1px solid var(--vds-surface-border);
+}
+
+.vds-permits__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vds-space-3);
+  align-items: flex-start;
+  margin: var(--vds-space-3) 0;
+}
+
+.vds-permits__form {
+  flex: 1 1 260px;
+  padding: var(--vds-space-3);
+  border: 1px solid var(--vds-surface-border);
+  border-radius: var(--vds-radius-sm);
+  background: var(--vds-surface-panel);
+}
+
+.vds-permits__form label {
+  display: block;
+  margin: var(--vds-space-2) 0 var(--vds-space-1);
+  font-size: var(--vds-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--vds-muted);
+}
+
+.vds-lifecycle {
+  margin: var(--vds-space-3) 0;
+  padding-left: var(--vds-space-4);
+  font-size: var(--vds-text-xs);
+}
+
+.vds-lifecycle li {
+  display: flex;
+  gap: var(--vds-space-3);
+  align-items: baseline;
+}
+
+.vds-lifecycle span:first-child {
+  color: var(--vds-muted);
+  min-width: 15ch;
+}
+
 @media (max-width: 820px) {
   .vds-shell {
     grid-template-columns: 1fr;
@@ -876,5 +1789,43 @@ textarea.vds-input,
   .vds-trace__form .vds-input,
   .vds-trace__form button {
     grid-column: 1;
+  }
+}
+
+/* The drawer stacks under the views before the page would need horizontal scroll: a 460px panel
+   beside a Gantt does not fit a tablet in portrait, and DS-01 forbids sideways page scroll. */
+@media (max-width: 1100px) {
+  .vds-planning[data-drawer='open'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vds-drawer {
+    position: static;
+    max-height: none;
+  }
+}
+
+@media (max-width: 820px) {
+  .vds-gantt {
+    --vds-lane-label: 110px;
+  }
+
+  .vds-planning__bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* The month grid keeps its seven columns — a calendar with fewer is not a calendar — but the cells
+     shrink and each day falls back to its counts, which are the part that still reads at this size. */
+  .vds-month__cell {
+    min-height: 64px;
+  }
+
+  .vds-month__items {
+    display: none;
+  }
+
+  .vds-permits__window {
+    margin-left: 0;
   }
 }
