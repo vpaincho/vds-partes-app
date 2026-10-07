@@ -1,0 +1,10 @@
+{
+  "name": "@vds/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TypeBox schemas: one source for compile-time types and runtime validation at the boundary.",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": { "@sinclair/typebox": "0.34.52", "@vds/kernel": "*" },
+  "scripts": { "test": "vitest run" }
+}

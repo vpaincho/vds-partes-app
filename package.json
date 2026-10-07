@@ -31,11 +31,16 @@
     "db:migrate": "node scripts/migrate.mjs",
     "db:status": "node scripts/migrate.mjs --status",
     "db:reset": "node scripts/migrate.mjs --reset",
-    "test:db": "vitest run --config vitest.db.config.ts"
+    "test:db": "vitest run --config vitest.db.config.ts",
+    "db:seed": "node scripts/seed.mjs",
+    "db:seed:reset": "node scripts/seed.mjs --truncate",
+    "api:dev": "node --watch apps/api/src/server.ts"
   },
   "devDependencies": {
+    "@sinclair/typebox": "^0.34.52",
     "@types/node": "^26.6.4",
     "@types/pg": "^8.23.1",
+    "ajv": "^8.20.0",
     "pg": "^8.23.1",
     "typescript": "7.0.2",
     "vitest": "5.0.3"

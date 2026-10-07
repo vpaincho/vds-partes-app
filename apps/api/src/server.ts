@@ -1,0 +1,280 @@
+/**
+ * Fastify application.
+ *
+ * Routes are thin: validate, resolve the actor, hand the command to the pipeline, map the result.
+ * Every command shares one path, so authorization, idempotency, rule evaluation, the transaction and
+ * the trace cannot be forgotten per endpoint — 03_TARGET_ARCHITECTURE requires that uniformity, and
+ * it is also what makes the permissions test matrix tractable.
+ *
+ * Deliberately absent: any `PATCH /parts/:id` that sets a state. 05_STATE_MODEL is explicit — "REST
+ * no permite PATCH arbitrario de estado." A state changes only through a named command whose
+ * transition the state machine permits.
+ */
+import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify';
+import {
+  DomainError,
+  HTTP_STATUS,
+  instantNow,
+  isDomainError,
+  uuidv4,
+  type Uuid,
+} from '@vds/kernel';
+import { COMMANDS, command as commandDefinition } from '@vds/contracts';
+import { closeDb, initDb, withConnection } from './platform/db.ts';
+import { resolveActor, touchSession, unauthenticated, type AuthenticatedActor } from './platform/authz.ts';
+import { execute, registeredCommands } from './platform/pipeline.ts';
+import { registerExecutionCommands } from './commands/execution.ts';
+import { registerReadRoutes } from './reads/routes.ts';
+
+export interface ServerOptions {
+  readonly databaseUrl: string;
+  readonly rulesetVersion: string;
+  readonly logger?: boolean;
+}
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    actor?: AuthenticatedActor;
+    requestId: Uuid;
+  }
+}
+
+/**
+ * Which URL segment carries the subject id for each command, and which payload key the handler
+ * expects it under. Keeping this next to the routes means a command cannot be exposed without
+ * saying how its subject is addressed.
+ */
+const SUBJECT_ROUTES: Record<string, { path: string; idParam?: string }> = {
+  'execution.parts.prepare': { path: '/execution/parts/prepare' },
+  'execution.units.create': { path: '/execution/units' },
+  'execution.units.start': { path: '/execution/units/:executionUnitId/start', idParam: 'executionUnitId' },
+  'execution.units.close': { path: '/execution/units/:executionUnitId/close', idParam: 'executionUnitId' },
+  'execution.parts.close': { path: '/execution/parts/:partId/close', idParam: 'partId' },
+};
+
+export async function buildServer(options: ServerOptions): Promise<FastifyInstance> {
+  initDb({ connectionString: options.databaseUrl });
+  registerExecutionCommands();
+
+  const app = Fastify({
+    logger: options.logger ?? false,
+    // A command payload is small; evidence goes through the upload endpoints, not here.
+    bodyLimit: 512 * 1024,
+    disableRequestLogging: true,
+  });
+
+  app.addHook('onRequest', async (request) => {
+    request.requestId = uuidv4();
+  });
+
+  /**
+   * Authentication. The actor comes from the session, never from the payload.
+   *
+   * A bearer session id stands in for the corporate IdP: 13_AUTH_PERMISSIONS keeps the provider
+   * swappable and the internal permission mapping independent of it, so this is the only place that
+   * changes when a real IdP arrives.
+   */
+  app.addHook('preHandler', async (request, reply) => {
+    if (request.url === '/health' || request.url === '/ready' || request.url === '/') return;
+
+    const header = request.headers.authorization;
+    const sessionId = header?.startsWith('Bearer ') ? header.slice(7).trim() : null;
+    if (!sessionId) {
+      return sendError(reply, request, unauthenticated());
+    }
+
+    const actor = await withConnection((db) => resolveActor(db, sessionId));
+    if (!actor) {
+      return sendError(reply, request, unauthenticated());
+    }
+    request.actor = actor;
+    // Fire-and-forget would hide a failure; it is cheap and inside the request.
+    await withConnection((db) => touchSession(db, actor.sessionId, instantNow()));
+  });
+
+  app.get('/health', async () => ({ status: 'ok', time: instantNow() }));
+
+  app.get('/ready', async (_request, reply) => {
+    // Ready means the dependencies a command needs are actually usable, and that migrations are
+    // current — serving traffic against a half-migrated schema is worse than refusing.
+    try {
+      const result = await withConnection(async (db) => {
+        const migration = await db.one<{ version: number }>(
+          'SELECT max(version) AS version FROM platform.schema_migrations',
+        );
+        const rules = await db.one<{ count: string }>(
+          "SELECT count(*)::text AS count FROM platform.capabilities",
+        );
+        return { migration: migration?.version ?? 0, capabilities: Number(rules?.count ?? '0') };
+      });
+      if (result.capabilities === 0) {
+        return reply.code(503).send({
+          status: 'not-ready',
+          reason: 'platform.capabilities is empty: the seed has not run, so every command is denied.',
+          ...result,
+        });
+      }
+      return { status: 'ready', ...result };
+    } catch (error) {
+      return reply.code(503).send({
+        status: 'not-ready',
+        reason: error instanceof Error ? error.message : 'database unreachable',
+      });
+    }
+  });
+
+  /** The command catalogue, so a client can discover what exists and what it needs. */
+  app.get('/commands', async (request) => ({
+    data: COMMANDS.map((c) => ({
+      name: c.name,
+      module: c.module,
+      capability: c.capability,
+      trigger: c.trigger,
+      subjectKind: c.subjectKind,
+      previewable: c.previewable,
+      implemented: registeredCommands().includes(c.name),
+      // Visibility only. Enforcement happens in the pipeline on every call (13).
+      allowedForActor: request.actor?.capabilities.includes(c.capability) ?? false,
+      route: SUBJECT_ROUTES[c.name]?.path ?? null,
+      description: c.description,
+    })),
+    meta: meta(request),
+  }));
+
+  // ------------------------------------------------------------------ command routes
+  for (const name of registeredCommands()) {
+    const definition = commandDefinition(name);
+    const route = SUBJECT_ROUTES[name];
+    if (!route) {
+      throw new Error(
+        `Command "${name}" is registered but has no route in SUBJECT_ROUTES. Exposing a command ` +
+          'without declaring how its subject is addressed would make the subject ambiguous.',
+      );
+    }
+
+    const handle = (preview: boolean) => async (request: FastifyRequest, reply: FastifyReply) => {
+      const actor = request.actor;
+      if (!actor) return sendError(reply, request, unauthenticated());
+
+      // The subject id travels alongside the envelope, never inside the validated payload: every
+      // payload sets additionalProperties:false, and routing is not a domain concern.
+      const body = (request.body ?? {}) as Record<string, unknown>;
+      const params = request.params as Record<string, string>;
+      const subjectId = route.idParam ? (params[route.idParam] ?? null) : null;
+
+      try {
+        const result = await execute({
+          commandName: name,
+          actor,
+          rawEnvelope: body,
+          subjectId,
+          preview,
+          rulesetVersion: options.rulesetVersion,
+          requestId: request.requestId,
+        });
+        // 200 for an applied command and for a replay: a retry is not an error, and the client
+        // needs the original receipt (RGT-06).
+        return reply.code(200).send({ ...result, meta: meta(request) });
+      } catch (error) {
+        return sendError(reply, request, error);
+      }
+    };
+
+    app.post(route.path, handle(false));
+
+    if (definition.previewable) {
+      // The preview endpoint evaluates and explains, and authorises nothing (RGT-17).
+      const previewPath = route.path.replace(/\/([^/]+)$/, '/evaluate-$1');
+      app.post(previewPath, handle(true));
+    }
+  }
+
+  await registerReadRoutes(app);
+
+  app.setNotFoundHandler(async (request, reply) =>
+    sendError(
+      reply,
+      request,
+      new DomainError({
+        code: 'NOT_FOUND',
+        message: `No existe la ruta ${request.method} ${request.url}.`,
+        details: [
+          {
+            message:
+              'Un estado no se cambia con PATCH: cada transición tiene un comando con nombre cuya ' +
+              'transición la máquina de estados permite (05_STATE_MODEL).',
+          },
+        ],
+      }),
+    ),
+  );
+
+  app.addHook('onClose', async () => {
+    await closeDb();
+  });
+
+  return app;
+}
+
+const meta = (request: FastifyRequest) => ({
+  requestId: request.requestId,
+  serverTime: instantNow(),
+});
+
+/**
+ * One error shape for everything.
+ *
+ * A GATE_BLOCKED response carries blocks, warnings and confirmations as separate arrays, so a client
+ * can show three counts without a second round trip — the prototype's single "9 pendientes" is the
+ * thing this prevents.
+ */
+function sendError(reply: FastifyReply, request: FastifyRequest, error: unknown): FastifyReply {
+  if (isDomainError(error)) {
+    const body = error.toJSON();
+    return reply.code(HTTP_STATUS[error.code]).send({
+      error: {
+        ...body.error,
+        // Surface the structured parts for a blocked decision.
+        ...(error.code === 'GATE_BLOCKED' || error.code === 'CONFIRMATION_REQUIRED'
+          ? {
+              blocks: error.details
+                .filter((d) => d.ruleId !== undefined && d.instead !== undefined)
+                .map((d) => ({
+                  ruleId: d.ruleId,
+                  reason: d.message,
+                  instead: d.instead,
+                  sourceRef: d.sourceRef,
+                })),
+            }
+          : {}),
+      },
+      meta: meta(request),
+    });
+  }
+
+  // An unexpected error is a bug. It is logged with the request id and returned without internals:
+  // observability must not leak payload contents (13 / ops).
+  request.log?.error({ err: error, requestId: request.requestId }, 'unhandled error');
+  return reply.code(500).send({
+    error: {
+      code: 'INVARIANT_VIOLATED',
+      message: 'Error interno. El identificador de la solicitud permite ubicarlo en los logs.',
+      details: [],
+      ruleIds: [],
+      retryable: false,
+    },
+    meta: meta(request),
+  });
+}
+
+/** Entry point. */
+if (process.argv[1]?.endsWith('server.ts') || process.argv[1]?.endsWith('server.js')) {
+  const app = await buildServer({
+    databaseUrl: process.env['DATABASE_URL'] ?? 'postgres://vds:vds_dev_only@127.0.0.1:5434/vds_partes',
+    rulesetVersion: process.env['RULESET_VERSION'] ?? 'dev',
+    logger: true,
+  });
+  const port = Number(process.env['PORT'] ?? 4180);
+  await app.listen({ port, host: '127.0.0.1' });
+  console.log(`VDS Partes API on http://127.0.0.1:${port}`);
+}

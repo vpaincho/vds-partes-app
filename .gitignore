@@ -24,3 +24,4 @@ tests/visual/__screenshots__/*.actual.png
 .vercel
 .DS_Store
 Thumbs.db
+.tmp/

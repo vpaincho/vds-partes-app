@@ -1,0 +1,16 @@
+{
+  "name": "@vds/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Business API: command pipeline, authorization, read models, sync endpoints.",
+  "main": "src/server.ts",
+  "dependencies": {
+    "@vds/contracts": "*",
+    "@vds/kernel": "*",
+    "@vds/rules": "*",
+    "fastify": "5.12.5",
+    "pg": "8.23.1"
+  },
+  "scripts": { "dev": "node --watch src/server.ts", "start": "node src/server.ts" }
+}

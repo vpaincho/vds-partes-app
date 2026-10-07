@@ -5,10 +5,16 @@
       "path": "./packages/domain/kernel"
     },
     {
+      "path": "./packages/contracts"
+    },
+    {
       "path": "./packages/domain/rules"
     },
     {
       "path": "./packages/ui"
+    },
+    {
+      "path": "./apps/api"
     }
   ]
 }
