@@ -34,15 +34,25 @@
     "test:db": "vitest run --config vitest.db.config.ts",
     "db:seed": "node scripts/seed.mjs",
     "db:seed:reset": "node scripts/seed.mjs --truncate",
-    "api:dev": "node --watch apps/api/src/server.ts"
+    "api:dev": "node --watch apps/api/src/server.ts",
+    "web:dev": "npm run --prefix apps/web dev",
+    "web:build": "npm run --prefix apps/web build"
   },
   "devDependencies": {
     "@sinclair/typebox": "^0.34.52",
     "@types/node": "^26.6.4",
     "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
     "ajv": "^8.20.0",
     "pg": "^8.23.1",
     "typescript": "7.0.2",
+    "vite": "^8.3.3",
     "vitest": "5.0.3"
+  },
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   }
 }

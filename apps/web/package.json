@@ -1,0 +1,19 @@
+{
+  "name": "@vds/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "VDS Partes field and back-office application. React + Vite, PWA candidate.",
+  "dependencies": {
+    "@vds/contracts": "*",
+    "@vds/kernel": "*",
+    "@vds/ui": "*",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  }
+}

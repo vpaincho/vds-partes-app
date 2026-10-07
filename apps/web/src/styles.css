@@ -1,0 +1,880 @@
+/*
+ * Application styles. Every colour, space and size comes from a DS-01 token — no literal colours
+ * here, which is what keeps the contrast and ΔE guarantees true of what actually ships.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0 0 var(--vds-space-3);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: var(--vds-text-xl);
+}
+h2 {
+  font-size: var(--vds-text-lg);
+}
+h3 {
+  font-size: var(--vds-text-md);
+  font-family: var(--vds-font-display);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--vds-muted);
+}
+h4 {
+  font-size: var(--vds-text-sm);
+  color: var(--vds-muted);
+}
+
+p {
+  margin: 0 0 var(--vds-space-3);
+}
+
+/* ------------------------------------------------------------------------- shell */
+
+.vds-shell {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  height: 100%;
+}
+
+.vds-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vds-space-5);
+  width: 232px;
+  padding: var(--vds-space-5) var(--vds-space-4);
+  background: var(--vds-surface-raised);
+  border-right: 1px solid var(--vds-surface-border);
+  transition: width 120ms ease;
+}
+
+.vds-shell[data-rail='collapsed'] .vds-rail {
+  width: 64px;
+  padding-inline: var(--vds-space-3);
+}
+
+.vds-rail__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--vds-space-3);
+}
+
+.vds-rail__wordmark {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.vds-rail__wordmark strong {
+  font-family: var(--vds-font-display);
+  font-size: var(--vds-text-sm);
+  letter-spacing: 0.06em;
+}
+.vds-rail__wordmark small {
+  color: var(--vds-muted);
+  font-size: var(--vds-text-xs);
+}
+
+.vds-rail__nav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.vds-rail__link {
+  display: flex;
+  align-items: center;
+  gap: var(--vds-space-3);
+  width: 100%;
+  /* Rail items are touch targets in the field, so they never shrink below the field tier. */
+  min-height: 44px;
+  padding: var(--vds-space-2) var(--vds-space-3);
+  border: 1px solid transparent;
+  border-radius: var(--vds-radius-md);
+  background: none;
+  color: var(--vds-ink);
+  font: inherit;
+  font-size: var(--vds-text-md);
+  text-align: left;
+  cursor: pointer;
+}
+
+.vds-rail__link:hover {
+  background: var(--vds-surface-surface);
+}
+
+.vds-rail__link[aria-current='page'] {
+  background: var(--vds-surface-surface);
+  border-color: var(--vds-action);
+  font-weight: 600;
+}
+
+.vds-rail__icon {
+  flex: none;
+  width: 1.25em;
+  text-align: center;
+  color: var(--vds-muted);
+}
+
+.vds-rail__planned {
+  margin-left: auto;
+  font-size: var(--vds-text-xs);
+  color: var(--vds-pending);
+  font-family: var(--vds-font-mono);
+}
+
+.vds-rail__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid var(--vds-surface-border);
+  padding-top: var(--vds-space-3);
+}
+
+.vds-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--vds-surface-canvas);
+}
+
+.vds-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--vds-space-4);
+  padding: var(--vds-space-5) var(--vds-space-6);
+  background: var(--vds-surface-panel);
+  border-bottom: 1px solid var(--vds-surface-border);
+}
+
+.vds-topbar h1 {
+  margin: 0;
+}
+
+.vds-topbar__context {
+  margin: 0;
+  color: var(--vds-muted);
+  font-size: var(--vds-text-sm);
+}
+
+.vds-topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--vds-space-3);
+}
+
+.vds-content {
+  flex: 1;
+  overflow: auto;
+  /* 16px side gutter minimum, and the tier's gutter above that. */
+  padding: var(--vds-space-6) max(var(--vds-space-5), var(--vds-gutter));
+}
+
+/* ----------------------------------------------------------------------- controls */
+
+.vds-button {
+  min-height: var(--vds-touch-target, 36px);
+  padding: var(--vds-space-3) var(--vds-space-5);
+  border: 1px solid var(--vds-surface-border-strong);
+  border-radius: var(--vds-radius-md);
+  background: var(--vds-surface-panel);
+  color: var(--vds-ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.vds-button:hover {
+  border-color: var(--vds-action);
+}
+
+.vds-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.vds-button--primary {
+  background: var(--vds-action);
+  border-color: var(--vds-action);
+  color: var(--vds-on-accent);
+}
+
+.vds-button--secondary {
+  background: var(--vds-surface-surface);
+}
+
+.vds-button--ghost {
+  background: none;
+  border-color: transparent;
+  color: var(--vds-muted);
+}
+
+.vds-input {
+  min-height: var(--vds-touch-target, 36px);
+  width: 100%;
+  padding: var(--vds-space-3);
+  border: 1px solid var(--vds-surface-border-strong);
+  border-radius: var(--vds-radius-md);
+  background: var(--vds-surface-panel);
+  color: var(--vds-ink);
+  font: inherit;
+}
+
+textarea.vds-input,
+.vds-gate__override textarea {
+  width: 100%;
+  padding: var(--vds-space-3);
+  border: 1px solid var(--vds-surface-border-strong);
+  border-radius: var(--vds-radius-md);
+  background: var(--vds-surface-panel);
+  color: var(--vds-ink);
+  font: inherit;
+  resize: vertical;
+}
+
+/* ------------------------------------------------------------------------ badges */
+
+.vds-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vds-space-2);
+  margin-block: var(--vds-space-3);
+}
+
+.vds-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--vds-space-2);
+  padding: 2px var(--vds-space-3);
+  border: 1px solid currentColor;
+  border-radius: var(--vds-radius-sm);
+  font-size: var(--vds-text-xs);
+  line-height: 1.6;
+}
+
+/* One hue per dimension, so a dimension is identifiable without reading the label. */
+.vds-badge[data-dimension='plan'] {
+  color: var(--vds-domain-plan);
+}
+.vds-badge[data-dimension='exec'] {
+  color: var(--vds-domain-exec);
+}
+.vds-badge[data-dimension='review'] {
+  color: var(--vds-domain-review);
+}
+.vds-badge[data-dimension='commercial'] {
+  color: var(--vds-domain-commercial);
+}
+.vds-badge[data-dimension='habilita'] {
+  color: var(--vds-domain-habilita);
+}
+.vds-badge[data-dimension='delivery'] {
+  color: var(--vds-domain-delivery);
+}
+
+.vds-badge__label {
+  font-family: var(--vds-font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+
+.vds-badge__state {
+  font-family: var(--vds-font-mono);
+  font-weight: 500;
+  color: var(--vds-ink);
+}
+
+/* Tone overrides the dimension hue only where severity must dominate. */
+.vds-badge[data-tone='critical'] {
+  color: var(--vds-critical);
+}
+.vds-badge[data-tone='warn'] {
+  color: var(--vds-warn);
+}
+
+.vds-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--vds-space-3);
+  border: 1px solid var(--vds-surface-border-strong);
+  border-radius: var(--vds-radius-pill);
+  font-size: var(--vds-text-xs);
+  font-family: var(--vds-font-mono);
+  color: var(--vds-muted);
+}
+
+.vds-chip--warn {
+  color: var(--vds-warn);
+  border-color: var(--vds-warn);
+}
+
+/* 14: the provider mode stays visible. A TEST reference must never read as real. */
+.vds-chip--test {
+  color: var(--vds-warn);
+  border-color: var(--vds-warn);
+  font-weight: 500;
+}
+
+/* -------------------------------------------------------------------- gate panel */
+
+.vds-gate {
+  margin-block: var(--vds-space-5);
+  padding: var(--vds-space-5);
+  border: 1px solid var(--vds-surface-border-strong);
+  border-left-width: 4px;
+  border-radius: var(--vds-radius-md);
+  background: var(--vds-surface-panel);
+}
+
+.vds-gate[data-decision='BLOCK'] {
+  border-left-color: var(--vds-critical);
+}
+.vds-gate[data-decision='WARN'] {
+  border-left-color: var(--vds-warn);
+}
+.vds-gate[data-decision='REQUIRE_CONFIRMATION'] {
+  border-left-color: var(--vds-action);
+}
+.vds-gate--clear {
+  border-left-color: var(--vds-ok);
+}
+
+.vds-gate__headline {
+  margin: 0;
+  color: var(--vds-ok);
+  font-weight: 600;
+}
+
+/* Four counts side by side. Never a single total: that is the "9 pendientes" defect. */
+.vds-gate__counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vds-space-5);
+  list-style: none;
+  margin: 0 0 var(--vds-space-4);
+  padding: 0 0 var(--vds-space-4);
+  border-bottom: 1px solid var(--vds-surface-border);
+  font-size: var(--vds-text-sm);
+}
+
+.vds-gate__counts li {
+  color: var(--vds-muted);
+}
+.vds-gate__counts li strong {
+  font-size: var(--vds-text-xl);
+  margin-right: var(--vds-space-2);
+}
+.vds-gate__counts li[data-tone='critical'] strong {
+  color: var(--vds-critical);
+}
+.vds-gate__counts li[data-tone='warn'] strong {
+  color: var(--vds-warn);
+}
+.vds-gate__counts li[data-tone='pending'] strong {
+  color: var(--vds-pending);
+}
+.vds-gate__counts li[data-zero='true'] {
+  opacity: 0.45;
+}
+.vds-gate__counts li[data-zero='true'] strong {
+  color: var(--vds-muted);
+}
+
+.vds-gate__group {
+  margin-bottom: var(--vds-space-5);
+}
+.vds-gate__group ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--vds-space-4);
+}
+
+.vds-gate__item {
+  padding-left: var(--vds-space-4);
+  border-left: 2px solid var(--vds-surface-border);
+}
+.vds-gate__group[data-tone='critical'] .vds-gate__item {
+  border-left-color: var(--vds-critical);
+}
+.vds-gate__group[data-tone='warn'] .vds-gate__item {
+  border-left-color: var(--vds-warn);
+}
+
+.vds-gate__reason {
+  margin: 0 0 var(--vds-space-2);
+  font-weight: 500;
+}
+
+/* The actionable half. Sheet 56 requires it; it gets visual weight to match. */
+.vds-gate__instead {
+  margin: 0 0 var(--vds-space-2);
+  padding: var(--vds-space-3);
+  border-radius: var(--vds-radius-sm);
+  background: var(--vds-surface-surface);
+  font-size: var(--vds-text-sm);
+}
+
+.vds-gate__note {
+  margin: 0;
+  color: var(--vds-muted);
+  font-size: var(--vds-text-sm);
+}
+
+.vds-gate__provenance {
+  margin: var(--vds-space-2) 0 0;
+  color: var(--vds-faint);
+  font-size: var(--vds-text-xs);
+}
+
+.vds-gate__override {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vds-space-2);
+  margin-top: var(--vds-space-3);
+  font-size: var(--vds-text-sm);
+}
+
+/* ------------------------------------------------------------------- Mi jornada */
+
+.vds-asof {
+  color: var(--vds-faint);
+  font-size: var(--vds-text-xs);
+}
+
+.vds-myday__group {
+  margin-bottom: var(--vds-space-7);
+}
+
+.vds-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--vds-space-4);
+}
+
+.vds-card {
+  border: 1px solid var(--vds-surface-border);
+  border-radius: var(--vds-radius-lg);
+  background: var(--vds-surface-panel);
+  padding: var(--vds-space-5);
+}
+
+.vds-card[data-state='EN_EJECUCION'] {
+  border-left: 4px solid var(--vds-domain-exec);
+}
+.vds-card[data-state='PREPARADO'] {
+  border-left: 4px solid var(--vds-domain-plan);
+}
+.vds-card[data-state='SUSPENDIDO'] {
+  border-left: 4px solid var(--vds-warn);
+}
+
+.vds-card__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--vds-space-3);
+  width: 100%;
+  min-height: var(--vds-touch-target, 44px);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.vds-card__title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--vds-space-3);
+  font-family: var(--vds-font-mono);
+  font-size: var(--vds-text-lg);
+  font-weight: 500;
+}
+
+.vds-card__type {
+  font-family: var(--vds-font-display);
+  font-size: var(--vds-text-sm);
+  color: var(--vds-muted);
+  letter-spacing: 0.04em;
+}
+
+.vds-card__meta {
+  color: var(--vds-muted);
+  font-size: var(--vds-text-xs);
+}
+
+.vds-card__stats {
+  display: flex;
+  gap: var(--vds-space-6);
+  margin: 0;
+}
+.vds-card__stats dt {
+  color: var(--vds-muted);
+  font-size: var(--vds-text-xs);
+  font-family: var(--vds-font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.vds-card__stats dd {
+  margin: 0;
+  font-size: var(--vds-text-lg);
+}
+
+.vds-card__body {
+  margin-top: var(--vds-space-5);
+  padding-top: var(--vds-space-5);
+  border-top: 1px solid var(--vds-surface-border);
+}
+
+.vds-units,
+.vds-people {
+  list-style: none;
+  margin: 0 0 var(--vds-space-5);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--vds-space-3);
+}
+
+.vds-unit {
+  padding: var(--vds-space-4);
+  border: 1px solid var(--vds-surface-border);
+  border-radius: var(--vds-radius-md);
+  background: var(--vds-surface-surface);
+}
+
+.vds-unit__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vds-space-3);
+}
+
+.vds-unit__desc {
+  font-weight: 500;
+}
+
+.vds-unit__actions {
+  display: flex;
+  gap: var(--vds-space-3);
+  margin-top: var(--vds-space-3);
+}
+
+.vds-people li {
+  display: flex;
+  align-items: center;
+  gap: var(--vds-space-3);
+  min-height: var(--vds-row-height, 40px);
+  padding-inline: var(--vds-space-3);
+  border-bottom: 1px solid var(--vds-surface-border);
+}
+
+.vds-people__role {
+  color: var(--vds-muted);
+  font-size: var(--vds-text-xs);
+  font-family: var(--vds-font-display);
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------------------ tables */
+
+.vds-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--vds-body-size, var(--vds-text-md));
+}
+
+.vds-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--vds-space-3);
+  background: var(--vds-surface-raised);
+  border-bottom: 1px solid var(--vds-surface-border-strong);
+  text-align: left;
+  font-family: var(--vds-font-display);
+  font-size: var(--vds-text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--vds-muted);
+}
+
+.vds-table td {
+  height: var(--vds-row-height, 38px);
+  padding: var(--vds-space-2) var(--vds-space-3);
+  border-bottom: 1px solid var(--vds-surface-border);
+  vertical-align: middle;
+}
+
+.vds-table__sub {
+  color: var(--vds-muted);
+  font-size: var(--vds-text-xs);
+}
+
+.vds-table tr[data-outcome^='DISCARDED'] td {
+  /* A discarded rule is still shown — that is the point — but visibly subordinate. */
+  color: var(--vds-muted);
+}
+
+/* ------------------------------------------------------------------------- trace */
+
+.vds-trace__form {
+  display: grid;
+  grid-template-columns: auto minmax(220px, 420px) auto;
+  align-items: end;
+  gap: var(--vds-space-3) var(--vds-space-4);
+  margin-bottom: var(--vds-space-6);
+}
+.vds-trace__form label {
+  grid-column: 1;
+  font-size: var(--vds-text-sm);
+  color: var(--vds-muted);
+}
+.vds-trace__form .vds-input {
+  grid-column: 2;
+}
+.vds-trace__form button {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.vds-trace__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--vds-space-4);
+}
+
+.vds-trace__entry {
+  padding: var(--vds-space-5);
+  border: 1px solid var(--vds-surface-border);
+  border-left-width: 4px;
+  border-radius: var(--vds-radius-md);
+  background: var(--vds-surface-panel);
+}
+.vds-trace__entry[data-decision='BLOCK'] {
+  border-left-color: var(--vds-critical);
+}
+.vds-trace__entry[data-decision='WARN'] {
+  border-left-color: var(--vds-warn);
+}
+.vds-trace__entry[data-decision='ALLOW'] {
+  border-left-color: var(--vds-ok);
+}
+.vds-trace__entry[data-decision='NO_OP'] {
+  border-left-color: var(--vds-pending);
+}
+
+.vds-trace__entry header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--vds-space-3);
+  margin-bottom: var(--vds-space-3);
+}
+
+.vds-trace__decision {
+  padding: 2px var(--vds-space-3);
+  border-radius: var(--vds-radius-sm);
+  font-family: var(--vds-font-mono);
+  font-size: var(--vds-text-xs);
+  font-weight: 500;
+  color: var(--vds-on-accent);
+  background: var(--vds-pending);
+}
+.vds-trace__decision[data-decision='BLOCK'] {
+  background: var(--vds-critical);
+}
+.vds-trace__decision[data-decision='WARN'] {
+  background: var(--vds-warn);
+}
+.vds-trace__decision[data-decision='ALLOW'] {
+  background: var(--vds-ok);
+}
+
+.vds-trace__when {
+  margin-left: auto;
+  color: var(--vds-faint);
+  font-size: var(--vds-text-xs);
+}
+
+.vds-trace__who {
+  margin: 0 0 var(--vds-space-3);
+  color: var(--vds-muted);
+  font-size: var(--vds-text-sm);
+}
+
+.vds-trace__blocks ul,
+.vds-trace__warnings ul {
+  margin: 0 0 var(--vds-space-3);
+  padding-left: var(--vds-space-5);
+  font-size: var(--vds-text-sm);
+}
+
+.vds-trace__instead {
+  margin-top: var(--vds-space-2);
+  padding: var(--vds-space-2) var(--vds-space-3);
+  background: var(--vds-surface-surface);
+  border-radius: var(--vds-radius-sm);
+}
+
+.vds-trace__rules summary {
+  cursor: pointer;
+  font-size: var(--vds-text-sm);
+  color: var(--vds-action);
+}
+
+.vds-trace__note {
+  color: var(--vds-muted);
+  font-size: var(--vds-text-xs);
+}
+
+/* ---------------------------------------------------------------- signin, states */
+
+.vds-signin {
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  padding: var(--vds-space-5);
+  background: var(--vds-surface-canvas);
+}
+
+.vds-signin__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vds-space-3);
+  width: min(100%, 420px);
+  padding: var(--vds-space-7);
+  border: 1px solid var(--vds-surface-border);
+  border-radius: var(--vds-radius-lg);
+  background: var(--vds-surface-panel);
+}
+
+.vds-signin__note {
+  color: var(--vds-muted);
+  font-size: var(--vds-text-sm);
+}
+
+.vds-signin__error {
+  margin: 0;
+  color: var(--vds-critical);
+  font-size: var(--vds-text-sm);
+}
+
+.vds-empty,
+.vds-note {
+  color: var(--vds-muted);
+}
+
+.vds-error {
+  padding: var(--vds-space-5);
+  border: 1px solid var(--vds-critical);
+  border-radius: var(--vds-radius-md);
+  color: var(--vds-critical);
+}
+
+.vds-notice {
+  padding: var(--vds-space-3) var(--vds-space-4);
+  border-radius: var(--vds-radius-md);
+  background: var(--vds-surface-surface);
+  border-left: 3px solid var(--vds-action);
+  font-size: var(--vds-text-sm);
+}
+
+.vds-planned {
+  max-width: 68ch;
+}
+.vds-planned__status {
+  padding: var(--vds-space-3) var(--vds-space-4);
+  border-left: 3px solid var(--vds-pending);
+  background: var(--vds-surface-surface);
+}
+.vds-planned__note {
+  color: var(--vds-faint);
+  font-size: var(--vds-text-sm);
+}
+
+/* --------------------------------------------------------------------- responsive */
+
+/* The prototype scaled a 1366x1024 frame to fit, which shrank every control. This is real
+   responsive: the rail collapses to a bar and the gutter holds at 16px. */
+@media (max-width: 820px) {
+  .vds-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .vds-rail {
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+    gap: var(--vds-space-3);
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--vds-surface-border);
+    padding: var(--vds-space-3) var(--vds-space-4);
+  }
+
+  .vds-rail__nav {
+    flex-direction: row;
+    flex: 1;
+  }
+
+  .vds-rail__footer {
+    flex-direction: row;
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .vds-rail__wordmark,
+  .vds-rail__link span:not(.vds-rail__icon) {
+    display: none;
+  }
+
+  .vds-content {
+    padding: var(--vds-space-5) var(--vds-space-5);
+  }
+
+  .vds-trace__form {
+    grid-template-columns: 1fr;
+  }
+  .vds-trace__form label,
+  .vds-trace__form .vds-input,
+  .vds-trace__form button {
+    grid-column: 1;
+  }
+}
