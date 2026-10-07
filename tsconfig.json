@@ -1,7 +1,14 @@
 {
   "files": [],
   "references": [
-    { "path": "./packages/domain/kernel" },
-    { "path": "./packages/ui" }
+    {
+      "path": "./packages/domain/kernel"
+    },
+    {
+      "path": "./packages/domain/rules"
+    },
+    {
+      "path": "./packages/ui"
+    }
   ]
 }

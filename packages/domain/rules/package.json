@@ -1,0 +1,10 @@
+{
+  "name": "@vds/rules",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic rule engine: S0-S11 pipeline, P0-P8 precedence, conflict resolution, DecisionTrace.",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": { "@vds/kernel": "*" },
+  "scripts": { "test": "vitest run" }
+}

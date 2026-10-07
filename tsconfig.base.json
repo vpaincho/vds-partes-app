@@ -27,6 +27,9 @@
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,
 
+    // Node built-ins only. A package that needs DOM types widens `lib` in its own tsconfig.
+    "types": ["node"],
+
     "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
