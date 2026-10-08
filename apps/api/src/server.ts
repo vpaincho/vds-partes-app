@@ -31,6 +31,7 @@ import { registerControlCommands } from './commands/control.ts';
 import { registerHabilitaCommands } from './commands/habilita.ts';
 import { registerHabilitaRespondCommands } from './commands/habilita-respond.ts';
 import { registerReadRoutes } from './reads/routes.ts';
+import { registerHabilitaRespondReadRoutes } from './reads/habilita-respond.ts';
 import { registerSyncRoutes } from './sync/routes.ts';
 import { registerPlanningReadRoutes } from './reads/planning.ts';
 
@@ -325,6 +326,7 @@ export async function buildServer(options: ServerOptions): Promise<FastifyInstan
   }
 
   await registerReadRoutes(app);
+  await registerHabilitaRespondReadRoutes(app);
   await registerSyncRoutes(app, { rulesetVersion: options.rulesetVersion });
   await registerPlanningReadRoutes(app);
 

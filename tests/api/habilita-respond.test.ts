@@ -11,7 +11,7 @@
  *   RUL-049  classification is a new version; the initial report is never edited
  */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { envelope, getApp, makeSession, post, sql, teardown, type Session } from './helpers.ts';
+import { envelope, get, getApp, makeSession, post, sql, teardown, type Session } from './helpers.ts';
 
 let field: Session;
 let habilita: Session;
@@ -297,5 +297,54 @@ describe('habilita.events.discard', () => {
       body: envelope({ payload: {} }),
     });
     expect(blocked.status).toBe(422);
+  });
+});
+
+describe('read models', () => {
+  it('lists events with their current classification and linked case, without exposing version history', async () => {
+    const eventId = await reportEvent('DERRAME');
+    await post(`/habilita/events/${eventId}/start-triage`, { session: habilita, body: envelope({ payload: {} }) });
+    await post(`/habilita/events/${eventId}/classify`, {
+      session: habilita,
+      body: envelope({ payload: { category: 'AMBIENTAL', severity: 'ALTA' } }),
+    });
+
+    const list = await get<{ data: readonly { id: string; current_category: string | null }[] }>(
+      '/habilita/events?state=CLASIFICADO',
+      { session: habilita },
+    );
+    expect(list.status, JSON.stringify(list.body)).toBe(200);
+    const row = list.body.data.find((r) => r.id === eventId);
+    expect(row?.current_category).toBe('AMBIENTAL');
+  });
+
+  it('returns the full detail with classification history, case, actions and notifications', async () => {
+    const eventId = await reportEvent('FUGA_GAS');
+    await post(`/habilita/events/${eventId}/start-triage`, { session: habilita, body: envelope({ payload: {} }) });
+    await post(`/habilita/events/${eventId}/classify`, {
+      session: habilita,
+      body: envelope({ payload: { category: 'SEGURIDAD', severity: 'MEDIA' } }),
+    });
+    await post(`/habilita/events/${eventId}/escalate-to-case`, {
+      session: habilita,
+      body: envelope({ payload: { ownerId: habilita.identityId, justification: 'Requiere seguimiento' } }),
+    });
+
+    const detail = await get<{
+      data: {
+        event: { id: string; state: string };
+        classifications: readonly { version_no: number }[];
+        case: { id: string; state: string } | null;
+      };
+    }>(`/habilita/events/${eventId}`, { session: habilita });
+    expect(detail.status, JSON.stringify(detail.body)).toBe(200);
+    expect(detail.body.data.event.state).toBe('ESCALADO_A_CASO');
+    expect(detail.body.data.classifications).toHaveLength(1);
+    expect(detail.body.data.case?.state).toBe('ABIERTO');
+  });
+
+  it('404s for an event that does not exist', async () => {
+    const result = await get(`/habilita/events/${crypto.randomUUID()}`, { session: habilita });
+    expect(result.status).toBe(404);
   });
 });
