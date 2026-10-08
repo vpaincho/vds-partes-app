@@ -576,6 +576,108 @@ export const ResolveNotificationPayload = Type.Object(
   { additionalProperties: false },
 );
 
+/* ---------------------------------------------------------------------------- review */
+
+export const CreateReviewDecisionPayload = Type.Object(
+  {
+    executionUnitVersionId: Type.Optional(UuidSchema),
+    partId: Type.Optional(UuidSchema),
+  },
+  { additionalProperties: false },
+);
+
+export const AcceptReviewPayload = Type.Object(
+  { note: Type.Optional(Type.String()) },
+  { additionalProperties: false },
+);
+
+export const ObserveReviewPayload = Type.Object(
+  {
+    observationKind: Type.Union([
+      Type.Literal('CLARIFICATION'),
+      Type.Literal('COMPLETENESS'),
+      Type.Literal('OPERATIONAL_ERROR'),
+      Type.Literal('COMMERCIAL_DISPUTE'),
+    ]),
+    subjectPath: Type.Optional(Type.String()),
+    description: Type.String({ minLength: 5 }),
+  },
+  { additionalProperties: false },
+);
+
+export const RequestAmendmentPayload = Type.Object(
+  {
+    observationId: Type.Optional(UuidSchema),
+    executionUnitId: Type.Optional(UuidSchema),
+    partId: Type.Optional(UuidSchema),
+    requestedChange: Type.String({ minLength: 5 }),
+    justification: Type.String({ minLength: 10 }),
+  },
+  { additionalProperties: false },
+);
+
+export const ResolveAmendmentRequestPayload = Type.Object(
+  { amendmentId: UuidSchema },
+  { additionalProperties: false },
+);
+
+/* ------------------------------------------------------------------------- commercial */
+
+export const DeriveCommercialUnitPayload = Type.Object(
+  {
+    contractServiceId: UuidSchema,
+    contractItemId: UuidSchema,
+    unitOfMeasureId: UuidSchema,
+    periodFrom: Type.Optional(Type.String({ pattern: '^\\d{4}-\\d{2}-\\d{2}$' })),
+    periodUntil: Type.Optional(Type.String({ pattern: '^\\d{4}-\\d{2}-\\d{2}$' })),
+    // C-029/R-061: N:M lineage from the start — one or more execution sources, each keeping the
+    // exact version used (C-030).
+    sources: Type.Array(
+      Type.Object(
+        {
+          executionUnitVersionId: UuidSchema,
+          executionAllocationId: Type.Optional(UuidSchema),
+          contributionQuantity: Type.Optional(QuantitySchema.properties.value),
+        },
+        { additionalProperties: false },
+      ),
+      { minItems: 1 },
+    ),
+  },
+  { additionalProperties: false },
+);
+
+export const CompleteCommercialRequirementsPayload = Type.Object(
+  { quantity: QuantitySchema.properties.value },
+  { additionalProperties: false },
+);
+
+export const AcceptCommercialUnitPayload = Type.Object(
+  { note: Type.Optional(Type.String()) },
+  { additionalProperties: false },
+);
+
+export const RejectCommercialUnitPayload = Type.Object(
+  { reason: Type.String({ minLength: 10 }) },
+  { additionalProperties: false },
+);
+
+/* ---------------------------------------------------------------------------- billing */
+
+export const BuildBillableLinesPayload = Type.Object(
+  { commercialUnitIds: Type.Array(UuidSchema, { minItems: 1 }) },
+  { additionalProperties: false },
+);
+
+export const CreateBillingLotPayload = Type.Object(
+  {
+    clientId: UuidSchema,
+    contractId: Type.Optional(UuidSchema),
+    billableLineIds: Type.Array(UuidSchema, { minItems: 1 }),
+  },
+  { additionalProperties: false },
+);
+
 /* ----------------------------------------------------------------- the catalogue */
 
 export const COMMANDS: readonly CommandDefinition[] = [
@@ -1136,6 +1238,153 @@ export const COMMANDS: readonly CommandDefinition[] = [
     previewable: false,
     description: 'RGT-16: resolver exige evidencia de la obligacion cumplida, no un envio de canal fixture.',
   },
+
+  // --- review VDS
+  {
+    name: 'review.decisions.create',
+    module: 'review',
+    capability: 'review.decide',
+    trigger: 'ABRIR_REVISION',
+    subjectKind: 'DecisionRevision',
+    payload: CreateReviewDecisionPayload,
+    previewable: false,
+    description: 'Abre la revision sobre una version, nunca sobre el Parte directamente (11).',
+  },
+  {
+    name: 'review.decisions.accept',
+    module: 'review',
+    capability: 'review.decide',
+    trigger: 'ACEPTAR',
+    subjectKind: 'DecisionRevision',
+    payload: AcceptReviewPayload,
+    previewable: false,
+    description: 'Aceptar la revision no certifica comercialmente ni altera el estado del Parte (CC-06).',
+  },
+  {
+    name: 'review.decisions.observe',
+    module: 'review',
+    capability: 'review.decide',
+    trigger: 'OBSERVAR',
+    subjectKind: 'DecisionRevision',
+    payload: ObserveReviewPayload,
+    previewable: false,
+    description: 'Registra una observacion tipada; solo OPERATIONAL_ERROR habilita pedir enmienda.',
+  },
+  {
+    name: 'review.amendment-requests.create',
+    module: 'review',
+    capability: 'review.decide',
+    trigger: 'SOLICITAR_ENMIENDA',
+    subjectKind: 'SolicitudEnmienda',
+    payload: RequestAmendmentPayload,
+    previewable: false,
+    description: 'Review pide la correccion; nunca edita la realidad operativa directamente (RGT-04).',
+  },
+  {
+    name: 'review.amendment-requests.resolve',
+    module: 'review',
+    capability: 'review.decide',
+    trigger: 'ENMIENDA_APLICADA',
+    subjectKind: 'SolicitudEnmienda',
+    payload: ResolveAmendmentRequestPayload,
+    previewable: false,
+    description: 'Vincula la solicitud con la EnmiendaOperativa que efectivamente la resolvio.',
+  },
+
+  // --- commercial / certification
+  {
+    name: 'commercial.units.derive',
+    module: 'commercial',
+    capability: 'commercial.derive',
+    trigger: 'GENERAR_UC',
+    subjectKind: 'UnidadComercial',
+    payload: DeriveCommercialUnitPayload,
+    previewable: false,
+    description: 'RUL-059. Lineage N:M desde el inicio; cada fuente conserva la version exacta usada (C-030).',
+  },
+  {
+    name: 'commercial.units.complete-requirements',
+    module: 'commercial',
+    capability: 'commercial.derive',
+    trigger: 'COMPLETAR_REQUISITOS',
+    subjectKind: 'UnidadComercial',
+    payload: CompleteCommercialRequirementsPayload,
+    previewable: false,
+    description: 'INCOMPLETA -> ELEGIBLE. Sin cantidad no hay elegibilidad (C-034).',
+  },
+  {
+    name: 'commercial.units.enter-review',
+    module: 'commercial',
+    capability: 'commercial.decide',
+    trigger: 'INGRESAR_REVISION',
+    subjectKind: 'UnidadComercial',
+    payload: empty,
+    previewable: false,
+    description: 'ELEGIBLE -> EN_REVISION.',
+  },
+  {
+    name: 'commercial.units.accept',
+    module: 'commercial',
+    capability: 'commercial.decide',
+    trigger: 'ACEPTAR',
+    subjectKind: 'UnidadComercial',
+    payload: AcceptCommercialUnitPayload,
+    previewable: false,
+    description: 'TPR-027 hard gate: no se acepta sin haber pasado por elegible (RUL-062).',
+  },
+  {
+    name: 'commercial.units.reject',
+    module: 'commercial',
+    capability: 'commercial.decide',
+    trigger: 'RECHAZAR',
+    subjectKind: 'UnidadComercial',
+    payload: RejectCommercialUnitPayload,
+    previewable: false,
+    description: 'EN_REVISION -> RECHAZADA, con causa.',
+  },
+
+  // --- billing boundary
+  {
+    name: 'billing.lines.build',
+    module: 'billing',
+    capability: 'billing.build',
+    trigger: 'CONSTRUIR_LINEAS',
+    subjectKind: 'LineaFacturable',
+    payload: BuildBillableLinesPayload,
+    previewable: false,
+    description: 'RUL-070: solo una UC ACEPTADA y VIGENTE (sin supersesion) produce una linea.',
+  },
+  {
+    name: 'billing.lots.create',
+    module: 'billing',
+    capability: 'billing.build',
+    trigger: 'CREAR_LOTE',
+    subjectKind: 'LoteFacturacion',
+    payload: CreateBillingLotPayload,
+    previewable: false,
+    description: 'RUL-071. Un lote agrupa lineas; no es un PaqueteCertificacion (C-035).',
+  },
+  {
+    name: 'billing.lots.validate',
+    module: 'billing',
+    capability: 'billing.build',
+    trigger: 'VALIDAR',
+    subjectKind: 'LoteFacturacion',
+    payload: empty,
+    previewable: false,
+    description: 'BORRADOR -> VALIDADO.',
+  },
+  {
+    name: 'billing.lots.send',
+    module: 'billing',
+    capability: 'billing.send',
+    trigger: 'ENVIAR_ERP',
+    subjectKind: 'LoteFacturacion',
+    payload: empty,
+    previewable: false,
+    description:
+      'RUL-072. El intento se registra ANTES del envio; ACCEPTED/ERROR/UNKNOWN son los tres resultados reales.',
+  },
 ];
 
 const byName = new Map(COMMANDS.map((c) => [c.name, c]));
@@ -1206,3 +1455,14 @@ export type ImplementActionInput = Static<typeof ImplementActionPayload>;
 export type VerifyActionInput = Static<typeof VerifyActionPayload>;
 export type CreateNotificationInput = Static<typeof CreateNotificationPayload>;
 export type ResolveNotificationInput = Static<typeof ResolveNotificationPayload>;
+export type CreateReviewDecisionInput = Static<typeof CreateReviewDecisionPayload>;
+export type AcceptReviewInput = Static<typeof AcceptReviewPayload>;
+export type ObserveReviewInput = Static<typeof ObserveReviewPayload>;
+export type RequestAmendmentInput = Static<typeof RequestAmendmentPayload>;
+export type ResolveAmendmentRequestInput = Static<typeof ResolveAmendmentRequestPayload>;
+export type DeriveCommercialUnitInput = Static<typeof DeriveCommercialUnitPayload>;
+export type CompleteCommercialRequirementsInput = Static<typeof CompleteCommercialRequirementsPayload>;
+export type AcceptCommercialUnitInput = Static<typeof AcceptCommercialUnitPayload>;
+export type RejectCommercialUnitInput = Static<typeof RejectCommercialUnitPayload>;
+export type BuildBillableLinesInput = Static<typeof BuildBillableLinesPayload>;
+export type CreateBillingLotInput = Static<typeof CreateBillingLotPayload>;
