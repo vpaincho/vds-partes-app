@@ -47,6 +47,8 @@ import { registerHabilitaRespondReadRoutes } from './reads/habilita-respond.ts';
 import { registerReviewCommercialBillingReadRoutes } from './reads/review-commercial-billing.ts';
 import { registerDashboardReadRoutes } from './reads/dashboard.ts';
 import { registerSyncReadRoutes } from './reads/sync.ts';
+import { registerConfigReadRoutes } from './reads/config.ts';
+import { registerHabilitaDocumentalReadRoutes } from './reads/habilita-documental.ts';
 import { registerSyncRoutes } from './sync/routes.ts';
 import { registerEvidenceRoutes } from './evidence/routes.ts';
 import { registerPlanningReadRoutes } from './reads/planning.ts';
@@ -397,6 +399,8 @@ export async function buildServer(options: ServerOptions): Promise<FastifyInstan
   await registerDashboardReadRoutes(app);
   await registerSyncRoutes(app, { rulesetVersion: options.rulesetVersion });
   await registerSyncReadRoutes(app);
+  await registerConfigReadRoutes(app);
+  await registerHabilitaDocumentalReadRoutes(app);
   await registerEvidenceRoutes(app);
   await registerPlanningReadRoutes(app);
 

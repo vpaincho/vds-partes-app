@@ -58,12 +58,12 @@ export const SURFACES: readonly Surface[] = [
   { id: 'habilita.permits', label: 'Permisos', capability: 'habilita.read', density: 'operations', icon: '⬢', status: 'built' },
   { id: 'habilita.events', label: 'Habilita Respond', capability: 'habilita.read', density: 'operations', icon: '▲', status: 'built' },
   { id: 'trace', label: 'Trazabilidad', capability: 'trace.read', density: 'analysis', icon: '◈', status: 'built' },
-  { id: 'habilita.matrix', label: 'Habilita', capability: 'habilita.documental', density: 'operations', icon: '◉', status: 'planned' },
+  { id: 'habilita.matrix', label: 'Habilita', capability: 'habilita.documental', density: 'operations', icon: '◉', status: 'built' },
   { id: 'review.queue', label: 'Revisión VDS', capability: 'review.read', density: 'operations', icon: '▷', status: 'built' },
   { id: 'commercial.queue', label: 'Certificación', capability: 'commercial.read', density: 'operations', icon: '◫', status: 'built' },
   { id: 'billing.queue', label: 'Facturación', capability: 'billing.read', density: 'operations', icon: '▣', status: 'built' },
   { id: 'dashboard', label: 'Dashboard', capability: 'execution.read', density: 'analysis', icon: '▚', status: 'built' },
-  { id: 'config', label: 'Configuración', capability: 'config.read', density: 'operations', icon: '⚙', status: 'planned' },
+  { id: 'config', label: 'Configuración', capability: 'config.read', density: 'operations', icon: '⚙', status: 'built' },
 ];
 
 export interface AppShellProps {

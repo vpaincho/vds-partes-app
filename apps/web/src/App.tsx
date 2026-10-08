@@ -11,6 +11,8 @@ import { Commercial } from './modules/commercial/Commercial.tsx';
 import { Billing } from './modules/billing/Billing.tsx';
 import { Dashboard } from './modules/dashboard/Dashboard.tsx';
 import { Trace } from './modules/trace/Trace.tsx';
+import { Config } from './modules/config/Config.tsx';
+import { HabilitaDocumental } from './modules/habilita/Documental.tsx';
 import { fetchCommands, hasSession, setSession, type CommandInfo } from './api/client.ts';
 
 interface Actor {
@@ -102,6 +104,8 @@ export function App(): JSX.Element {
       {surface === 'billing.queue' && <Billing capabilities={actor.capabilities} />}
       {surface === 'dashboard' && <Dashboard capabilities={actor.capabilities} />}
       {surface === 'trace' && <Trace {...(traceSubject ? { subject: traceSubject } : {})} />}
+      {surface === 'habilita.matrix' && <HabilitaDocumental />}
+      {surface === 'config' && <Config />}
     </AppShell>
   );
 }

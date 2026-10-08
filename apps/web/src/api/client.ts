@@ -750,3 +750,121 @@ export interface CommercialDashboard {
 }
 
 export const fetchCommercialDashboard = () => read<CommercialDashboard>('/dashboard/commercial');
+
+/* ------------------------------------------------------------------ configuración (maestros) */
+
+export interface ConfigContractRow {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly client_id: string;
+  readonly client_code: string;
+  readonly client_name: string;
+  readonly version_count: string;
+  readonly published_version_no: number | null;
+}
+
+export interface ConfigClientRow {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+}
+
+export interface ConfigNamedRow {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly [key: string]: unknown;
+}
+
+export interface ConfigMasters {
+  readonly contracts: readonly ConfigContractRow[];
+  readonly clients: readonly ConfigClientRow[];
+  readonly services: readonly ConfigNamedRow[];
+  readonly partTypes: readonly ConfigNamedRow[];
+  readonly unitsOfMeasure: readonly ConfigNamedRow[];
+  readonly resourceTypes: readonly ConfigNamedRow[];
+  readonly technicalLocations: readonly ConfigNamedRow[];
+  readonly crews: readonly ConfigNamedRow[];
+  readonly people: readonly ConfigNamedRow[];
+  readonly resources: readonly ConfigNamedRow[];
+}
+
+export const fetchConfigMasters = () => read<ConfigMasters>('/config/masters');
+
+export interface ConfigContractDetail {
+  readonly contract: { readonly id: string; readonly code: string; readonly name: string };
+  readonly versions: readonly {
+    readonly id: string;
+    readonly version_no: number;
+    readonly status: string;
+    readonly valid_from: string | null;
+    readonly valid_until: string | null;
+    readonly service_count: string;
+  }[];
+}
+
+export const fetchConfigContract = (contractId: string) =>
+  read<ConfigContractDetail>(`/config/contracts/${contractId}`);
+
+/* ------------------------------------------------------------------- habilita documental */
+
+export interface HabilitaRequirementRow {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly requirement_type: string;
+  readonly applies_to: 'PERSON' | 'RESOURCE';
+  readonly severity: 'HARD_BLOCK' | 'WARNING' | 'INFORMATIVE';
+  readonly overrideable_via: string | null;
+  readonly valid_from: string;
+  readonly valid_until: string | null;
+  readonly client_name: string | null;
+  readonly service_name: string | null;
+}
+
+export interface HabilitaMatrixRow {
+  readonly requirement_id: string;
+  readonly requirement_code: string;
+  readonly severity: string;
+  readonly status: string;
+  readonly valid_from: string;
+  readonly valid_until: string | null;
+  readonly document_id: string | null;
+}
+
+export interface HabilitaPersonMatrixRow extends HabilitaMatrixRow {
+  readonly person_id: string;
+  readonly person_code: string | null;
+  readonly first_name: string;
+  readonly last_name: string;
+}
+
+export interface HabilitaResourceMatrixRow extends HabilitaMatrixRow {
+  readonly resource_id: string;
+  readonly resource_code: string;
+  readonly resource_name: string;
+}
+
+export interface HabilitaDocumentRow {
+  readonly id: string;
+  readonly code: string | null;
+  readonly document_type: string;
+  readonly subject_kind: 'PERSON' | 'RESOURCE';
+  readonly valid_from: string;
+  readonly valid_until: string | null;
+  readonly issuer: string | null;
+  readonly provenance: string;
+  readonly first_name: string | null;
+  readonly last_name: string | null;
+  readonly resource_code: string | null;
+}
+
+export interface HabilitaDocumentalMatrix {
+  readonly requirements: readonly HabilitaRequirementRow[];
+  readonly personMatrix: readonly HabilitaPersonMatrixRow[];
+  readonly resourceMatrix: readonly HabilitaResourceMatrixRow[];
+  readonly recentDocuments: readonly HabilitaDocumentRow[];
+}
+
+export const fetchHabilitaDocumentalMatrix = () => read<HabilitaDocumentalMatrix>('/habilita/documental/matrix');
