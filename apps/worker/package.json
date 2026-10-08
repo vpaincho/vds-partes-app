@@ -1,0 +1,16 @@
+{
+  "name": "@vds/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Background jobs sharing the domain with the API: expiries today, outbox/reconcile/erp/notifications next.",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@vds/kernel": "*",
+    "pg": "8.23.1"
+  },
+  "scripts": {
+    "dev": "node --watch src/index.ts",
+    "start": "node src/index.ts"
+  }
+}
