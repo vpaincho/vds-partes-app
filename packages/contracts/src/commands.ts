@@ -683,6 +683,24 @@ export const CreateBillingLotPayload = Type.Object(
   { additionalProperties: false },
 );
 
+/* -------------------------------------------------------------------------- sync */
+
+export const ResolveDiscrepancyPayload = Type.Object(
+  {
+    resolution: Type.Union([
+      Type.Literal('ACCEPTED_AS_DECLARED'),
+      Type.Literal('AMENDED'),
+      Type.Literal('REJECTED'),
+      Type.Literal('RECORDED_NON_COMPLIANT'),
+    ]),
+    resolutionNote: Type.String({ minLength: 10 }),
+    // Required when resolution is AMENDED — checked in the handler, since TypeBox cannot express
+    // "required if this other field equals X" without a oneOf the rest of this catalogue doesn't use.
+    amendmentId: Type.Optional(UuidSchema),
+  },
+  { additionalProperties: false },
+);
+
 /* ----------------------------------------------------------------- the catalogue */
 
 export const COMMANDS: readonly CommandDefinition[] = [
@@ -1401,6 +1419,19 @@ export const COMMANDS: readonly CommandDefinition[] = [
     description:
       'RUL-072. El intento se registra ANTES del envio; ACCEPTED/ERROR/UNKNOWN son los tres resultados reales.',
   },
+
+  // --- sync reconciliation
+  {
+    name: 'sync.discrepancies.resolve',
+    module: 'sync',
+    capability: 'sync.reconcile',
+    trigger: 'RESOLVE_DISCREPANCY',
+    subjectKind: 'DiscrepanciaSync',
+    payload: ResolveDiscrepancyPayload,
+    previewable: false,
+    description:
+      'RGT-11. Resuelve lo declarado por un dispositivo cuya sesion fue revocada offline; nunca reescribe lo declarado.',
+  },
 ];
 
 const byName = new Map(COMMANDS.map((c) => [c.name, c]));
@@ -1483,3 +1514,4 @@ export type AcceptCommercialUnitInput = Static<typeof AcceptCommercialUnitPayloa
 export type RejectCommercialUnitInput = Static<typeof RejectCommercialUnitPayload>;
 export type BuildBillableLinesInput = Static<typeof BuildBillableLinesPayload>;
 export type CreateBillingLotInput = Static<typeof CreateBillingLotPayload>;
+export type ResolveDiscrepancyInput = Static<typeof ResolveDiscrepancyPayload>;
