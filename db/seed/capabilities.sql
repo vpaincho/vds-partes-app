@@ -72,7 +72,13 @@ INSERT INTO platform.capabilities (id, module, description, dual_control) VALUES
   ('config.import',             'config',    'Ejecutar y publicar importaciones de maestros.', true),
 
   -- trace
-  ('trace.read',                'trace',     'Leer DecisionTrace y lineage.', false)
+  ('trace.read',                'trace',     'Leer DecisionTrace y lineage.', false),
+
+  -- sync / reconciliation
+  -- RGT-11: una sesión revocada mientras el dispositivo estaba offline no re-autoriza nada; el
+  -- comando declarado se preserva como discrepancia (sync.discrepancies) y esta es la autoridad
+  -- que decide qué hacer con lo declarado — nunca el dispositivo, nunca un reintento silencioso.
+  ('sync.reconcile',            'sync',      'Resolver discrepancias de sincronización (RGT-11).', true)
 ON CONFLICT (id) DO UPDATE
   SET description = excluded.description, dual_control = excluded.dual_control;
 
@@ -112,7 +118,7 @@ INSERT INTO platform.role_capabilities (role_id, capability_id) VALUES
   ('supervisor', 'habilita.report'), ('supervisor', 'habilita.read'),
   ('supervisor', 'habilita.permit.manage'), ('supervisor', 'habilita.permit.activate'),
   ('supervisor', 'planning.read'), ('supervisor', 'control.emit'), ('supervisor', 'control.apply'),
-  ('supervisor', 'trace.read'),
+  ('supervisor', 'trace.read'), ('supervisor', 'sync.reconcile'),
 
   -- habilita: the only role with override authority and permit approval.
   ('habilita', 'habilita.read'), ('habilita', 'habilita.report'), ('habilita', 'habilita.documental'),
