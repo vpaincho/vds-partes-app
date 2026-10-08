@@ -93,6 +93,28 @@ export function setSession(token: string | null): void {
 
 export const hasSession = (): boolean => sessionToken !== null;
 
+
+export interface DevIdentity {
+  readonly identityId: string;
+  readonly subjectRef: string;
+  readonly displayName: string;
+  readonly roles: readonly string[];
+}
+
+export interface DevSession {
+  readonly sessionId: string;
+  readonly displayName: string;
+  readonly roles: readonly string[];
+  readonly expiresInHours: number;
+}
+
+/** Development helper. These routes do not exist when devAuth is disabled on the API. */
+export const fetchDevIdentities = () =>
+  call<{ data: readonly DevIdentity[]; meta: ApiMeta }>('GET', '/dev/identities');
+
+export const createDevSession = (identityId: string) =>
+  call<{ data: DevSession; meta: ApiMeta }>('POST', '/dev/sessions', { identityId });
+
 async function call<T>(method: 'GET' | 'POST', path: string, body?: unknown): Promise<T> {
   let response: Response;
   try {
