@@ -2,6 +2,7 @@ import { useState, type JSX } from 'react';
 import { AppShell, type SurfaceId } from './shell/AppShell.tsx';
 import { SignIn } from './shell/SignIn.tsx';
 import { MyDay } from './modules/field/MyDay.tsx';
+import { Parts } from './modules/execution/Parts.tsx';
 import { Planning } from './modules/planning/Planning.tsx';
 import { Directives } from './modules/control/Directives.tsx';
 import { Permits } from './modules/habilita/Permits.tsx';
@@ -87,7 +88,7 @@ export function App(): JSX.Element {
       {surface === 'planning.timeline' && (
         <Planning capabilities={actor.capabilities} onShowTrace={showTrace} />
       )}
-      {surface === 'execution.parts' && <MyDay />}
+      {surface === 'execution.parts' && <Parts />}
       {surface === 'control.directives' && (
         <Directives capabilities={actor.capabilities} onShowTrace={showTrace} />
       )}
