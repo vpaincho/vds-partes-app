@@ -33,9 +33,14 @@ import {
   routeTipoParte,
   stateTransition,
 } from './evaluators.ts';
+import {
+  loadPart,
+  loadUnit,
+  PART_TERMINAL,
+  requireSubjectId,
+  UNIT_TERMINAL,
+} from './execution-shared.ts';
 
-const PART_TERMINAL = ['CERRADO_OPERATIVAMENTE', 'ANULADO'] as const;
-const UNIT_TERMINAL = ['CERRADA', 'NO_REALIZADA', 'ANULADA'] as const;
 
 /* -------------------------------------------------------------- execution.parts.prepare */
 
@@ -67,13 +72,14 @@ const preparePart: CommandHandler<PreparePartInput> = {
     return { subject: { kind: 'Parte', id: null }, scope };
   },
 
-  async evaluators({ db, payload }) {
+  async evaluators({ db, payload, envelope }) {
     return [
       routeTipoParte({
         db,
         subject: { kind: 'Parte', id: null },
         ...(payload.plannedAssignmentId ? { plannedAssignmentId: payload.plannedAssignmentId } : {}),
         isEmergent: payload.emergent !== undefined,
+        at: envelope.occurredAt as Instant,
       }),
       // No from-state: creation. The target state is PREPARADO, declared by the handler.
       stateTransition({
@@ -657,66 +663,6 @@ const closePart: CommandHandler<Record<string, never>> = {
 };
 
 /* ------------------------------------------------------------------------- helpers */
-
-interface PartRow {
-  id: Uuid;
-  code: string | null;
-  state: string;
-  base_id: Uuid | null;
-  version: number;
-}
-
-async function loadPart(db: Db, partId: string): Promise<PartRow> {
-  const row = await db.one<PartRow>(
-    'SELECT id, code, state::text AS state, base_id, version FROM execution.parts WHERE id = $1',
-    [partId],
-  );
-  if (!row) {
-    const { DomainError } = await import('@vds/kernel');
-    throw new DomainError({ code: 'NOT_FOUND', message: `No existe el Parte ${partId}.` });
-  }
-  return row;
-}
-
-interface UnitRow {
-  id: Uuid;
-  code: string | null;
-  state: string;
-  part_id: Uuid;
-  base_id: Uuid | null;
-  version: number;
-  requires_work_permit: boolean;
-}
-
-async function loadUnit(db: Db, unitId: string): Promise<UnitRow> {
-  const row = await db.one<UnitRow>(
-    `SELECT u.id, u.code, u.state::text AS state, u.part_id, p.base_id, u.version,
-            -- Whether a permit is required comes from the planned assignment that this work
-            -- materialises; absent a plan the context rule decides, defaulting to required for
-            -- emergent work is NOT assumed here — it is configuration (RUL-042).
-            coalesce(a.requires_work_permit, false) AS requires_work_permit
-     FROM execution.execution_units u
-     JOIN execution.parts p ON p.id = u.part_id
-     LEFT JOIN planning.plan_execution_links l ON l.part_id = p.id
-     LEFT JOIN planning.planned_assignments a ON a.id = l.planned_assignment_id
-     WHERE u.id = $1
-     LIMIT 1`,
-    [unitId],
-  );
-  if (!row) {
-    const { DomainError } = await import('@vds/kernel');
-    throw new DomainError({ code: 'NOT_FOUND', message: `No existe la UnidadEjecucion ${unitId}.` });
-  }
-  return row;
-}
-
-/** The subject id comes from the route path, supplied by the pipeline. */
-function requireSubjectId(subjectId: string | null, what: string): Uuid {
-  if (subjectId === null) {
-    throw new Error(`${what} is addressed by its route path, but no subject id was supplied.`);
-  }
-  return subjectId as Uuid;
-}
 
 async function buildUnitSnapshot(db: Db, unitId: string): Promise<Record<string, unknown>> {
   const unit = await db.one(

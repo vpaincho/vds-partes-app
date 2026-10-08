@@ -23,6 +23,7 @@ import {
 import { rule } from '@vds/rules';
 import type { StageEvaluator, StageOutcome } from '@vds/rules';
 import type { Db } from '../platform/db.ts';
+import { buildRoutingContext } from '../platform/typeparts.ts';
 
 const cite = (ruleId: string): { ruleId: string; sourceRef: string } => {
   const r = rule(ruleId);
@@ -400,67 +401,125 @@ export function routeTipoParte(input: {
   subject: SubjectRef;
   plannedAssignmentId?: string;
   isEmergent: boolean;
+  at: Instant;
 }): StageEvaluator {
   return {
     stage: 'S6_IDENTITY',
     precedence: 'P4',
     owner: 'config/routing',
     evaluate: async (): Promise<StageOutcome> => {
-      // The planned assignment names the expected pattern; that is the normal path.
-      if (input.plannedAssignmentId) {
-        const row = await input.db.one<{ part_type_id: string | null; code: string | null }>(
-          `SELECT a.expected_part_type_id AS part_type_id, pt.code
-           FROM planning.planned_assignments a
-           LEFT JOIN config.part_types pt ON pt.id = a.expected_part_type_id
-           WHERE a.id = $1`,
-          [input.plannedAssignmentId],
+      // The decision belongs to the three strategies, not to this evaluator. Each pattern says
+      // whether it applies to the context, and `routeContext` reports the outcome: resolved,
+      // ambiguous, or nothing applicable. Keeping the judgement in @vds/typeparts is what lets the
+      // same answer be computed in a test, in the worker and (later) offline on a device.
+      const { context, result } = await buildRoutingContext(input.db, {
+        ...(input.plannedAssignmentId ? { plannedAssignmentId: input.plannedAssignmentId } : {}),
+        isEmergent: input.isEmergent,
+        at: input.at,
+      });
+
+      if (result.resolved) {
+        const winner = result.applicable.find((a) => a.id === result.resolved)!;
+        const row = await input.db.one<{ id: string }>(
+          'SELECT id FROM config.part_types WHERE code = $1 AND is_active = true',
+          [result.resolved],
         );
-        if (row?.part_type_id) {
+        if (!row) {
+          // The strategy exists but the catalogue does not carry the pattern: configuration, not
+          // something to approximate.
           return {
-            derived: { partTypeId: row.part_type_id, partTypeCode: row.code },
-            rulesApplied: [
+            blocks: [
               {
                 ruleId: 'RUL-001',
                 precedence: 'P4',
-                outcome: 'WON',
-                note: `derivado del TipoParte previsto de la asignación: ${row.code}`,
+                reason: `El patrón ${result.resolved} no está activo en el catálogo de TipoParte.`,
+                instead: 'Activar el TipoParte en configuración antes de operar con ese patrón.',
+                subject: input.subject,
+                overrideable: false,
               },
             ],
+            rulesApplied: [{ ruleId: 'RUL-001', precedence: 'P4', outcome: 'WON' }],
           };
         }
+        return {
+          derived: { partTypeId: row.id, partTypeCode: result.resolved },
+          rulesApplied: [
+            {
+              ruleId: winner.decision.ruleId,
+              precedence: 'P4',
+              outcome: 'WON',
+              note: winner.decision.reason,
+            },
+            // The patterns that were considered and did not win are recorded too. Sheet 58 step 8
+            // requires the discarded candidates with their reason: once configuration moves on, a
+            // past routing decision can only be explained if the alternatives are on record.
+            ...result.rejected.map((r) => ({
+              ruleId: r.decision.ruleId,
+              precedence: 'P4' as const,
+              outcome: 'DISCARDED_BY_SPECIFICITY' as const,
+              note: `${r.id}: ${r.decision.reason}`,
+            })),
+          ],
+        };
       }
 
-      // Emergent work has no plan, so routing falls back to the actor's operational profile.
-      const candidates = await input.db.query<{ id: string; code: string }>(
-        `SELECT id, code FROM config.part_types WHERE is_active = true ORDER BY code`,
-      );
-
-      if (candidates.rows.length === 1) {
-        const only = candidates.rows[0]!;
+      // Nothing applies at all. That is not an ambiguity to confirm — it is a context no pattern
+      // covers, and inventing one would decide the grain of the Parte by accident.
+      if (result.applicable.length === 0 && result.ambiguous.length === 0) {
         return {
-          derived: { partTypeId: only.id, partTypeCode: only.code },
+          blocks: [
+            {
+              ruleId: 'RUL-001',
+              precedence: 'P4',
+              reason:
+                'Ningún TipoParte es aplicable a este contexto: ' +
+                result.rejected.map((r) => `${r.id} (${r.decision.reason})`).join(' · '),
+              instead:
+                'Revisar el alcance de la asignación. Un contexto que no corresponde a ningún ' +
+                'patrón no se fuerza al más parecido: el grano del Parte quedaría decidido por azar.',
+              subject: input.subject,
+              overrideable: false,
+            },
+          ],
           rulesApplied: [{ ruleId: 'RUL-001', precedence: 'P4', outcome: 'WON' }],
         };
       }
 
-      // RUL-002: ambiguous. Record the candidates and ask, rather than choose.
+      // RUL-002: more than one pattern compatible, or a discriminating datum missing. Ask for the
+      // minimum confirmation and record the candidates — never take the first match (AP-03).
+      const candidates = [...result.applicable, ...result.ambiguous].map((c) => c.id);
       return {
         confirmationsRequired: [
           {
             field: 'partTypeId',
             reason:
-              'Más de un TipoParte es compatible con el contexto y no hay asignación planificada ' +
-              'que lo determine. Confirmá el patrón o escalá a supervisión.',
-            candidate: candidates.rows.map((c) => c.code),
+              `Más de un TipoParte es compatible con el contexto (${candidates.join(', ')}) o falta ` +
+              `un dato discriminante (${result.missing.join(', ') || 'sin especificar'}). ` +
+              'Confirmá el patrón o escalá a supervisión.',
+            candidate: candidates,
             ruleId: 'RUL-002',
           },
         ],
+        ...(result.missing.length > 0
+          ? {
+              missing: result.missing.map((what) => ({
+                what,
+                reason:
+                  'Dato discriminante del ruteo. No se completa por defecto: un valor inventado acá ' +
+                  'se arrastra a la imputación y a la certificación (AP-06).',
+              })),
+            }
+          : {}),
         rulesApplied: [
           {
             ruleId: 'RUL-002',
             precedence: 'P4',
             outcome: 'WON',
-            note: `candidatos: ${candidates.rows.map((c) => c.code).join(', ')}`,
+            note:
+              `candidatos: ${candidates.join(', ')}` +
+              (result.missing.length > 0 ? ` · falta: ${result.missing.join(', ')}` : '') +
+              ` · contexto: ${context.hasOriginAndDestination ? 'trayecto' : 'sin trayecto'}, ` +
+              `${context.hasCrew ? 'con cuadrilla' : 'sin cuadrilla'}`,
           },
         ],
       };

@@ -154,7 +154,35 @@ export async function registerReadRoutes(app: FastifyInstance): Promise<void> {
           [partId],
         );
 
-        return { part, units, intervals, people };
+        const { rows: locations } = await db.query(
+          `SELECT l.id, l.execution_unit_id, l.technical_location_id, tl.code AS technical_location_code,
+                  tl.name AS technical_location_name, l.location_role, l.unmapped_label, l.confirmed_at
+           FROM execution.execution_locations l
+           LEFT JOIN config.technical_locations tl ON tl.id = l.technical_location_id
+           JOIN execution.execution_units u ON u.id = l.execution_unit_id
+           WHERE u.part_id = $1
+           ORDER BY l.confirmed_at NULLS LAST`,
+          [partId],
+        );
+
+        const { rows: measurements } = await db.query(
+          `SELECT m.id, m.execution_unit_id, m.metric_code, m.quantity, m.unit_of_measure_id,
+                  um.code AS unit_code, m.measurement_source, m.measured_at
+           FROM execution.execution_measurements m
+           JOIN execution.execution_units u ON u.id = m.execution_unit_id
+           LEFT JOIN config.units_of_measure um ON um.id = m.unit_of_measure_id
+           WHERE u.part_id = $1
+           ORDER BY m.measured_at`,
+          [partId],
+        );
+
+        // A small, stable catalogue the capture form needs to build a valid CaptureMeasurement
+        // payload (C-014: a magnitude always travels with its unit — never a bare number).
+        const { rows: unitsOfMeasure } = await db.query(
+          'SELECT id, code, name FROM config.units_of_measure ORDER BY code',
+        );
+
+        return { part, units, intervals, people, locations, measurements, unitsOfMeasure };
       });
 
       if (!data) {

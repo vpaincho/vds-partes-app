@@ -41,6 +41,29 @@ function uuidv7(ms = Date.now()) {
 const ids = {};
 const id = (key) => (ids[key] ??= uuidv7());
 
+/**
+ * Bind the id map to what the database actually holds.
+ *
+ * Every insert here is `ON CONFLICT (code) DO NOTHING`, which is what makes the seed re-runnable —
+ * but it also means that on a second run the row kept is the EXISTING one, whose id is not the one
+ * `id(key)` just generated. Anything linking to it by the generated id then fails the foreign key,
+ * which is exactly what happened the first time part_type_components was added. So after each
+ * catalogue insert, the ids are read back by code.
+ */
+async function bindIds(client, table, mapping) {
+  const codes = Object.values(mapping);
+  const { rows } = await client.query(
+    `SELECT id, code FROM ${table} WHERE code = ANY($1::text[])`,
+    [codes],
+  );
+  const byCode = new Map(rows.map((r) => [r.code, r.id]));
+  for (const [key, code] of Object.entries(mapping)) {
+    const found = byCode.get(code);
+    if (!found) throw new Error(`seed: ${table} has no row with code "${code}" after insert`);
+    ids[key] = found;
+  }
+}
+
 async function seedCapabilities(client) {
   const sql = await readFile(path.join(repoRoot, 'db/seed/capabilities.sql'), 'utf8');
   await client.query(sql);
@@ -64,6 +87,11 @@ async function seedDev(client) {
      ON CONFLICT (code) DO NOTHING`,
     [id('client.aup'), id('client.gen'), id('client.cdo')],
   );
+  await bindIds(client, 'config.clients', {
+    'client.aup': 'AUP',
+    'client.gen': 'GEN',
+    'client.cdo': 'CDO',
+  });
 
   await client.query(
     `INSERT INTO config.units_of_measure (id, code, name, dimension) VALUES
@@ -73,6 +101,13 @@ async function seedDev(client) {
        ($9,'unidad','Unidad','COUNT')
      ON CONFLICT (code) DO NOTHING`,
     ['m3', 'm2', 'm', 't', 'km', 'viaje', 'maniobra', 'h', 'unidad'].map((c) => id(`um.${c}`)),
+  );
+  await bindIds(
+    client,
+    'config.units_of_measure',
+    Object.fromEntries(
+      ['m3', 'm2', 'm', 't', 'km', 'viaje', 'maniobra', 'h', 'unidad'].map((c) => [`um.${c}`, c]),
+    ),
   );
 
   await client.query(
@@ -84,6 +119,12 @@ async function seedDev(client) {
      ON CONFLICT (code) DO NOTHING`,
     [id('svc.suelo'), id('svc.lineas'), id('svc.transporte'), id('svc.izaje')],
   );
+  await bindIds(client, 'config.services', {
+    'svc.suelo': 'MOV-SUELO',
+    'svc.lineas': 'LINEAS',
+    'svc.transporte': 'TRANSPORTE',
+    'svc.izaje': 'IZAJE',
+  });
 
   await client.query(
     `INSERT INTO config.part_types (id, code, name, description) VALUES
@@ -92,6 +133,123 @@ async function seedDev(client) {
        ($3,'TP-03','Cuadrilla','Cuadrilla por jornada o turno; UE por trabajo real distinguible acumulado.')
      ON CONFLICT (code) DO NOTHING`,
     [id('pt.tp01'), id('pt.tp02'), id('pt.tp03')],
+  );
+  await bindIds(client, 'config.part_types', {
+    'pt.tp01': 'TP-01',
+    'pt.tp02': 'TP-02',
+    'pt.tp03': 'TP-03',
+  });
+
+  // Capture components, and which TipoParte requires which. This is the configuration that answers
+  // "what does this pattern ask for", so the UI never shows a field the pattern has no reason to
+  // have — "no exigir campos que no aplican al tipo" is a baseline instruction, not a preference.
+  await client.query(
+    `INSERT INTO config.part_components (id, code, name, description) VALUES
+       ($1,'RESULTADO_UE','Resultado de la UE','Cierre con resultado y causa condicional (RUL-033).'),
+       ($2,'MEDICION_SERVICIO','Medición del servicio','Métrica del servicio o del activo intervenido.'),
+       ($3,'ROL_ORIGEN','Ubicación de origen','Origen del movimiento, del maestro (RUL-031).'),
+       ($4,'ROL_DESTINO','Ubicación de destino','Destino del movimiento, del maestro (RUL-031).'),
+       ($5,'CARGA','Carga: tipo y cantidad','Rama de carga de TP-02. Componente, no TipoParte aparte.'),
+       ($6,'ROSTER_REAL','Roster real del turno','Derivado de los intervalos; se confirma la excepción (CAP-061).'),
+       ($7,'EVIDENCIA_FOTO','Evidencia fotográfica','Foto de respaldo cuando la regla la exige.'),
+       ($8,'FIRMA_CLIENTE','Firma del cliente','Conformidad en campo, cuando el contrato la pide.')
+     ON CONFLICT (code) DO NOTHING`,
+    [
+      id('pc.resultado'),
+      id('pc.medicion'),
+      id('pc.origen'),
+      id('pc.destino'),
+      id('pc.carga'),
+      id('pc.roster'),
+      id('pc.foto'),
+      id('pc.firma'),
+    ],
+  );
+  await bindIds(client, 'config.part_components', {
+    'pc.resultado': 'RESULTADO_UE',
+    'pc.medicion': 'MEDICION_SERVICIO',
+    'pc.origen': 'ROL_ORIGEN',
+    'pc.destino': 'ROL_DESTINO',
+    'pc.carga': 'CARGA',
+    'pc.roster': 'ROSTER_REAL',
+    'pc.foto': 'EVIDENCIA_FOTO',
+    'pc.firma': 'FIRMA_CLIENTE',
+  });
+
+  // The links. TP-02 requires origin and destination; TP-03 requires the real roster; none of them
+  // requires the other's fields. Photo and signature are seeded as OPTIONAL everywhere, because
+  // whether they are mandatory is contractual and no contract has said so yet.
+  const componentLinks = [
+    ['pt.tp01', 'pc.resultado', true],
+    ['pt.tp01', 'pc.medicion', false],
+    ['pt.tp01', 'pc.foto', false],
+    ['pt.tp02', 'pc.origen', true],
+    ['pt.tp02', 'pc.destino', true],
+    ['pt.tp02', 'pc.carga', false],
+    ['pt.tp02', 'pc.resultado', true],
+    ['pt.tp03', 'pc.roster', true],
+    ['pt.tp03', 'pc.resultado', true],
+    ['pt.tp03', 'pc.medicion', false],
+    ['pt.tp03', 'pc.foto', false],
+  ];
+  for (const [partType, component, required] of componentLinks) {
+    await client.query(
+      `INSERT INTO config.part_type_components
+         (id, part_type_id, part_component_id, is_required, valid_from)
+       VALUES ($1, $2, $3, $4, '2026-01-01')
+       ON CONFLICT DO NOTHING`,
+      [uuidv7(), id(partType), id(component), required],
+    );
+  }
+
+  // The shift boundary for TP-03, as a rule version rather than a constant. RGT-10: the operational
+  // day is NOT midnight, and the only way the product can say that truthfully is for the boundary
+  // to be configuration someone set. 06:00 is the seeded value for the dev dataset; TP-01 and TP-02
+  // are deliberately left WITHOUT one, so the "ambiguous until configured" path stays exercised.
+  await client.query(
+    `INSERT INTO config.rule_definitions (id, rule_type, code, canonical_rule_id, name, description)
+     VALUES ($1,'SHIFT_BOUNDARY','RD-SHIFT-TP03','RUL-005','Frontera de jornada TP-03',
+             'Frontera de jornada operativa para cuadrilla. Dato contractual: acá es fixture TEST.')
+     ON CONFLICT (code) DO NOTHING`,
+    [id('rd.shift.tp03')],
+  );
+  await bindIds(client, 'config.rule_definitions', { 'rd.shift.tp03': 'RD-SHIFT-TP03' });
+  await client.query(
+    `INSERT INTO config.rule_versions
+       (id, rule_definition_id, version_no, params, effect, force, valid_from, status)
+     VALUES ($1, $2, 1, '{"boundary":"06:00"}'::jsonb, 'ALLOW', 'REQUIRED', '2026-01-01', 'PUBLISHED')
+     ON CONFLICT DO NOTHING`,
+    [id('rv.shift.tp03'), id('rd.shift.tp03')],
+  );
+  await client.query(
+    `INSERT INTO config.rule_scopes (id, rule_version_id, scope_level, part_type_id)
+     VALUES ($1, $2, 'PART_TYPE', $3) ON CONFLICT DO NOTHING`,
+    [uuidv7(), id('rv.shift.tp03'), id('pt.tp03')],
+  );
+
+  // Transport continuity for TP-02: successive legs stay in the same assignment. Seeded explicitly
+  // so the dev dataset shows six runs as six UE of one Parte, which is the distinction the
+  // prototype could not express.
+  await client.query(
+    `INSERT INTO config.rule_definitions (id, rule_type, code, canonical_rule_id, name, description)
+     VALUES ($1,'PART_TYPE_CUT','RD-CUT-TP02','RUL-004','Continuidad de transporte TP-02',
+             'Un tramo nuevo continúa la misma asignación. Dato contractual: acá es fixture TEST.')
+     ON CONFLICT (code) DO NOTHING`,
+    [id('rd.cut.tp02')],
+  );
+  await bindIds(client, 'config.rule_definitions', { 'rd.cut.tp02': 'RD-CUT-TP02' });
+  await client.query(
+    `INSERT INTO config.rule_versions
+       (id, rule_definition_id, version_no, params, effect, force, valid_from, status)
+     VALUES ($1, $2, 1, '{"transportContinuity":"SAME_PART","shiftCutsPart":false}'::jsonb,
+             'ALLOW', 'REQUIRED', '2026-01-01', 'PUBLISHED')
+     ON CONFLICT DO NOTHING`,
+    [id('rv.cut.tp02'), id('rd.cut.tp02')],
+  );
+  await client.query(
+    `INSERT INTO config.rule_scopes (id, rule_version_id, scope_level, part_type_id)
+     VALUES ($1, $2, 'PART_TYPE', $3) ON CONFLICT DO NOTHING`,
+    [uuidv7(), id('rv.cut.tp02'), id('pt.tp02')],
   );
 
   await client.query(
@@ -103,6 +261,12 @@ async function seedDev(client) {
      ON CONFLICT (code) DO NOTHING`,
     [id('rt.cuadrilla'), id('rt.pickup'), id('rt.hidrogrua'), id('rt.camion')],
   );
+  await bindIds(client, 'config.resource_types', {
+    'rt.cuadrilla': 'CUADRILLA',
+    'rt.pickup': 'PICKUP',
+    'rt.hidrogrua': 'HIDROGRUA',
+    'rt.camion': 'CAMION',
+  });
 
   // People: the prototype's CREW['C-03'] crew, which is the one PD-0392 involves.
   const people = [
@@ -120,12 +284,18 @@ async function seedDev(client) {
       [id(`person.${key}`), key, first, last],
     );
   }
+  await bindIds(
+    client,
+    'config.people',
+    Object.fromEntries(people.map(([key]) => [`person.${key}`, key])),
+  );
 
   await client.query(
     `INSERT INTO config.crews (id, code, name) VALUES ($1, 'C-03', 'Cuadrilla 03')
      ON CONFLICT (code) DO NOTHING`,
     [id('crew.c03')],
   );
+  await bindIds(client, 'config.crews', { 'crew.c03': 'C-03' });
   for (const [key] of people.slice(0, 4)) {
     await client.query(
       `INSERT INTO config.crew_memberships (id, crew_id, person_id, role, valid_from)
@@ -148,6 +318,11 @@ async function seedDev(client) {
      ON CONFLICT (code) DO NOTHING`,
     [id('loc.etb3'), id('loc.et'), id('client.aup')],
   );
+  await bindIds(client, 'config.technical_locations', {
+    'loc.et': 'ET',
+    'loc.es': 'ES',
+    'loc.etb3': 'ET-B3',
+  });
 
   // --- contract configuration
   await client.query(
@@ -156,21 +331,50 @@ async function seedDev(client) {
      ON CONFLICT (code) DO NOTHING`,
     [id('contract.aup017'), id('client.aup')],
   );
+  await bindIds(client, 'config.contracts', { 'contract.aup017': 'CT-AUP-017' });
   await client.query(
     `INSERT INTO config.contract_versions (id, contract_id, version_no, valid_from, status, published_at)
      VALUES ($1, $2, 1, '2026-01-01', 'PUBLISHED', now())
      ON CONFLICT (contract_id, version_no) DO NOTHING`,
     [id('cv.aup017'), id('contract.aup017')],
   );
+  // contract_versions has no code column; it is identified by (contract_id, version_no).
+  {
+    const { rows } = await client.query(
+      'SELECT id FROM config.contract_versions WHERE contract_id = $1 AND version_no = 1',
+      [id('contract.aup017')],
+    );
+    if (!rows[0]) throw new Error('seed: contract version 1 missing after insert');
+    ids['cv.aup017'] = rows[0].id;
+  }
   await client.query(
     `INSERT INTO config.contract_services (id, contract_version_id, service_id, code)
      VALUES ($1, $2, $3, 'CS-SUELO') ON CONFLICT DO NOTHING`,
     [id('cs.suelo'), id('cv.aup017'), id('svc.suelo')],
   );
+  await bindIds(client, 'config.contract_services', { 'cs.suelo': 'CS-SUELO' });
   await client.query(
     `INSERT INTO config.contract_items (id, contract_service_id, unit_of_measure_id, code, description)
      VALUES ($1, $2, $3, 'IT-DESM', 'Desmalezado') ON CONFLICT DO NOTHING`,
     [id('item.desm'), id('cs.suelo'), id('um.m2')],
+  );
+  await bindIds(client, 'config.contract_items', { 'item.desm': 'IT-DESM' });
+
+  // R-045: which cost centres the contract service allows. Without this, resolving an allocation is
+  // refused — correctly — because there is no configured pairing to check against.
+  await client.query(
+    `INSERT INTO config.cost_centers (id, code, name, provenance) VALUES
+       ($1,'CC-SUELO','Movimiento de suelo','FIXTURE_TEST'),
+       ($2,'CC-GEN','Gastos generales','FIXTURE_TEST')
+     ON CONFLICT (code) DO NOTHING`,
+    [id('cc.suelo'), id('cc.gen')],
+  );
+  await bindIds(client, 'config.cost_centers', { 'cc.suelo': 'CC-SUELO', 'cc.gen': 'CC-GEN' });
+  await client.query(
+    `INSERT INTO config.contract_service_cost_centers
+       (id, contract_service_id, cost_center_id, valid_from)
+     VALUES ($1, $2, $3, '2026-01-01') ON CONFLICT DO NOTHING`,
+    [uuidv7(), id('cs.suelo'), id('cc.suelo')],
   );
 
   // --- identities and scopes, one per prototype actor
@@ -191,6 +395,17 @@ async function seedDev(client) {
        ON CONFLICT (provider, subject_ref) DO NOTHING`,
       [id(`identity.${key}`), key, name, ids[`person.${key}`] ?? null],
     );
+    // Identities are keyed by (provider, subject_ref), not by a code column, so the generic
+    // bindIds does not fit. Same reason as everywhere else: on a re-run the kept row is the
+    // existing one and its scope insert would reference an id that is not there.
+    {
+      const { rows } = await client.query(
+        'SELECT id FROM platform.identities WHERE provider = $1 AND subject_ref = $2',
+        ['fixture-dev', key],
+      );
+      if (!rows[0]) throw new Error(`seed: identity "${key}" missing after insert`);
+      ids[`identity.${key}`] = rows[0].id;
+    }
     await client.query(
       `INSERT INTO platform.identity_scopes (id, identity_id, role_id, contract_id, valid_from)
        VALUES ($1, $2, $3, $4, '2026-01-01') ON CONFLICT DO NOTHING`,
@@ -243,6 +458,10 @@ async function seedDev(client) {
      ON CONFLICT (code) DO NOTHING`,
     [id('req.induccion'), id('req.epp'), id('client.aup')],
   );
+  await bindIds(client, 'habilita.requirements', {
+    'req.induccion': 'RQ-INDUCCION',
+    'req.epp': 'RQ-EPP',
+  });
 
   // Everyone in the crew is compliant EXCEPT Cristian Paz, whose induction expired — the PD-0392
   // case. He is left non-compliant on purpose: the point is that his real presence is preserved
@@ -267,12 +486,19 @@ async function seedDev(client) {
     `SELECT (SELECT count(*)::int FROM platform.identities) AS identities,
             (SELECT count(*)::int FROM config.people) AS people,
             (SELECT count(*)::int FROM config.part_types) AS part_types,
+            (SELECT count(*)::int FROM config.part_components) AS components,
+            (SELECT count(*)::int FROM config.part_type_components) AS component_links,
             (SELECT count(*)::int FROM habilita.requirements) AS requirements`,
   );
   const c = counts.rows[0];
   console.log(
     `  dev: ${c.identities} identities, ${c.people} people, ${c.part_types} part types, ` +
+      `${c.components} capture components in ${c.component_links} links, ` +
       `${c.requirements} habilita requirements`,
+  );
+  console.log(
+    '  NOTE: TP-03 has a configured 06:00 shift boundary; TP-01 and TP-02 deliberately have none, ' +
+      'so routing still reports the boundary as missing instead of assuming midnight (RGT-10).',
   );
   console.log('  NOTE: Cristian Paz is seeded with an EXPIRED induction on purpose (PD-0392/RGT-05).');
 }
@@ -291,6 +517,9 @@ async function truncate(client) {
       platform.identities,
       config.crew_memberships, config.crews, config.contract_items, config.contract_services,
       config.contract_versions, config.contracts, config.technical_locations, config.people,
+      config.rule_scopes, config.rule_versions, config.rule_definitions,
+      config.part_type_components, config.part_components,
+      config.contract_service_cost_centers, config.cost_centers,
       config.resources, config.resource_types, config.services, config.part_types,
       config.units_of_measure, config.clients,
       habilita.compliances, habilita.requirements,

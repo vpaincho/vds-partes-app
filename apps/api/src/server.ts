@@ -24,6 +24,8 @@ import { closeDb, initDb, withConnection } from './platform/db.ts';
 import { resolveActor, touchSession, unauthenticated, type AuthenticatedActor } from './platform/authz.ts';
 import { execute, registeredCommands } from './platform/pipeline.ts';
 import { registerExecutionCommands } from './commands/execution.ts';
+import { registerExecutionCaptureCommands } from './commands/execution-capture.ts';
+import { registerExecutionLifecycleCommands } from './commands/execution-lifecycle.ts';
 import { registerPlanningCommands } from './commands/planning.ts';
 import { registerControlCommands } from './commands/control.ts';
 import { registerHabilitaCommands } from './commands/habilita.ts';
@@ -95,13 +97,58 @@ const SUBJECT_ROUTES: Record<string, { path: string; idParam?: string }> = {
   'execution.parts.prepare': { path: '/execution/parts/prepare' },
   'execution.units.create': { path: '/execution/units' },
   'execution.units.start': { path: '/execution/units/:executionUnitId/start', idParam: 'executionUnitId' },
+  'execution.units.suspend': { path: '/execution/units/:executionUnitId/suspend', idParam: 'executionUnitId' },
+  'execution.units.resume': { path: '/execution/units/:executionUnitId/resume', idParam: 'executionUnitId' },
+  'execution.units.change-time-category': {
+    path: '/execution/units/:executionUnitId/change-time-category',
+    idParam: 'executionUnitId',
+  },
+  'execution.units.confirm-location': {
+    path: '/execution/units/:executionUnitId/confirm-location',
+    idParam: 'executionUnitId',
+  },
+  'execution.units.capture-measurement': {
+    path: '/execution/units/:executionUnitId/capture-measurement',
+    idParam: 'executionUnitId',
+  },
+  'execution.units.replace-person': {
+    path: '/execution/units/:executionUnitId/replace-person',
+    idParam: 'executionUnitId',
+  },
+  'execution.units.replace-resource': {
+    path: '/execution/units/:executionUnitId/replace-resource',
+    idParam: 'executionUnitId',
+  },
+  'execution.units.record-transition': {
+    path: '/execution/units/:executionUnitId/record-transition',
+    idParam: 'executionUnitId',
+  },
+  'execution.units.mark-not-performed': {
+    path: '/execution/units/:executionUnitId/mark-not-performed',
+    idParam: 'executionUnitId',
+  },
+  'execution.units.void': { path: '/execution/units/:executionUnitId/void', idParam: 'executionUnitId' },
   'execution.units.close': { path: '/execution/units/:executionUnitId/close', idParam: 'executionUnitId' },
+  'execution.allocations.resolve': {
+    path: '/execution/units/:executionUnitId/resolve-allocation',
+    idParam: 'executionUnitId',
+  },
   'execution.parts.close': { path: '/execution/parts/:partId/close', idParam: 'partId' },
+  'execution.parts.void': { path: '/execution/parts/:partId/void', idParam: 'partId' },
+  'execution.parts.handover': { path: '/execution/parts/:partId/handover', idParam: 'partId' },
+  'execution.amendments.create': { path: '/execution/amendments' },
+  'execution.amendments.approve': {
+    path: '/execution/amendments/:amendmentId/approve',
+    idParam: 'amendmentId',
+  },
+  'execution.evidence.attach': { path: '/execution/evidence' },
 };
 
 export async function buildServer(options: ServerOptions): Promise<FastifyInstance> {
   initDb({ connectionString: options.databaseUrl });
   registerExecutionCommands();
+  registerExecutionCaptureCommands();
+  registerExecutionLifecycleCommands();
   registerPlanningCommands();
   registerControlCommands();
   registerHabilitaCommands();
