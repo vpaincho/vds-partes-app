@@ -478,6 +478,104 @@ export const ActivatePermitPayload = Type.Object(
   { additionalProperties: false },
 );
 
+/* ---------------------------------------------------------- habilita: Respond & Learn */
+
+export const StartTriagePayload = Type.Object(
+  { assignedTo: Type.Optional(UuidSchema) },
+  { additionalProperties: false },
+);
+
+export const ClassifyEventPayload = Type.Object(
+  {
+    // RUL-048/049: the initial report is never edited. Classification is a new version.
+    category: Type.String({ minLength: 1 }),
+    severity: Type.Optional(Type.String({ minLength: 1 })),
+    eventTypeCode: Type.Optional(Type.String({ minLength: 1 })),
+    justification: Type.Optional(Type.String()),
+  },
+  { additionalProperties: false },
+);
+
+export const EscalateToCasePayload = Type.Object(
+  {
+    ownerId: UuidSchema,
+    justification: Type.String({ minLength: 10 }),
+  },
+  { additionalProperties: false },
+);
+
+export const CloseEventWithoutCasePayload = Type.Object(
+  { justification: Type.String({ minLength: 10 }) },
+  { additionalProperties: false },
+);
+
+export const DiscardEventPayload = Type.Object(
+  {
+    reason: Type.String({ minLength: 10 }),
+    duplicateOfId: Type.Optional(UuidSchema),
+  },
+  { additionalProperties: false },
+);
+
+export const StartInvestigationPayload = Type.Object(
+  { scope: Type.Optional(Type.String()) },
+  { additionalProperties: false },
+);
+
+export const FinishInvestigationPayload = Type.Object(
+  { summary: Type.String({ minLength: 10 }) },
+  { additionalProperties: false },
+);
+
+export const CloseCasePayload = Type.Object(
+  { note: Type.Optional(Type.String()) },
+  { additionalProperties: false },
+);
+
+export const CreateActionPayload = Type.Object(
+  {
+    caseId: UuidSchema,
+    description: Type.String({ minLength: 5 }),
+    actionKind: Type.Optional(Type.String()),
+    // B-09: whether this blocks closing the case is configuration-shaped, never assumed; the
+    // caller states it explicitly and the trace records who decided.
+    isBlocking: Type.Boolean(),
+    responsibleId: UuidSchema,
+    dueAt: Type.Optional(InstantSchema),
+  },
+  { additionalProperties: false },
+);
+
+export const ImplementActionPayload = Type.Object(
+  { note: Type.Optional(Type.String()) },
+  { additionalProperties: false },
+);
+
+export const VerifyActionPayload = Type.Object(
+  { note: Type.Optional(Type.String()) },
+  { additionalProperties: false },
+);
+
+export const CreateNotificationPayload = Type.Object(
+  {
+    eventId: Type.Optional(UuidSchema),
+    caseId: Type.Optional(UuidSchema),
+    obligationCode: Type.String({ minLength: 1 }),
+    recipientRole: Type.String({ minLength: 1 }),
+    responsibleId: Type.Optional(UuidSchema),
+    dueAt: Type.Optional(InstantSchema),
+  },
+  { additionalProperties: false },
+);
+
+export const ResolveNotificationPayload = Type.Object(
+  {
+    resolutionNote: Type.String({ minLength: 3 }),
+    evidenceId: Type.Optional(UuidSchema),
+  },
+  { additionalProperties: false },
+);
+
 /* ----------------------------------------------------------------- the catalogue */
 
 export const COMMANDS: readonly CommandDefinition[] = [
@@ -895,6 +993,149 @@ export const COMMANDS: readonly CommandDefinition[] = [
     previewable: true,
     description: 'RUL-043. APROBADO is not VIGENTE: activation is its own authorised act.',
   },
+
+  // --- habilita: Respond & Learn
+  {
+    name: 'habilita.events.start-triage',
+    module: 'habilita',
+    capability: 'habilita.triage',
+    trigger: 'INICIAR_TRIAGE',
+    subjectKind: 'EventoHabilita',
+    payload: StartTriagePayload,
+    previewable: false,
+    description: 'T-EH02. REPORTADO -> EN_TRIAGE. El reporte original queda intacto (RUL-048).',
+  },
+  {
+    name: 'habilita.events.classify',
+    module: 'habilita',
+    capability: 'habilita.triage',
+    trigger: 'CLASIFICAR',
+    subjectKind: 'EventoHabilita',
+    payload: ClassifyEventPayload,
+    previewable: false,
+    description: 'T-EH03. Escribe una EventoClasificacionHabilita versionada; nunca edita el reporte (RUL-049).',
+  },
+  {
+    name: 'habilita.events.escalate-to-case',
+    module: 'habilita',
+    capability: 'habilita.triage',
+    trigger: 'EVALUAR_ESCALAMIENTO_ABRE_CASO',
+    subjectKind: 'EventoHabilita',
+    payload: EscalateToCasePayload,
+    previewable: true,
+    description: 'T-EH04/T-CH01. Abre el unico CasoHabilita del evento (R-057) con su owner.',
+  },
+  {
+    name: 'habilita.events.close-without-case',
+    module: 'habilita',
+    capability: 'habilita.triage',
+    trigger: 'CERRAR_SIN_CASO',
+    subjectKind: 'EventoHabilita',
+    payload: CloseEventWithoutCasePayload,
+    previewable: true,
+    description: 'T-EH05 hard gate (TPR-019): exige clasificacion previa antes de cerrar sin caso.',
+  },
+  {
+    name: 'habilita.events.discard',
+    module: 'habilita',
+    capability: 'habilita.triage',
+    trigger: 'DESCARTAR_DUPLICADO_NO_EVENTO',
+    subjectKind: 'EventoHabilita',
+    payload: DiscardEventPayload,
+    previewable: false,
+    description: 'T-EH06. Duplicado o no-evento, con causa y referencia; nunca se reutiliza (TPR-021).',
+  },
+  {
+    name: 'habilita.cases.start-investigation',
+    module: 'habilita',
+    capability: 'habilita.case',
+    trigger: 'INICIAR_INVESTIGACION',
+    subjectKind: 'CasoHabilita',
+    payload: StartInvestigationPayload,
+    previewable: false,
+    description: 'T-CH02. ABIERTO -> EN_INVESTIGACION.',
+  },
+  {
+    name: 'habilita.cases.finish-investigation',
+    module: 'habilita',
+    capability: 'habilita.case',
+    trigger: 'FINALIZAR_INVESTIGACION',
+    subjectKind: 'CasoHabilita',
+    payload: FinishInvestigationPayload,
+    previewable: true,
+    description: 'T-CH03. La investigacion puede terminar con las acciones aun abiertas (T-CH03, GS-035).',
+  },
+  {
+    name: 'habilita.cases.evaluate-closure',
+    module: 'habilita',
+    capability: 'habilita.case',
+    trigger: 'EVALUAR_CIERRE_OK',
+    subjectKind: 'CasoHabilita',
+    payload: empty,
+    previewable: true,
+    description:
+      'T-CH04 hard gate: notificaciones requeridas resueltas y ninguna accion bloqueante sin verificar (RUL-053/TPR-024).',
+  },
+  {
+    name: 'habilita.cases.close',
+    module: 'habilita',
+    capability: 'habilita.case',
+    trigger: 'CERRAR',
+    subjectKind: 'CasoHabilita',
+    payload: CloseCasePayload,
+    previewable: true,
+    description: 'T-CH05 hard gate (TPR-022/023): solo desde LISTO_PARA_CIERRE.',
+  },
+  {
+    name: 'habilita.actions.create',
+    module: 'habilita',
+    capability: 'habilita.case',
+    trigger: 'ACTION_CREATED',
+    subjectKind: 'AccionCorrectivaHabilita',
+    payload: CreateActionPayload,
+    previewable: false,
+    description: 'R-060. Una accion correctiva con responsable y si bloquea el cierre del caso (B-09).',
+  },
+  {
+    name: 'habilita.actions.implement',
+    module: 'habilita',
+    capability: 'habilita.case',
+    trigger: 'ACTION_IMPLEMENTED',
+    subjectKind: 'AccionCorrectivaHabilita',
+    payload: ImplementActionPayload,
+    previewable: false,
+    description: 'Implementada no es verificada: la verificacion es un acto separado.',
+  },
+  {
+    name: 'habilita.actions.verify',
+    module: 'habilita',
+    capability: 'habilita.case',
+    trigger: 'ACTION_VERIFIED',
+    subjectKind: 'AccionCorrectivaHabilita',
+    payload: VerifyActionPayload,
+    previewable: false,
+    description: 'RUL-053/TPR-024: una accion bloqueante sin verificar impide EVALUAR_CIERRE_OK.',
+  },
+  {
+    name: 'habilita.notifications.create',
+    module: 'habilita',
+    capability: 'habilita.case',
+    trigger: 'NOTIFICATION_CREATED',
+    subjectKind: 'Notificacion',
+    payload: CreateNotificationPayload,
+    previewable: false,
+    description: 'R-059. Una obligacion con responsable y plazo; el canal fixture no la descarga (RGT-16).',
+  },
+  {
+    name: 'habilita.notifications.resolve',
+    module: 'habilita',
+    capability: 'habilita.case',
+    trigger: 'NOTIFICATION_RESOLVED',
+    subjectKind: 'Notificacion',
+    payload: ResolveNotificationPayload,
+    previewable: false,
+    description: 'RGT-16: resolver exige evidencia de la obligacion cumplida, no un envio de canal fixture.',
+  },
 ];
 
 const byName = new Map(COMMANDS.map((c) => [c.name, c]));
@@ -952,3 +1193,16 @@ export type HandoverInput = Static<typeof HandoverPayload>;
 export type ResolveAllocationInput = Static<typeof ResolveAllocationPayload>;
 export type ApproveAmendmentInput = Static<typeof ApproveAmendmentPayload>;
 export type AttachEvidenceInput = Static<typeof AttachEvidencePayload>;
+export type StartTriageInput = Static<typeof StartTriagePayload>;
+export type ClassifyEventInput = Static<typeof ClassifyEventPayload>;
+export type EscalateToCaseInput = Static<typeof EscalateToCasePayload>;
+export type CloseEventWithoutCaseInput = Static<typeof CloseEventWithoutCasePayload>;
+export type DiscardEventInput = Static<typeof DiscardEventPayload>;
+export type StartInvestigationInput = Static<typeof StartInvestigationPayload>;
+export type FinishInvestigationInput = Static<typeof FinishInvestigationPayload>;
+export type CloseCaseInput = Static<typeof CloseCasePayload>;
+export type CreateActionInput = Static<typeof CreateActionPayload>;
+export type ImplementActionInput = Static<typeof ImplementActionPayload>;
+export type VerifyActionInput = Static<typeof VerifyActionPayload>;
+export type CreateNotificationInput = Static<typeof CreateNotificationPayload>;
+export type ResolveNotificationInput = Static<typeof ResolveNotificationPayload>;
