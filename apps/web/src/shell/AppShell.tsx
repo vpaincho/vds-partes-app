@@ -26,6 +26,7 @@ export type SurfaceId =
   | 'habilita.matrix'
   | 'review.queue'
   | 'commercial.queue'
+  | 'billing.queue'
   | 'dashboard'
   | 'config'
   | 'trace';
@@ -58,8 +59,9 @@ export const SURFACES: readonly Surface[] = [
   { id: 'habilita.events', label: 'Habilita Respond', capability: 'habilita.read', density: 'operations', icon: '▲', status: 'built' },
   { id: 'trace', label: 'Trazabilidad', capability: 'trace.read', density: 'analysis', icon: '◈', status: 'built' },
   { id: 'habilita.matrix', label: 'Habilita', capability: 'habilita.documental', density: 'operations', icon: '◉', status: 'planned' },
-  { id: 'review.queue', label: 'Revisión VDS', capability: 'review.read', density: 'operations', icon: '▷', status: 'planned' },
-  { id: 'commercial.queue', label: 'Certificación', capability: 'commercial.read', density: 'operations', icon: '◫', status: 'planned' },
+  { id: 'review.queue', label: 'Revisión VDS', capability: 'review.read', density: 'operations', icon: '▷', status: 'built' },
+  { id: 'commercial.queue', label: 'Certificación', capability: 'commercial.read', density: 'operations', icon: '◫', status: 'built' },
+  { id: 'billing.queue', label: 'Facturación', capability: 'billing.read', density: 'operations', icon: '▣', status: 'built' },
   { id: 'dashboard', label: 'Dashboard', capability: 'commercial.client.read', density: 'analysis', icon: '▚', status: 'planned' },
   { id: 'config', label: 'Configuración', capability: 'config.read', density: 'operations', icon: '⚙', status: 'planned' },
 ];
@@ -225,28 +227,6 @@ function PlannedSurface({ surface }: { readonly surface: Surface }): JSX.Element
         'Alta y versionado de requisitos por tipo de sujeto (persona/recurso)',
         'Carga y vigencia de documentos, con freshness explícito',
         'Vista cruzada persona/recurso × requisito × contexto × fecha',
-      ],
-    },
-    'review.queue': {
-      summary:
-        'Bandeja lista–detalle sobre una versión de ejecución, con observación específica y solicitud ' +
-        'de enmienda. No cambia el estado operacional del Parte.',
-      wave: 'W5',
-      items: [
-        'Decisión sobre versión, con actor, instante y causa',
-        'Observación tipada: aclaración, completitud, error operacional o disputa comercial',
-        'Solicitud de enmienda, que ejecuta Execution y no Review',
-      ],
-    },
-    'commercial.queue': {
-      summary:
-        'Unidades comerciales con su lineage N:M hacia versiones de ejecución, paquetes, conformidad, ' +
-        'ajustes y supersession.',
-      wave: 'W5',
-      items: [
-        'UC derivada por regla, con la versión exacta de ejecución que consumió',
-        'Paquetes con composición versionada y parcialidad sólo si la regla la permite',
-        'Ajuste comercial que no toca la realidad operativa',
       ],
     },
     dashboard: {

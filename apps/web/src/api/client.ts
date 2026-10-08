@@ -558,3 +558,162 @@ export interface CommandInfo {
 }
 
 export const fetchCommands = () => read<CommandInfo[]>('/commands');
+
+/* ------------------------------------------------------------------ review VDS */
+
+export interface ReviewDecisionRow {
+  readonly id: string;
+  readonly state: string;
+  readonly execution_unit_version_id: string | null;
+  readonly part_id: string | null;
+  readonly reviewer_name: string | null;
+  readonly decided_at: string | null;
+  readonly created_at: string;
+  readonly observation_count: string;
+}
+
+export const fetchReviewDecisions = (options: { state?: string } = {}) => {
+  const params = new URLSearchParams();
+  if (options.state) params.set('state', options.state);
+  const query = params.toString();
+  return read<ReviewDecisionRow[]>(`/review/decisions${query ? `?${query}` : ''}`);
+};
+
+export interface ReviewDecisionDetail {
+  readonly decision: ReviewDecisionRow & { readonly decision_note: string | null };
+  readonly observations: readonly {
+    readonly id: string;
+    readonly observation_kind: string;
+    readonly subject_path: string | null;
+    readonly description: string;
+    readonly raised_at: string;
+    readonly raised_by_name: string | null;
+    readonly resolved_at: string | null;
+    readonly resolution_note: string | null;
+  }[];
+  readonly amendmentRequests: readonly {
+    readonly id: string;
+    readonly observation_id: string | null;
+    readonly execution_unit_id: string | null;
+    readonly part_id: string | null;
+    readonly requested_change: string;
+    readonly justification: string;
+    readonly status: string;
+    readonly amendment_id: string | null;
+    readonly requested_at: string;
+    readonly resolved_at: string | null;
+  }[];
+}
+
+export const fetchReviewDecision = (decisionId: string) =>
+  read<ReviewDecisionDetail>(`/review/decisions/${decisionId}`);
+
+/* ----------------------------------------------------------------- commercial */
+
+export interface CommercialUnitRow {
+  readonly id: string;
+  readonly code: string | null;
+  readonly state: string;
+  readonly supersession_state: string;
+  readonly quantity: string | null;
+  readonly unit_code: string;
+  readonly contract_item_code: string;
+  readonly period_from: string | null;
+  readonly period_until: string | null;
+  readonly derived_at: string;
+  readonly eligible_at: string | null;
+  readonly accepted_at: string | null;
+  readonly rejected_at: string | null;
+  readonly source_count: string;
+}
+
+export const fetchCommercialUnits = (options: { state?: string } = {}) => {
+  const params = new URLSearchParams();
+  if (options.state) params.set('state', options.state);
+  const query = params.toString();
+  return read<CommercialUnitRow[]>(`/commercial/units${query ? `?${query}` : ''}`);
+};
+
+export interface CommercialUnitDetail {
+  readonly unit: CommercialUnitRow & {
+    readonly contract_service_id: string;
+    readonly contract_item_id: string;
+    readonly unit_of_measure_id: string;
+    readonly supersedes_id: string | null;
+    readonly version: number;
+  };
+  readonly sources: readonly {
+    readonly id: string;
+    readonly execution_unit_version_id: string;
+    readonly execution_allocation_id: string | null;
+    readonly contribution_quantity: string | null;
+    readonly version_no: number;
+    readonly effective_at: string;
+    readonly unit_description: string;
+  }[];
+  readonly observations: readonly {
+    readonly id: string;
+    readonly reason_code: string | null;
+    readonly description: string;
+    readonly raised_at: string;
+    readonly resolved_at: string | null;
+    readonly resolution_note: string | null;
+  }[];
+}
+
+export const fetchCommercialUnit = (unitId: string) => read<CommercialUnitDetail>(`/commercial/units/${unitId}`);
+
+/* --------------------------------------------------------------------- billing */
+
+export interface BillingLotRow {
+  readonly id: string;
+  readonly code: string | null;
+  readonly state: string;
+  readonly client_name: string;
+  readonly contract_code: string | null;
+  readonly validated_at: string | null;
+  readonly sent_at: string | null;
+  readonly accepted_at: string | null;
+  readonly line_count: string;
+}
+
+export const fetchBillingLots = (options: { state?: string } = {}) => {
+  const params = new URLSearchParams();
+  if (options.state) params.set('state', options.state);
+  const query = params.toString();
+  return read<BillingLotRow[]>(`/billing/lots${query ? `?${query}` : ''}`);
+};
+
+export interface BillingLotDetail {
+  readonly lot: BillingLotRow & { readonly cancelled_at: string | null; readonly version: number };
+  readonly lines: readonly {
+    readonly id: string;
+    readonly commercial_unit_id: string;
+    readonly quantity: string;
+    readonly unit_code: string;
+    readonly contract_item_code: string;
+    readonly invalidated_at: string | null;
+    readonly invalidation_reason: string | null;
+  }[];
+  readonly attempts: readonly {
+    readonly id: string;
+    readonly attempt_no: number;
+    readonly status: string;
+    readonly provider_kind: string;
+    readonly external_ref: string | null;
+    readonly error_code: string | null;
+    readonly error_message: string | null;
+    readonly started_at: string;
+    readonly completed_at: string | null;
+  }[];
+  readonly documentRefs: readonly {
+    readonly external_system: string;
+    readonly external_id: string;
+    readonly document_kind: string | null;
+    readonly document_status: string | null;
+    readonly issued_at: string | null;
+    readonly observed_at: string;
+  }[];
+}
+
+export const fetchBillingLot = (lotId: string) => read<BillingLotDetail>(`/billing/lots/${lotId}`);

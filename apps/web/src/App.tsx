@@ -6,6 +6,9 @@ import { Planning } from './modules/planning/Planning.tsx';
 import { Directives } from './modules/control/Directives.tsx';
 import { Permits } from './modules/habilita/Permits.tsx';
 import { HabilitaEvents } from './modules/habilita/Events.tsx';
+import { Review } from './modules/review/Review.tsx';
+import { Commercial } from './modules/commercial/Commercial.tsx';
+import { Billing } from './modules/billing/Billing.tsx';
 import { Trace } from './modules/trace/Trace.tsx';
 import { fetchCommands, hasSession, setSession, type CommandInfo } from './api/client.ts';
 
@@ -93,6 +96,9 @@ export function App(): JSX.Element {
         <Permits capabilities={actor.capabilities} onShowTrace={showTrace} />
       )}
       {surface === 'habilita.events' && <HabilitaEvents capabilities={actor.capabilities} />}
+      {surface === 'review.queue' && <Review capabilities={actor.capabilities} />}
+      {surface === 'commercial.queue' && <Commercial capabilities={actor.capabilities} />}
+      {surface === 'billing.queue' && <Billing capabilities={actor.capabilities} />}
       {surface === 'trace' && <Trace {...(traceSubject ? { subject: traceSubject } : {})} />}
     </AppShell>
   );
