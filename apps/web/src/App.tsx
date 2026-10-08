@@ -1,4 +1,4 @@
-import { useEffect, useState, type JSX } from 'react';
+import { useState, type JSX } from 'react';
 import { AppShell, type SurfaceId } from './shell/AppShell.tsx';
 import { SignIn } from './shell/SignIn.tsx';
 import { MyDay } from './modules/field/MyDay.tsx';
@@ -13,7 +13,7 @@ import { Dashboard } from './modules/dashboard/Dashboard.tsx';
 import { Trace } from './modules/trace/Trace.tsx';
 import { Config } from './modules/config/Config.tsx';
 import { HabilitaDocumental } from './modules/habilita/Documental.tsx';
-import { fetchCommands, hasSession, setSession, type CommandInfo } from './api/client.ts';
+import { setSession } from './api/client.ts';
 import { landingForRoles } from './shell/productProfile.ts';
 
 interface Actor {
@@ -46,7 +46,6 @@ function landingSurface(roles: readonly string[], capabilities: readonly string[
 
 export function App(): JSX.Element {
   const [actor, setActor] = useState<Actor | null>(null);
-  const [commands, setCommands] = useState<readonly CommandInfo[]>([]);
   const [surface, setSurface] = useState<SurfaceId>('field.my-day');
   // Set when another surface hands over to the trace, so "ver trazabilidad" lands on the subject
   // instead of an empty form. A decision that cannot be reached from the thing it affected is a
@@ -58,13 +57,6 @@ export function App(): JSX.Element {
     setSurface('trace');
   };
 
-  useEffect(() => {
-    if (!actor || !hasSession()) return;
-    void (async () => {
-      const result = await fetchCommands();
-      setCommands(result.data);
-    })();
-  }, [actor]);
 
   if (!actor) {
     return (
@@ -80,7 +72,6 @@ export function App(): JSX.Element {
   return (
     <AppShell
       actor={actor}
-      commands={commands}
       current={surface}
       onNavigate={setSurface}
       onSignOut={() => {
@@ -88,7 +79,6 @@ export function App(): JSX.Element {
         // must not leave a usable credential behind).
         setSession(null);
         setActor(null);
-        setCommands([]);
       }}
       // Every provider is a fixture until W7 connects a real one, and the shell says so.
       fixtureProviders={['masters', 'identity', 'documentary', 'erp', 'weather', 'notification', 'files', 'client']}
