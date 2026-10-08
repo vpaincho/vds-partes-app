@@ -52,11 +52,14 @@ import { registerHabilitaDocumentalReadRoutes } from './reads/habilita-documenta
 import { registerSyncRoutes } from './sync/routes.ts';
 import { registerEvidenceRoutes } from './evidence/routes.ts';
 import { registerPlanningReadRoutes } from './reads/planning.ts';
+import { registerDevAuthRoutes } from './dev/auth.ts';
 
 export interface ServerOptions {
   readonly databaseUrl: string;
   readonly rulesetVersion: string;
   readonly logger?: boolean;
+  /** DEV-only fixture login helper. Defaults false for embedded/test servers. */
+  readonly devAuth?: boolean;
 }
 
 declare module 'fastify' {
@@ -248,6 +251,8 @@ export async function buildServer(options: ServerOptions): Promise<FastifyInstan
   registerBillingCommands();
   registerSyncCommands();
 
+  const devAuth = options.devAuth ?? false;
+
   const app = Fastify({
     logger: options.logger ?? false,
     // A command payload is small; evidence goes through the upload endpoints, not here.
@@ -267,7 +272,12 @@ export async function buildServer(options: ServerOptions): Promise<FastifyInstan
    * changes when a real IdP arrives.
    */
   app.addHook('preHandler', async (request, reply) => {
-    if (request.url === '/health' || request.url === '/ready' || request.url === '/') return;
+    if (
+      request.url === '/health' ||
+      request.url === '/ready' ||
+      request.url === '/' ||
+      (devAuth && request.url.startsWith('/dev/'))
+    ) return;
 
     const header = request.headers.authorization;
     const sessionId = header?.startsWith('Bearer ') ? header.slice(7).trim() : null;
@@ -326,6 +336,8 @@ export async function buildServer(options: ServerOptions): Promise<FastifyInstan
       });
     }
   });
+
+  registerDevAuthRoutes(app, devAuth);
 
   /** The command catalogue, so a client can discover what exists and what it needs. */
   app.get('/commands', async (request) => ({
@@ -486,6 +498,7 @@ if (process.argv[1]?.endsWith('server.ts') || process.argv[1]?.endsWith('server.
     databaseUrl: process.env['DATABASE_URL'] ?? 'postgres://vds:vds_dev_only@127.0.0.1:5434/vds_partes',
     rulesetVersion: process.env['RULESET_VERSION'] ?? 'dev',
     logger: true,
+    devAuth: process.env['NODE_ENV'] !== 'production' && process.env['VDS_DEV_AUTH'] !== '0',
   });
   const port = Number(process.env['PORT'] ?? 4180);
   await app.listen({ port, host: '127.0.0.1' });
