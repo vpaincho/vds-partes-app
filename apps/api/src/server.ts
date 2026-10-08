@@ -36,6 +36,7 @@ import { registerBillingCommands } from './commands/billing.ts';
 import { registerReadRoutes } from './reads/routes.ts';
 import { registerHabilitaRespondReadRoutes } from './reads/habilita-respond.ts';
 import { registerReviewCommercialBillingReadRoutes } from './reads/review-commercial-billing.ts';
+import { registerDashboardReadRoutes } from './reads/dashboard.ts';
 import { registerSyncRoutes } from './sync/routes.ts';
 import { registerEvidenceRoutes } from './evidence/routes.ts';
 import { registerPlanningReadRoutes } from './reads/planning.ts';
@@ -363,6 +364,7 @@ export async function buildServer(options: ServerOptions): Promise<FastifyInstan
   await registerReadRoutes(app);
   await registerHabilitaRespondReadRoutes(app);
   await registerReviewCommercialBillingReadRoutes(app);
+  await registerDashboardReadRoutes(app);
   await registerSyncRoutes(app, { rulesetVersion: options.rulesetVersion });
   await registerEvidenceRoutes(app);
   await registerPlanningReadRoutes(app);
