@@ -14,9 +14,11 @@ import { Trace } from './modules/trace/Trace.tsx';
 import { Config } from './modules/config/Config.tsx';
 import { HabilitaDocumental } from './modules/habilita/Documental.tsx';
 import { fetchCommands, hasSession, setSession, type CommandInfo } from './api/client.ts';
+import { landingForRoles } from './shell/productProfile.ts';
 
 interface Actor {
   readonly displayName: string;
+  readonly roles: readonly string[];
   readonly capabilities: readonly string[];
 }
 
@@ -27,13 +29,17 @@ interface Actor {
  * Mi Jornada, a reviewer in their queue. So the landing surface is derived from the actor's
  * capabilities rather than fixed.
  */
-function landingSurface(capabilities: readonly string[]): SurfaceId {
+function landingSurface(roles: readonly string[], capabilities: readonly string[]): SurfaceId {
+  const baselineLanding = landingForRoles(roles);
+  if (baselineLanding) return baselineLanding as SurfaceId;
+
+  // Specialist/support identities keep a capability-based fallback without redefining the five
+  // primary product personas.
+  if (capabilities.includes('habilita.documental')) return 'habilita.matrix';
+  if (capabilities.includes('billing.read')) return 'billing.queue';
+  if (capabilities.includes('commercial.read')) return 'commercial.queue';
   if (capabilities.includes('execution.start')) return 'field.my-day';
-  if (capabilities.includes('planning.approve') || capabilities.includes('planning.dispatch')) {
-    return 'planning.timeline';
-  }
-  if (capabilities.includes('review.decide')) return 'review.queue';
-  if (capabilities.includes('commercial.client.read')) return 'dashboard';
+  if (capabilities.includes('planning.read')) return 'planning.timeline';
   if (capabilities.includes('execution.read')) return 'execution.parts';
   return 'trace';
 }
@@ -65,7 +71,7 @@ export function App(): JSX.Element {
       <SignIn
         onSignedIn={(signedIn) => {
           setActor(signedIn);
-          setSurface(landingSurface(signedIn.capabilities));
+          setSurface(landingSurface(signedIn.roles, signedIn.capabilities));
         }}
       />
     );
