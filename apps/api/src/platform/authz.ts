@@ -106,6 +106,35 @@ export async function resolveActor(db: Db, sessionId: string): Promise<Authentic
   };
 }
 
+export interface RevokedSessionInfo {
+  readonly sessionId: Uuid;
+  readonly identityId: Uuid;
+  readonly deviceId: Uuid | null;
+  readonly revokedAt: Instant;
+}
+
+/**
+ * A session that existed and was specifically revoked — not merely unknown, expired or belonging
+ * to a deactivated identity. RGT-11: a device offline when its session was revoked cannot know
+ * that happened; when it reconnects, `/sync/commands` uses this to recognise *which* identity
+ * declared the queued commands, so the fact can be preserved as a discrepancy rather than either
+ * re-authorised (which `resolveActor` already correctly refuses) or silently dropped.
+ */
+export async function findRevokedSession(db: Db, sessionId: string): Promise<RevokedSessionInfo | null> {
+  const row = await db.one<{ id: Uuid; identity_id: Uuid; device_id: Uuid | null; revoked_at: Date }>(
+    `SELECT id, identity_id, device_id, revoked_at FROM platform.sessions
+     WHERE id = $1 AND revoked_at IS NOT NULL`,
+    [sessionId],
+  );
+  if (!row) return null;
+  return {
+    sessionId: row.id,
+    identityId: row.identity_id,
+    deviceId: row.device_id,
+    revokedAt: row.revoked_at.toISOString() as Instant,
+  };
+}
+
 /** The ownership references of the object being acted on. */
 export interface ObjectScope {
   readonly companyId?: Uuid | null;

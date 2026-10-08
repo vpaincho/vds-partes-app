@@ -16,12 +16,20 @@ import {
   HTTP_STATUS,
   instantNow,
   isDomainError,
+  isUuid,
   uuidv4,
   type Uuid,
 } from '@vds/kernel';
 import { COMMANDS, command as commandDefinition } from '@vds/contracts';
 import { closeDb, initDb, withConnection } from './platform/db.ts';
-import { resolveActor, touchSession, unauthenticated, type AuthenticatedActor } from './platform/authz.ts';
+import {
+  findRevokedSession,
+  resolveActor,
+  touchSession,
+  unauthenticated,
+  type AuthenticatedActor,
+  type RevokedSessionInfo,
+} from './platform/authz.ts';
 import { execute, registeredCommands } from './platform/pipeline.ts';
 import { registerExecutionCommands } from './commands/execution.ts';
 import { registerExecutionCaptureCommands } from './commands/execution-capture.ts';
@@ -33,10 +41,12 @@ import { registerHabilitaRespondCommands } from './commands/habilita-respond.ts'
 import { registerReviewCommands } from './commands/review.ts';
 import { registerCommercialCommands } from './commands/commercial.ts';
 import { registerBillingCommands } from './commands/billing.ts';
+import { registerSyncCommands } from './commands/sync.ts';
 import { registerReadRoutes } from './reads/routes.ts';
 import { registerHabilitaRespondReadRoutes } from './reads/habilita-respond.ts';
 import { registerReviewCommercialBillingReadRoutes } from './reads/review-commercial-billing.ts';
 import { registerDashboardReadRoutes } from './reads/dashboard.ts';
+import { registerSyncReadRoutes } from './reads/sync.ts';
 import { registerSyncRoutes } from './sync/routes.ts';
 import { registerEvidenceRoutes } from './evidence/routes.ts';
 import { registerPlanningReadRoutes } from './reads/planning.ts';
@@ -51,6 +61,8 @@ declare module 'fastify' {
   interface FastifyRequest {
     actor?: AuthenticatedActor;
     requestId: Uuid;
+    /** RGT-11: set only on /sync/commands when the bearer names a session that was revoked. */
+    revokedSession?: RevokedSessionInfo;
   }
 }
 
@@ -213,6 +225,11 @@ const SUBJECT_ROUTES: Record<string, { path: string; idParam?: string }> = {
     idParam: 'amendmentId',
   },
   'execution.evidence.attach': { path: '/execution/evidence' },
+  // sync (RGT-11)
+  'sync.discrepancies.resolve': {
+    path: '/sync/discrepancies/:discrepancyId/resolve',
+    idParam: 'discrepancyId',
+  },
 };
 
 export async function buildServer(options: ServerOptions): Promise<FastifyInstance> {
@@ -227,6 +244,7 @@ export async function buildServer(options: ServerOptions): Promise<FastifyInstan
   registerReviewCommands();
   registerCommercialCommands();
   registerBillingCommands();
+  registerSyncCommands();
 
   const app = Fastify({
     logger: options.logger ?? false,
@@ -251,12 +269,24 @@ export async function buildServer(options: ServerOptions): Promise<FastifyInstan
 
     const header = request.headers.authorization;
     const sessionId = header?.startsWith('Bearer ') ? header.slice(7).trim() : null;
-    if (!sessionId) {
+    // A malformed bearer (not a uuid at all) is still just "no usable session" — it must not reach
+    // the database as a raw value and surface as a 500 from a type error.
+    if (!sessionId || !isUuid(sessionId)) {
       return sendError(reply, request, unauthenticated());
     }
 
     const actor = await withConnection((db) => resolveActor(db, sessionId));
     if (!actor) {
+      // RGT-11: only /sync/commands gets a second look, and only to recognise a session that was
+      // revoked (never merely expired or unknown) — this never authorises anything by itself. The
+      // route handler still refuses to apply any command; it records what was declared.
+      if (request.url.startsWith('/sync/commands')) {
+        const revoked = await withConnection((db) => findRevokedSession(db, sessionId));
+        if (revoked) {
+          request.revokedSession = revoked;
+          return;
+        }
+      }
       return sendError(reply, request, unauthenticated());
     }
     request.actor = actor;
@@ -366,6 +396,7 @@ export async function buildServer(options: ServerOptions): Promise<FastifyInstan
   await registerReviewCommercialBillingReadRoutes(app);
   await registerDashboardReadRoutes(app);
   await registerSyncRoutes(app, { rulesetVersion: options.rulesetVersion });
+  await registerSyncReadRoutes(app);
   await registerEvidenceRoutes(app);
   await registerPlanningReadRoutes(app);
 

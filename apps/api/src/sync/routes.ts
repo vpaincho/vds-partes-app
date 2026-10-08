@@ -24,10 +24,10 @@
  * today, independent of this gap.
  */
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { instantNow, isDomainError, DomainError, HTTP_STATUS, type Uuid } from '@vds/kernel';
-import { commandNames } from '@vds/contracts';
+import { instantNow, isDomainError, uuidv7, DomainError, HTTP_STATUS, type Uuid } from '@vds/kernel';
+import { command, commandNames } from '@vds/contracts';
 import { withConnection } from '../platform/db.ts';
-import { unauthenticated } from '../platform/authz.ts';
+import { unauthenticated, type RevokedSessionInfo } from '../platform/authz.ts';
 import { execute, registeredCommands } from '../platform/pipeline.ts';
 
 const meta = (request: FastifyRequest) => ({ requestId: request.requestId, serverTime: instantNow() });
@@ -57,6 +57,82 @@ interface BatchItemResult {
   readonly error?: ReturnType<DomainError['toJSON']>['error'] & { httpStatus: number };
 }
 
+/**
+ * RGT-11: preserve, never re-authorise.
+ *
+ * A device that queued these commands while online, then went offline for long enough that its
+ * session was revoked, cannot know that happened — `12_OFFLINE_SYNC` is explicit that offline does
+ * not know about remote revocation. When it reconnects and replays its outbox, this is what runs
+ * instead of `execute()`: no rule engine, no authorisation grant, no state change, no receipt —
+ * each declared command becomes one `sync.discrepancies` row, verbatim, for someone holding
+ * `sync.reconcile` to decide (ACCEPTED_AS_DECLARED / AMENDED / REJECTED /
+ * RECORDED_NON_COMPLIANT). The response still carries one result per item, same shape as the
+ * normal path, so the device's own outbox bookkeeping does not need a second code path to
+ * understand "this was neither applied nor a retryable failure — a human has it now."
+ */
+async function reconcileRevokedSessionBatch(
+  request: FastifyRequest,
+  reply: FastifyReply,
+  revoked: RevokedSessionInfo,
+): Promise<FastifyReply> {
+  const body = request.body as { commands?: readonly BatchItem[] } | null;
+  const items = body?.commands ?? [];
+  if (!Array.isArray(items) || items.length === 0) {
+    return sendError(
+      reply,
+      request,
+      new DomainError({ code: 'VALIDATION_FAILED', message: 'El lote necesita al menos un comando en "commands".' }),
+    );
+  }
+
+  const results: BatchItemResult[] = [];
+  await withConnection(async (db) => {
+    for (const item of items) {
+      const commandId = (item.envelope?.['commandId'] as string | undefined) ?? undefined;
+      let subjectKind = 'Desconocido';
+      try {
+        subjectKind = command(item.commandName).subjectKind;
+      } catch {
+        // An unknown command name is still recorded — the declaration is preserved either way.
+      }
+
+      await db.query(
+        `INSERT INTO sync.discrepancies
+           (id, command_id, device_id, identity_id, discrepancy_kind, subject_kind, subject_id, declared)
+         VALUES ($1, $2, $3, $4, 'SESSION_REVOKED', $5, $6, $7)`,
+        [
+          uuidv7(),
+          commandId ?? uuidv7(),
+          revoked.deviceId,
+          revoked.identityId,
+          subjectKind,
+          item.subjectId ?? null,
+          JSON.stringify({ commandName: item.commandName, envelope: item.envelope }),
+        ],
+      );
+
+      results.push({
+        commandId,
+        commandName: item.commandName,
+        status: 'error',
+        error: {
+          code: 'GATE_BLOCKED',
+          message:
+            'La sesión que declaró este comando fue revocada mientras el dispositivo estaba ' +
+            'offline. No se aplicó ningún efecto; lo declarado quedó preservado como discrepancia ' +
+            'para resolución autorizada (RGT-11).',
+          details: [],
+          ruleIds: [],
+          retryable: false,
+          httpStatus: 409,
+        },
+      });
+    }
+  });
+
+  return reply.code(200).send({ data: { results }, meta: meta(request) });
+}
+
 export async function registerSyncRoutes(app: FastifyInstance, options: { rulesetVersion: string }): Promise<void> {
   /**
    * The batch outbox endpoint. Each item is processed independently and in the order received —
@@ -65,7 +141,14 @@ export async function registerSyncRoutes(app: FastifyInstance, options: { rulese
    */
   app.post('/sync/commands', async (request, reply) => {
     const actor = request.actor;
-    if (!actor) return sendError(reply, request, unauthenticated());
+    if (!actor) {
+      // RGT-11: the session was recognised as specifically revoked, not merely unknown. Nothing
+      // below this ever applies a command — it only preserves what the device declared.
+      if (request.revokedSession) {
+        return reconcileRevokedSessionBatch(request, reply, request.revokedSession);
+      }
+      return sendError(reply, request, unauthenticated());
+    }
 
     const body = request.body as { commands?: readonly BatchItem[] } | null;
     const items = body?.commands ?? [];
