@@ -12,6 +12,18 @@ export class OutboxQuotaExceededError extends Error {
 }
 
 /**
+ * A strictly increasing ordering key, immune to millisecond ties.
+ *
+ * Tracks wall-clock time when calls are spaced out, but never goes backwards or repeats within
+ * this module's lifetime — two calls in the same tick still get distinct, correctly ordered values.
+ */
+let lastSeq = 0;
+function nextSeq(): number {
+  lastSeq = Math.max(Date.now(), lastSeq + 1);
+  return lastSeq;
+}
+
+/**
  * Commit a command to the local outbox.
  *
  * Keyed by the envelope's own `commandId`, so calling this twice for the same user intent (a
@@ -34,6 +46,7 @@ export async function enqueueCommand(
       subjectId: input.subjectId,
       envelope: input.envelope,
       createdAt: new Date().toISOString(),
+      seq: nextSeq(),
       state: 'GUARDADO_LOCAL',
       attempts: 0,
     });
@@ -49,11 +62,11 @@ export async function outstandingCommands(db: VdsOfflineDb): Promise<readonly Ou
   return db.commands
     .where('state')
     .anyOf(['GUARDADO_LOCAL', 'PENDIENTE', 'REQUIERE_INTERVENCION'])
-    .sortBy('createdAt');
+    .sortBy('seq');
 }
 
 export async function allCommands(db: VdsOfflineDb): Promise<readonly OutboxCommand[]> {
-  return db.commands.orderBy('createdAt').toArray();
+  return db.commands.orderBy('seq').toArray();
 }
 
 /**

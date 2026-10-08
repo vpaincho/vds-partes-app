@@ -25,6 +25,13 @@ export interface OutboxCommand {
   /** The full command envelope — commandId, occurredAt, expectedVersion?, payload, etc. */
   readonly envelope: Record<string, unknown>;
   readonly createdAt: string;
+  /**
+   * Strictly increasing within this device session. `createdAt` is millisecond-resolution and two
+   * commands enqueued in the same tick (a double-tap, a tight batch-create loop) can tie on it;
+   * IndexedDB then falls back to ordering by the primary key (`commandId`, a random uuid), which
+   * has no relation to insertion order. `seq` is the actual oldest-first ordering key.
+   */
+  readonly seq: number;
   state: DeliveryState;
   attempts: number;
   lastError?: string;
@@ -50,7 +57,7 @@ export class VdsOfflineDb extends Dexie {
   constructor(name = 'vds-partes-offline') {
     super(name);
     this.version(1).stores({
-      commands: 'commandId, state, createdAt',
+      commands: 'commandId, state, createdAt, seq',
       bundles: 'assignmentId, validUntil',
     });
   }
