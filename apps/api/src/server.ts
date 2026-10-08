@@ -29,6 +29,7 @@ import { registerExecutionLifecycleCommands } from './commands/execution-lifecyc
 import { registerPlanningCommands } from './commands/planning.ts';
 import { registerControlCommands } from './commands/control.ts';
 import { registerHabilitaCommands } from './commands/habilita.ts';
+import { registerHabilitaRespondCommands } from './commands/habilita-respond.ts';
 import { registerReadRoutes } from './reads/routes.ts';
 import { registerPlanningReadRoutes } from './reads/planning.ts';
 
@@ -93,6 +94,41 @@ const SUBJECT_ROUTES: Record<string, { path: string; idParam?: string }> = {
   'habilita.permits.suspend': { path: '/habilita/permits/:permitId/suspend', idParam: 'permitId' },
   'habilita.permits.close': { path: '/habilita/permits/:permitId/close', idParam: 'permitId' },
   'habilita.events.flash-report': { path: '/habilita/events/flash-report' },
+  'habilita.events.start-triage': {
+    path: '/habilita/events/:eventId/start-triage',
+    idParam: 'eventId',
+  },
+  'habilita.events.classify': { path: '/habilita/events/:eventId/classify', idParam: 'eventId' },
+  'habilita.events.escalate-to-case': {
+    path: '/habilita/events/:eventId/escalate-to-case',
+    idParam: 'eventId',
+  },
+  'habilita.events.close-without-case': {
+    path: '/habilita/events/:eventId/close-without-case',
+    idParam: 'eventId',
+  },
+  'habilita.events.discard': { path: '/habilita/events/:eventId/discard', idParam: 'eventId' },
+  'habilita.cases.start-investigation': {
+    path: '/habilita/cases/:caseId/start-investigation',
+    idParam: 'caseId',
+  },
+  'habilita.cases.finish-investigation': {
+    path: '/habilita/cases/:caseId/finish-investigation',
+    idParam: 'caseId',
+  },
+  'habilita.cases.evaluate-closure': {
+    path: '/habilita/cases/:caseId/evaluate-closure',
+    idParam: 'caseId',
+  },
+  'habilita.cases.close': { path: '/habilita/cases/:caseId/close', idParam: 'caseId' },
+  'habilita.actions.create': { path: '/habilita/actions' },
+  'habilita.actions.implement': { path: '/habilita/actions/:actionId/implement', idParam: 'actionId' },
+  'habilita.actions.verify': { path: '/habilita/actions/:actionId/verify', idParam: 'actionId' },
+  'habilita.notifications.create': { path: '/habilita/notifications' },
+  'habilita.notifications.resolve': {
+    path: '/habilita/notifications/:notificationId/resolve',
+    idParam: 'notificationId',
+  },
   // execution
   'execution.parts.prepare': { path: '/execution/parts/prepare' },
   'execution.units.create': { path: '/execution/units' },
@@ -152,6 +188,7 @@ export async function buildServer(options: ServerOptions): Promise<FastifyInstan
   registerPlanningCommands();
   registerControlCommands();
   registerHabilitaCommands();
+  registerHabilitaRespondCommands();
 
   const app = Fastify({
     logger: options.logger ?? false,
