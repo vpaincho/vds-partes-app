@@ -8,6 +8,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   envelope,
+  get,
   getApp,
   makeScenario,
   makeSession,
@@ -357,5 +358,129 @@ describe('review.amendment-requests — review requests, execution decides (RGT-
     );
     expect(request!.status).toBe('RESUELTA');
     expect(request!.amendment_id).toBe(amendmentId);
+  });
+});
+
+describe('read models', () => {
+  it('lists and shows the detail of a review decision, with its observations and amendment requests', async () => {
+    const ctx = await closedUnitWithVersion();
+    const decision = await post<{ data: { subject: { id: string } } }>('/review/decisions', {
+      session: reviewer,
+      body: envelope({ payload: { executionUnitVersionId: ctx.executionUnitVersionId } }),
+    });
+    const decisionId = decision.body.data.subject.id;
+
+    const list = await get<{ data: readonly { id: string; state: string }[] }>(
+      '/review/decisions?state=PENDIENTE_REVISION',
+      { session: reviewer },
+    );
+    expect(list.status, JSON.stringify(list.body)).toBe(200);
+    expect(list.body.data.some((d) => d.id === decisionId)).toBe(true);
+
+    const detail = await get<{
+      data: { decision: { id: string; state: string }; observations: readonly unknown[]; amendmentRequests: readonly unknown[] };
+    }>(`/review/decisions/${decisionId}`, { session: reviewer });
+    expect(detail.status, JSON.stringify(detail.body)).toBe(200);
+    expect(detail.body.data.decision.state).toBe('PENDIENTE_REVISION');
+    expect(detail.body.data.observations).toEqual([]);
+  });
+
+  it('lists and shows the detail of a commercial unit, with its N:M source lineage', async () => {
+    const ctx = await closedUnitWithVersion();
+    const derived = await post<{ data: { subject: { id: string } } }>('/commercial/units', {
+      session: backoffice,
+      body: envelope({
+        payload: {
+          contractServiceId: ctx.contractServiceId,
+          contractItemId: ctx.contractItemId,
+          unitOfMeasureId: ctx.unitOfMeasureId,
+          sources: [
+            { executionUnitVersionId: ctx.executionUnitVersionId, executionAllocationId: ctx.executionAllocationId },
+          ],
+        },
+      }),
+    });
+    const ucId = derived.body.data.subject.id;
+
+    const list = await get<{ data: readonly { id: string; state: string; source_count: string }[] }>(
+      '/commercial/units?state=INCOMPLETA',
+      { session: backoffice },
+    );
+    expect(list.status, JSON.stringify(list.body)).toBe(200);
+    const row = list.body.data.find((u) => u.id === ucId);
+    expect(row?.source_count).toBe('1');
+
+    const detail = await get<{ data: { unit: { id: string }; sources: readonly { execution_unit_version_id: string }[] } }>(
+      `/commercial/units/${ucId}`,
+      { session: backoffice },
+    );
+    expect(detail.status, JSON.stringify(detail.body)).toBe(200);
+    expect(detail.body.data.sources).toHaveLength(1);
+    expect(detail.body.data.sources[0]!.execution_unit_version_id).toBe(ctx.executionUnitVersionId);
+  });
+
+  it('lists and shows the detail of a billing lot, with its lines, ERP attempts and document refs', async () => {
+    const ctx = await closedUnitWithVersion();
+    const derived = await post<{ data: { subject: { id: string } } }>('/commercial/units', {
+      session: backoffice,
+      body: envelope({
+        payload: {
+          contractServiceId: ctx.contractServiceId,
+          contractItemId: ctx.contractItemId,
+          unitOfMeasureId: ctx.unitOfMeasureId,
+          sources: [
+            { executionUnitVersionId: ctx.executionUnitVersionId, executionAllocationId: ctx.executionAllocationId },
+          ],
+        },
+      }),
+    });
+    const ucId = derived.body.data.subject.id;
+    await post(`/commercial/units/${ucId}/complete-requirements`, {
+      session: backoffice,
+      body: envelope({ payload: { quantity: '2' } }),
+    });
+    await post(`/commercial/units/${ucId}/enter-review`, { session: backoffice, body: envelope({ payload: {} }) });
+    await post(`/commercial/units/${ucId}/accept`, { session: backoffice, body: envelope({ payload: {} }) });
+
+    const linesBuilt = await post<{ data: { effects: readonly { lineIds?: readonly string[] }[] } }>('/billing/lines', {
+      session: backoffice,
+      body: envelope({ payload: { commercialUnitIds: [ucId] } }),
+    });
+    const lineId = linesBuilt.body.data.effects[0]?.lineIds?.[0];
+
+    const lotCreated = await post<{ data: { subject: { id: string } } }>('/billing/lots', {
+      session: backoffice,
+      body: envelope({ payload: { clientId: ctx.clientId, contractId: ctx.contractId, billableLineIds: [lineId] } }),
+    });
+    const lotId = lotCreated.body.data.subject.id;
+    await post(`/billing/lots/${lotId}/validate`, { session: backoffice, body: envelope({ payload: {} }) });
+    await post(`/billing/lots/${lotId}/send`, { session: backoffice, body: envelope({ payload: {} }) });
+
+    const list = await get<{ data: readonly { id: string; state: string; line_count: string }[] }>(
+      '/billing/lots?state=ACEPTADO_ERP',
+      { session: backoffice },
+    );
+    expect(list.status, JSON.stringify(list.body)).toBe(200);
+    const row = list.body.data.find((l) => l.id === lotId);
+    expect(row?.line_count).toBe('1');
+
+    const detail = await get<{
+      data: {
+        lot: { id: string; state: string };
+        lines: readonly unknown[];
+        attempts: readonly { status: string; external_ref: string | null }[];
+        documentRefs: readonly unknown[];
+      };
+    }>(`/billing/lots/${lotId}`, { session: backoffice });
+    expect(detail.status, JSON.stringify(detail.body)).toBe(200);
+    expect(detail.body.data.lot.state).toBe('ACEPTADO_ERP');
+    expect(detail.body.data.lines).toHaveLength(1);
+    expect(detail.body.data.attempts[0]?.status).toBe('ACCEPTED');
+    expect(detail.body.data.documentRefs).toHaveLength(1);
+  });
+
+  it('404s for a billing lot that does not exist', async () => {
+    const result = await get(`/billing/lots/${uuid()}`, { session: backoffice });
+    expect(result.status).toBe(404);
   });
 });
