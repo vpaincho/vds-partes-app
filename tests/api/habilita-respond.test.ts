@@ -348,3 +348,63 @@ describe('read models', () => {
     expect(result.status).toBe(404);
   });
 });
+
+describe('habilita.notifications.attempt-channel — RGT-16', () => {
+  it('labels the attempt TEST_FIXTURE and never resolves the obligation by itself', async () => {
+    const eventId = await reportEvent('DERRAME');
+    await post(`/habilita/events/${eventId}/start-triage`, { session: habilita, body: envelope({ payload: {} }) });
+    await post(`/habilita/events/${eventId}/classify`, {
+      session: habilita,
+      body: envelope({ payload: { category: 'AMBIENTAL', severity: 'ALTA' } }),
+    });
+    const escalated = await post(`/habilita/events/${eventId}/escalate-to-case`, {
+      session: habilita,
+      body: envelope({ payload: { ownerId: habilita.identityId, justification: 'Requiere seguimiento' } }),
+    });
+    expect(escalated.status).toBe(200);
+    const [caseRow] = await sql<{ id: string }>('SELECT id FROM habilita.cases WHERE event_id = $1', [eventId]);
+    const caseId = caseRow!.id;
+
+    const notificationCreated = await post<{ data: { subject: { id: string } } }>('/habilita/notifications', {
+      session: habilita,
+      body: envelope({
+        payload: {
+          caseId,
+          obligationCode: 'NOTIFICAR_AUTORIDAD',
+          recipientRole: 'AUTORIDAD_AMBIENTAL',
+          responsibleId: habilita.identityId,
+        },
+      }),
+    });
+    const notificationId = notificationCreated.body.data.subject.id;
+
+    const attempted = await post<{ data: { effects: readonly { channelKind?: string; accepted?: boolean }[] } }>(
+      `/habilita/notifications/${notificationId}/attempt-channel`,
+      { session: habilita, body: envelope({ payload: {} }) },
+    );
+    expect(attempted.status, JSON.stringify(attempted.body)).toBe(200);
+    expect(attempted.body.data.effects[0]?.channelKind).toBe('TEST_FIXTURE');
+    expect(attempted.body.data.effects[0]?.accepted).toBe(true);
+
+    const [row] = await sql<{ status: string; channel_kind: string; channel_reference: string | null }>(
+      'SELECT status, channel_kind, channel_reference FROM habilita.notifications WHERE id = $1',
+      [notificationId],
+    );
+    expect(row!.channel_kind).toBe('TEST_FIXTURE');
+    expect(row!.channel_reference).toMatch(/^TEST-NOTIF-/);
+    // RGT-16: a channel send is not a resolution — status moved off PENDIENTE but never to RESUELTA.
+    expect(row!.status).toBe('EN_CURSO');
+
+    // Only an explicit resolve, with its own evidence, closes the obligation.
+    const resolved = await post(`/habilita/notifications/${notificationId}/resolve`, {
+      session: habilita,
+      body: envelope({ payload: { resolutionNote: 'Autoridad notificada y confirmó recepción por escrito.' } }),
+    });
+    expect(resolved.status, JSON.stringify(resolved.body)).toBe(200);
+    const [resolvedRow] = await sql<{ status: string }>(
+      'SELECT status FROM habilita.notifications WHERE id = $1',
+      [notificationId],
+    );
+    expect(resolvedRow!.status).toBe('RESUELTA');
+  });
+});

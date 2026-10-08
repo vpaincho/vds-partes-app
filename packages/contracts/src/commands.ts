@@ -576,6 +576,11 @@ export const ResolveNotificationPayload = Type.Object(
   { additionalProperties: false },
 );
 
+export const AttemptNotificationChannelPayload = Type.Object(
+  { note: Type.Optional(Type.String()) },
+  { additionalProperties: false },
+);
+
 /* ---------------------------------------------------------------------------- review */
 
 export const CreateReviewDecisionPayload = Type.Object(
@@ -1238,6 +1243,17 @@ export const COMMANDS: readonly CommandDefinition[] = [
     previewable: false,
     description: 'RGT-16: resolver exige evidencia de la obligacion cumplida, no un envio de canal fixture.',
   },
+  {
+    name: 'habilita.notifications.attempt-channel',
+    module: 'habilita',
+    capability: 'habilita.case',
+    trigger: 'NOTIFICATION_CHANNEL_ATTEMPTED',
+    subjectKind: 'Notificacion',
+    payload: AttemptNotificationChannelPayload,
+    previewable: false,
+    description:
+      'RGT-16: registra el intento de envio por el canal TEST_FIXTURE. No cambia el status de la obligacion.',
+  },
 
   // --- review VDS
   {
@@ -1455,6 +1471,7 @@ export type ImplementActionInput = Static<typeof ImplementActionPayload>;
 export type VerifyActionInput = Static<typeof VerifyActionPayload>;
 export type CreateNotificationInput = Static<typeof CreateNotificationPayload>;
 export type ResolveNotificationInput = Static<typeof ResolveNotificationPayload>;
+export type AttemptNotificationChannelInput = Static<typeof AttemptNotificationChannelPayload>;
 export type CreateReviewDecisionInput = Static<typeof CreateReviewDecisionPayload>;
 export type AcceptReviewInput = Static<typeof AcceptReviewPayload>;
 export type ObserveReviewInput = Static<typeof ObserveReviewPayload>;

@@ -22,8 +22,9 @@
  *  - **A TEST notification channel never resolves the obligation** (RGT-16): sending through a
  *    fixture is a recorded attempt, not evidence that the obligation was met.
  */
-import { DomainError, uuidv7, type Uuid } from '@vds/kernel';
+import { DomainError, uuidv7, type Instant, type Uuid } from '@vds/kernel';
 import type {
+  AttemptNotificationChannelInput,
   ClassifyEventInput,
   CloseCaseInput,
   CloseEventWithoutCaseInput,
@@ -42,6 +43,7 @@ import { registerHandler, type CommandHandler } from '../platform/pipeline.ts';
 import type { Db } from '../platform/db.ts';
 import { stateTransition } from './evaluators.ts';
 import { requireSubjectId } from './execution-shared.ts';
+import { getProviders } from '../platform/providers.ts';
 
 interface EventRow {
   id: Uuid;
@@ -1006,11 +1008,14 @@ const verifyAction: CommandHandler<VerifyActionInput> = {
 interface NotificationRow {
   id: Uuid;
   status: string;
+  obligation_code: string;
+  recipient_role: string;
+  due_at: Date | null;
 }
 
 async function loadNotification(db: Db, notificationId: string): Promise<NotificationRow> {
   const row = await db.one<NotificationRow>(
-    'SELECT id, status FROM habilita.notifications WHERE id = $1',
+    'SELECT id, status, obligation_code, recipient_role, due_at FROM habilita.notifications WHERE id = $1',
     [notificationId],
   );
   if (!row) {
@@ -1150,6 +1155,108 @@ const resolveNotification: CommandHandler<ResolveNotificationInput> = {
   },
 };
 
+/* --------------------------------------------------- habilita.notifications.attempt-channel */
+
+/**
+ * RGT-16: a channel send is an attempt, never a resolution.
+ *
+ * This records that `NotificationPort.send` was called and what it answered — `channel_kind`
+ * becomes `TEST_FIXTURE` precisely so the UI can label it TEST, per 14_DATA_INTEGRATION_ADAPTERS's
+ * rule that a fixture is never indistinguishable from a real provider. `status` is untouched: only
+ * `habilita.notifications.resolve`, with its own evidence, moves the obligation to RESUELTA.
+ */
+const attemptNotificationChannel: CommandHandler<AttemptNotificationChannelInput> = {
+  name: 'habilita.notifications.attempt-channel',
+
+  async resolveScope({ db, subjectId }) {
+    const notification = await loadNotification(db, requireSubjectId(subjectId, 'Notificacion'));
+    return {
+      subject: { kind: 'Notificacion', id: notification.id },
+      scope: {},
+      currentState: notification.status,
+    };
+  },
+
+  async evaluators({ subjectId, currentState }) {
+    const notificationId = requireSubjectId(subjectId, 'Notificacion');
+    const subject = { kind: 'Notificacion', id: notificationId };
+    return [
+      {
+        stage: 'S7_OPERATION',
+        precedence: 'P5',
+        owner: 'habilita/notification-channel',
+        evaluate: () => {
+          if (currentState === 'RESUELTA' || currentState === 'CANCELADA') {
+            return {
+              blocks: [
+                {
+                  ruleId: 'RGT-16',
+                  precedence: 'P5' as const,
+                  reason: `La obligación ya está ${currentState}: no hay nada que notificar.`,
+                  instead: 'Una obligación resuelta o cancelada no se reenvía.',
+                  subject,
+                  overrideable: false,
+                },
+              ],
+            };
+          }
+          return {
+            effects: [
+              {
+                kind: 'ATTEMPT_NOTIFICATION_CHANNEL',
+                description:
+                  'Intentar el envío por el canal configurado. El resultado se registra; la ' +
+                  'obligación sigue abierta hasta que alguien la resuelva con evidencia (RGT-16).',
+                ruleId: 'RGT-16',
+              },
+            ],
+          };
+        },
+      },
+    ];
+  },
+
+  async apply({ db, subjectId, payload, occurredAt }) {
+    const notificationId = requireSubjectId(subjectId, 'Notificacion');
+    const notification = await loadNotification(db, notificationId);
+
+    const result = await getProviders().notification.send({
+      obligationCode: notification.obligation_code,
+      recipientRole: notification.recipient_role,
+      subject: `Obligación Habilita: ${notification.obligation_code}`,
+      body: payload.note ?? `Obligación ${notification.obligation_code} pendiente para ${notification.recipient_role}.`,
+      ...(notification.due_at ? { dueAt: notification.due_at.toISOString() as Instant } : {}),
+    });
+
+    // The channel never decides the obligation: only its own metadata is updated here, and the
+    // fixture's TEST_FIXTURE kind travels with it so the UI can never show it as a real delivery.
+    await db.query(
+      `UPDATE habilita.notifications
+       SET channel_kind = $2, channel_reference = $3, channel_attempted_at = $4,
+           status = CASE WHEN status = 'PENDIENTE' THEN 'EN_CURSO' ELSE status END
+       WHERE id = $1`,
+      [notificationId, result.status === 'OK' ? 'TEST_FIXTURE' : 'NONE', result.value?.channelRef ?? null, occurredAt],
+    );
+
+    return {
+      subject: { kind: 'Notificacion', id: notificationId },
+      version: 1,
+      effects: [
+        {
+          kind: 'NOTIFICATION_CHANNEL_ATTEMPTED',
+          subjectKind: 'Notificacion',
+          subjectId: notificationId,
+          detail: {
+            channelKind: result.status === 'OK' ? 'TEST_FIXTURE' : 'NONE',
+            accepted: result.value?.accepted ?? false,
+            note: 'Intento de canal TEST — no prueba entrega externa real (RGT-16).',
+          },
+        },
+      ],
+    };
+  },
+};
+
 export function registerHabilitaRespondCommands(): void {
   registerHandler(startTriage);
   registerHandler(classifyEvent);
@@ -1165,4 +1272,5 @@ export function registerHabilitaRespondCommands(): void {
   registerHandler(verifyAction);
   registerHandler(createNotification);
   registerHandler(resolveNotification);
+  registerHandler(attemptNotificationChannel);
 }

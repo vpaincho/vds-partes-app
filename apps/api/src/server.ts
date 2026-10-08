@@ -136,6 +136,10 @@ const SUBJECT_ROUTES: Record<string, { path: string; idParam?: string }> = {
     path: '/habilita/notifications/:notificationId/resolve',
     idParam: 'notificationId',
   },
+  'habilita.notifications.attempt-channel': {
+    path: '/habilita/notifications/:notificationId/attempt-channel',
+    idParam: 'notificationId',
+  },
   // review
   'review.decisions.create': { path: '/review/decisions' },
   'review.decisions.accept': { path: '/review/decisions/:decisionId/accept', idParam: 'decisionId' },
