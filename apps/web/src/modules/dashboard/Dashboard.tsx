@@ -33,12 +33,14 @@ export function Dashboard({ capabilities }: DashboardProps): JSX.Element {
   const canSeeReview = capabilities.includes('review.read');
   const canSeeCommercial =
     capabilities.includes('commercial.read') || capabilities.includes('commercial.client.read');
+  const clientView =
+    capabilities.includes('commercial.client.read') && !capabilities.includes('commercial.read');
 
   return (
     <div className="vds-dashboard" data-density="analysis">
       {canSeeOperational && <OperationalSection />}
       {canSeeReview && <ReviewSection />}
-      {canSeeCommercial && <CommercialSection />}
+      {canSeeCommercial && <CommercialSection clientView={clientView} />}
       {!canSeeOperational && !canSeeReview && !canSeeCommercial && (
         <p className="vds-empty">Sin capability de lectura para ningún tablero.</p>
       )}
@@ -212,7 +214,7 @@ function ReviewSection(): JSX.Element {
   );
 }
 
-function CommercialSection(): JSX.Element {
+function CommercialSection({ clientView }: { readonly clientView: boolean }): JSX.Element {
   const [data, setData] = useState<CommercialDashboard | null>(null);
   const [meta, setMeta] = useState<{ source?: string; asOf?: string; note?: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -232,7 +234,7 @@ function CommercialSection(): JSX.Element {
   }, [load]);
 
   return (
-    <SectionFrame title="Comercial / Facturación" source={meta?.source} asOf={meta?.asOf} note={meta?.note} error={error}>
+    <SectionFrame title={clientView ? 'Servicio / Certificación' : 'Comercial / Facturación'} source={meta?.source} asOf={meta?.asOf} note={meta?.note} error={error}>
       {data && (
         <div className="vds-dashboard__grid">
           <div>
@@ -243,10 +245,12 @@ function CommercialSection(): JSX.Element {
             <h3>Unidades comerciales — vigencia</h3>
             <CountList dimension="commercial" rows={data.unitsBySupersessionState} />
           </div>
-          <div>
-            <h3>Lotes de facturación</h3>
-            <CountList dimension="commercial" rows={data.lotsByState} />
-          </div>
+          {!clientView && (
+            <div>
+              <h3>Lotes de facturación</h3>
+              <CountList dimension="commercial" rows={data.lotsByState} />
+            </div>
+          )}
         </div>
       )}
     </SectionFrame>
