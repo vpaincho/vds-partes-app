@@ -8,7 +8,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { instantNow, isDomainError, HTTP_STATUS } from '@vds/kernel';
 import { withConnection } from '../platform/db.ts';
-import { readableContractIds, unauthenticated } from '../platform/authz.ts';
+import { readableContractIds, readableContractIdsAny, unauthenticated } from '../platform/authz.ts';
 
 const meta = (request: FastifyRequest) => ({ requestId: request.requestId, serverTime: instantNow() });
 
@@ -112,7 +112,11 @@ export async function registerReviewCommercialBillingReadRoutes(app: FastifyInst
     if (!actor) return reply.code(401).send({ error: unauthenticated().toJSON().error, meta: meta(request) });
     try {
       const query = request.query as { state?: string };
-      readableContractIds(actor, 'commercial.read');
+      const contractIds = readableContractIdsAny(actor, [
+        'commercial.read',
+        'commercial.client.read',
+      ]);
+      const contractScope = contractIds === null ? null : [...contractIds];
       const data = await withConnection(async (db) => {
         const { rows } = await db.query(
           `SELECT u.id, u.code, u.state::text AS state, u.supersession_state::text AS supersession_state,
@@ -123,10 +127,13 @@ export async function registerReviewCommercialBillingReadRoutes(app: FastifyInst
            FROM commercial.commercial_units u
            JOIN config.units_of_measure um ON um.id = u.unit_of_measure_id
            JOIN config.contract_items ci ON ci.id = u.contract_item_id
+           JOIN config.contract_services cs ON cs.id = u.contract_service_id
+           JOIN config.contract_versions cv ON cv.id = cs.contract_version_id
            WHERE ($1::text IS NULL OR u.state::text = $1::text)
+             AND ($2::uuid[] IS NULL OR cv.contract_id = ANY($2::uuid[]))
            ORDER BY u.derived_at DESC
            LIMIT 200`,
-          [query.state ?? null],
+          [query.state ?? null, contractScope],
         );
         return rows;
       });
@@ -148,7 +155,11 @@ export async function registerReviewCommercialBillingReadRoutes(app: FastifyInst
     const actor = request.actor;
     if (!actor) return reply.code(401).send({ error: unauthenticated().toJSON().error, meta: meta(request) });
     try {
-      readableContractIds(actor, 'commercial.read');
+      const contractIds = readableContractIdsAny(actor, [
+        'commercial.read',
+        'commercial.client.read',
+      ]);
+      const contractScope = contractIds === null ? null : [...contractIds];
       const { unitId } = request.params as { unitId: string };
       const data = await withConnection(async (db) => {
         const unit = await db.one(
@@ -156,8 +167,12 @@ export async function registerReviewCommercialBillingReadRoutes(app: FastifyInst
                   u.quantity, u.contract_service_id, u.contract_item_id, u.unit_of_measure_id,
                   u.period_from, u.period_until, u.derived_at, u.eligible_at, u.accepted_at, u.rejected_at,
                   u.supersedes_id, u.version
-           FROM commercial.commercial_units u WHERE u.id = $1`,
-          [unitId],
+           FROM commercial.commercial_units u
+           JOIN config.contract_services cs ON cs.id = u.contract_service_id
+           JOIN config.contract_versions cv ON cv.id = cs.contract_version_id
+           WHERE u.id = $1
+             AND ($2::uuid[] IS NULL OR cv.contract_id = ANY($2::uuid[]))`,
+          [unitId, contractScope],
         );
         if (!unit) return null;
         const sources = await db.query(
