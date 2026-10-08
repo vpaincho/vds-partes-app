@@ -717,3 +717,36 @@ export interface BillingLotDetail {
 }
 
 export const fetchBillingLot = (lotId: string) => read<BillingLotDetail>(`/billing/lots/${lotId}`);
+
+/* -------------------------------------------------------------------- dashboards */
+
+export interface CountByState {
+  readonly state: string;
+  readonly count: number;
+}
+
+export interface OperationalDashboard {
+  readonly partsByState: readonly CountByState[];
+  readonly unitsByState: readonly CountByState[];
+  readonly openIntervals: number;
+  readonly permitsByState: readonly CountByState[];
+  readonly openDirectives: number;
+}
+
+export const fetchOperationalDashboard = () => read<OperationalDashboard>('/dashboard/operational');
+
+export interface ReviewDashboard {
+  readonly decisionsByState: readonly CountByState[];
+  readonly observationsByKind: readonly CountByState[];
+  readonly amendmentRequestsByStatus: readonly CountByState[];
+}
+
+export const fetchReviewDashboard = () => read<ReviewDashboard>('/dashboard/review');
+
+export interface CommercialDashboard {
+  readonly unitsByState: readonly CountByState[];
+  readonly unitsBySupersessionState: readonly CountByState[];
+  readonly lotsByState: readonly CountByState[];
+}
+
+export const fetchCommercialDashboard = () => read<CommercialDashboard>('/dashboard/commercial');

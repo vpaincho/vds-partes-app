@@ -663,6 +663,92 @@ textarea.vds-input,
   border-top: 1px solid var(--vds-surface-border);
 }
 
+.vds-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vds-space-6);
+}
+
+.vds-dashboard__section h2 {
+  margin-bottom: var(--vds-space-3);
+}
+
+.vds-dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--vds-space-5);
+}
+
+.vds-dashboard__grid h3 {
+  margin: 0 0 var(--vds-space-2);
+  font-size: var(--vds-text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--vds-muted);
+}
+
+.vds-dashboard__counts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--vds-space-2);
+}
+
+.vds-dashboard__counts li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vds-space-3);
+  padding: var(--vds-space-2) var(--vds-space-3);
+  border: 1px solid var(--vds-surface-border);
+  border-radius: var(--vds-radius-sm);
+  overflow: hidden;
+}
+
+.vds-dashboard__count {
+  font-weight: 600;
+}
+
+/* A thin, data-driven fill behind the row — the stat tile's only "chart". Colour follows the same
+   reserved status tones every badge in this app already uses; it is never a generic accent. */
+.vds-dashboard__bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: 0;
+  opacity: 0.12;
+  background: var(--vds-pending);
+}
+.vds-dashboard__bar[data-tone='ok'] {
+  background: var(--vds-ok);
+}
+.vds-dashboard__bar[data-tone='warn'] {
+  background: var(--vds-warn);
+}
+.vds-dashboard__bar[data-tone='critical'] {
+  background: var(--vds-critical);
+}
+
+.vds-dashboard__counts li > * {
+  position: relative;
+  z-index: 1;
+}
+
+.vds-dashboard__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.vds-dashboard__hero {
+  margin: 0;
+  font-size: var(--vds-text-3xl);
+  font-weight: 700;
+}
+
 .vds-people li {
   display: flex;
   align-items: center;

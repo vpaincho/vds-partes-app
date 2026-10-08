@@ -9,6 +9,7 @@ import { HabilitaEvents } from './modules/habilita/Events.tsx';
 import { Review } from './modules/review/Review.tsx';
 import { Commercial } from './modules/commercial/Commercial.tsx';
 import { Billing } from './modules/billing/Billing.tsx';
+import { Dashboard } from './modules/dashboard/Dashboard.tsx';
 import { Trace } from './modules/trace/Trace.tsx';
 import { fetchCommands, hasSession, setSession, type CommandInfo } from './api/client.ts';
 
@@ -99,6 +100,7 @@ export function App(): JSX.Element {
       {surface === 'review.queue' && <Review capabilities={actor.capabilities} />}
       {surface === 'commercial.queue' && <Commercial capabilities={actor.capabilities} />}
       {surface === 'billing.queue' && <Billing capabilities={actor.capabilities} />}
+      {surface === 'dashboard' && <Dashboard capabilities={actor.capabilities} />}
       {surface === 'trace' && <Trace {...(traceSubject ? { subject: traceSubject } : {})} />}
     </AppShell>
   );

@@ -62,7 +62,7 @@ export const SURFACES: readonly Surface[] = [
   { id: 'review.queue', label: 'Revisión VDS', capability: 'review.read', density: 'operations', icon: '▷', status: 'built' },
   { id: 'commercial.queue', label: 'Certificación', capability: 'commercial.read', density: 'operations', icon: '◫', status: 'built' },
   { id: 'billing.queue', label: 'Facturación', capability: 'billing.read', density: 'operations', icon: '▣', status: 'built' },
-  { id: 'dashboard', label: 'Dashboard', capability: 'commercial.client.read', density: 'analysis', icon: '▚', status: 'planned' },
+  { id: 'dashboard', label: 'Dashboard', capability: 'execution.read', density: 'analysis', icon: '▚', status: 'built' },
   { id: 'config', label: 'Configuración', capability: 'config.read', density: 'operations', icon: '⚙', status: 'planned' },
 ];
 
@@ -227,15 +227,6 @@ function PlannedSurface({ surface }: { readonly surface: Surface }): JSX.Element
         'Alta y versionado de requisitos por tipo de sujeto (persona/recurso)',
         'Carga y vigencia de documentos, con freshness explícito',
         'Vista cruzada persona/recurso × requisito × contexto × fecha',
-      ],
-    },
-    dashboard: {
-      summary: 'Indicadores con fuente y vigencia por cifra, y drilldown hasta los hechos.',
-      wave: 'W6',
-      items: [
-        'Métricas separadas por fuente: plan, operación, revisión y comercial',
-        'Cada cifra con su source y su as_of',
-        'Un cambio de estado no hace desaparecer un histórico',
       ],
     },
     config: {
