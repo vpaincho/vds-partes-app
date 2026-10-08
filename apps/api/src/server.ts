@@ -339,6 +339,22 @@ export async function buildServer(options: ServerOptions): Promise<FastifyInstan
 
   registerDevAuthRoutes(app, devAuth);
 
+  app.get('/me', async (request, reply) => {
+    const actor = request.actor;
+    if (!actor) return sendError(reply, request, unauthenticated());
+
+    return {
+      data: {
+        identityId: actor.identityId,
+        displayName: actor.displayName,
+        personId: actor.personId,
+        roles: [...new Set(actor.grants.map((grant) => grant.roleId))],
+        capabilities: actor.capabilities,
+      },
+      meta: meta(request),
+    };
+  });
+
   /** The command catalogue, so a client can discover what exists and what it needs. */
   app.get('/commands', async (request) => ({
     data: COMMANDS.map((c) => ({
