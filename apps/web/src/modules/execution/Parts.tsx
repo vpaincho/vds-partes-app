@@ -5,7 +5,7 @@
  * "Mi jornada" (field work for the operator). The new architecture keeps that distinction while
  * reading the real execution model instead of duplicating state in the browser.
  */
-import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState, type JSX } from 'react';
 import {
   ApiError,
   fetchMyDay,
@@ -93,8 +93,8 @@ export function Parts(): JSX.Element {
             {visible.map((row) => {
               const expanded = selected === row.partId;
               return (
-                <>
-                  <tr key={row.partId}>
+                <Fragment key={row.partId}>
+                  <tr>
                     <td className="vds-numeric">{row.code ?? row.partId.slice(0, 8)}</td>
                     <td className="vds-numeric">{row.operationalDate}</td>
                     <td>{row.partType}</td>
@@ -130,13 +130,13 @@ export function Parts(): JSX.Element {
                     </td>
                   </tr>
                   {expanded && (
-                    <tr key={`${row.partId}-detail`} className="vds-parts-register__detail-row">
+                    <tr className="vds-parts-register__detail-row">
                       <td colSpan={8}>
                         <PartReadOnlyDetail partId={row.partId} />
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               );
             })}
           </tbody>
