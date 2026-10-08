@@ -217,6 +217,9 @@ export interface PartDetail {
   readonly units: readonly Record<string, unknown>[];
   readonly intervals: readonly Record<string, unknown>[];
   readonly people: readonly Record<string, unknown>[];
+  readonly locations: readonly Record<string, unknown>[];
+  readonly measurements: readonly Record<string, unknown>[];
+  readonly unitsOfMeasure: readonly { readonly id: string; readonly code: string; readonly name: string }[];
 }
 
 export const fetchPart = (partId: string) => read<PartDetail>(`/execution/parts/${partId}`);

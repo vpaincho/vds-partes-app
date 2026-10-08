@@ -592,6 +592,77 @@ textarea.vds-input,
   margin-top: var(--vds-space-3);
 }
 
+.vds-unit__active {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vds-space-3);
+  margin-top: var(--vds-space-3);
+}
+
+.vds-unit__sub {
+  flex: 1 1 100%;
+}
+
+.vds-unit__sub h4 {
+  margin: 0 0 var(--vds-space-1);
+  font-size: var(--vds-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--vds-muted);
+}
+
+.vds-list--compact {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--vds-space-1);
+  font-size: var(--vds-text-sm);
+}
+
+.vds-list--compact li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--vds-space-3);
+}
+
+/* A compact command form: label, inputs and a submit button in one row that wraps. Generic — any
+   module can use it for a single-intent capture, same shape as .vds-permits__form but unscoped. */
+.vds-inline-form {
+  flex: 1 1 220px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--vds-space-2);
+  padding: var(--vds-space-3);
+  border: 1px solid var(--vds-surface-border);
+  border-radius: var(--vds-radius-sm);
+  background: var(--vds-surface-panel);
+}
+
+.vds-inline-form label {
+  flex: 1 1 100%;
+  font-size: var(--vds-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--vds-muted);
+}
+
+.vds-inline-form .vds-input {
+  flex: 1 1 140px;
+}
+
+.vds-inline-form .vds-note {
+  flex: 1 1 100%;
+}
+
+.vds-part-close {
+  margin-top: var(--vds-space-5);
+  padding-top: var(--vds-space-5);
+  border-top: 1px solid var(--vds-surface-border);
+}
+
 .vds-people li {
   display: flex;
   align-items: center;
