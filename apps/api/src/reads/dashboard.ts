@@ -11,7 +11,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { instantNow, isDomainError, HTTP_STATUS } from '@vds/kernel';
 import { withConnection } from '../platform/db.ts';
-import { readableContractIds, unauthenticated } from '../platform/authz.ts';
+import { readableContractIds, readableContractIdsAny, unauthenticated } from '../platform/authz.ts';
 
 const meta = (request: FastifyRequest) => ({ requestId: request.requestId, serverTime: instantNow() });
 
@@ -117,16 +117,36 @@ export async function registerDashboardReadRoutes(app: FastifyInstance): Promise
     const actor = request.actor;
     if (!actor) return reply.code(401).send({ error: unauthenticated().toJSON().error, meta: meta(request) });
     try {
-      readableContractIds(actor, 'commercial.read');
+      const contractIds = readableContractIdsAny(actor, [
+        'commercial.read',
+        'commercial.client.read',
+      ]);
+      const contractScope = contractIds === null ? null : [...contractIds];
       const data = await withConnection(async (db) => {
         const units = await db.query<{ state: string; count: string }>(
-          'SELECT state::text AS state, count(*)::text AS count FROM commercial.commercial_units GROUP BY state',
+          `SELECT u.state::text AS state, count(*)::text AS count
+             FROM commercial.commercial_units u
+             JOIN config.contract_services cs ON cs.id = u.contract_service_id
+             JOIN config.contract_versions cv ON cv.id = cs.contract_version_id
+            WHERE ($1::uuid[] IS NULL OR cv.contract_id = ANY($1::uuid[]))
+            GROUP BY u.state`,
+          [contractScope],
         );
         const supersession = await db.query<{ supersession_state: string; count: string }>(
-          'SELECT supersession_state::text AS supersession_state, count(*)::text AS count FROM commercial.commercial_units GROUP BY supersession_state',
+          `SELECT u.supersession_state::text AS supersession_state, count(*)::text AS count
+             FROM commercial.commercial_units u
+             JOIN config.contract_services cs ON cs.id = u.contract_service_id
+             JOIN config.contract_versions cv ON cv.id = cs.contract_version_id
+            WHERE ($1::uuid[] IS NULL OR cv.contract_id = ANY($1::uuid[]))
+            GROUP BY u.supersession_state`,
+          [contractScope],
         );
         const lots = await db.query<{ state: string; count: string }>(
-          'SELECT state::text AS state, count(*)::text AS count FROM billing.billing_lots GROUP BY state',
+          `SELECT state::text AS state, count(*)::text AS count
+             FROM billing.billing_lots
+            WHERE ($1::uuid[] IS NULL OR contract_id = ANY($1::uuid[]))
+            GROUP BY state`,
+          [contractScope],
         );
         return {
           unitsByState: countsBy(units.rows, 'state'),
