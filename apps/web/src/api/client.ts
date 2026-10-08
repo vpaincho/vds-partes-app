@@ -115,6 +115,18 @@ export const fetchDevIdentities = () =>
 export const createDevSession = (identityId: string) =>
   call<{ data: DevSession; meta: ApiMeta }>('POST', '/dev/sessions', { identityId });
 
+
+export interface SessionActor {
+  readonly identityId: string;
+  readonly displayName: string;
+  readonly personId: string | null;
+  readonly roles: readonly string[];
+  readonly capabilities: readonly string[];
+}
+
+export const fetchSessionActor = () =>
+  call<{ data: SessionActor; meta: ApiMeta }>('GET', '/me');
+
 async function call<T>(method: 'GET' | 'POST', path: string, body?: unknown): Promise<T> {
   let response: Response;
   try {
