@@ -31,7 +31,8 @@ export interface DashboardProps {
 export function Dashboard({ capabilities }: DashboardProps): JSX.Element {
   const canSeeOperational = capabilities.includes('execution.read');
   const canSeeReview = capabilities.includes('review.read');
-  const canSeeCommercial = capabilities.includes('commercial.read');
+  const canSeeCommercial =
+    capabilities.includes('commercial.read') || capabilities.includes('commercial.client.read');
 
   return (
     <div className="vds-dashboard" data-density="analysis">
