@@ -1,0 +1,11 @@
+{
+  "name": "@vds/sync",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Client-side offline outbox: durable local commands and the drain loop that posts them to /sync/commands.",
+  "main": "src/index.ts",
+  "dependencies": {
+    "dexie": "4.4.6"
+  }
+}

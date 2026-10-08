@@ -20,6 +20,9 @@
       "path": "./packages/ui"
     },
     {
+      "path": "./packages/sync"
+    },
+    {
       "path": "./apps/api"
     },
     {
