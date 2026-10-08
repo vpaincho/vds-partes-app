@@ -1,20 +1,19 @@
 /**
- * The application shell.
+ * Application shell.
  *
- * KEEP from the product baseline, per 01 and 15: navigation that differs by actor, a collapsible
- * rail, and visible identity and context. Those are the parts of the prototype that reflect how
- * people actually work, and 15 lists them as preserved surfaces.
+ * Product rule: the primary navigation follows Juan's five Product Baseline personas
+ * (Administrador, Planner, Operador, Validador VDS, Cliente). Granular capabilities remain the
+ * authorization mechanism underneath; they no longer define the product's information architecture.
  *
- * What changes is the basis of the navigation. `shell()` in the prototype branched on `S.user`, a
- * client-side role. Here the rail is built from the **capabilities the server reported**, and that is
- * presentation only — 13 is explicit that frontend visibility is UX and every call is authorised
- * server-side regardless of what the rail shows.
- *
- * The density tier is set per surface (DS-01 §5): field surfaces get touch targets and large rows,
- * planning gets an analytic density. Field never inherits analysis.
+ * Specialist roles keep a capability-driven fallback so Habilita / supervisor / backoffice flows
+ * remain testable without becoming new primary personas by accident.
  */
 import { useState, type JSX } from 'react';
-import type { CommandInfo } from '../api/client.ts';
+import {
+  primaryNavigationForRoles,
+  productProfileForRoles,
+  profileLabel,
+} from './productProfile.ts';
 
 export type SurfaceId =
   | 'field.my-day'
@@ -34,52 +33,80 @@ export type SurfaceId =
 export interface Surface {
   readonly id: SurfaceId;
   readonly label: string;
-  /** The capability that makes this surface worth showing. Visibility only. */
+  /** Capability used only by specialist-role fallback navigation. */
   readonly capability: string;
-  /** DS-01 density tier. */
   readonly density: 'field' | 'operations' | 'analysis';
   readonly icon: string;
-  /** Null when the surface is specified but not built yet, so the state is honest. */
   readonly status: 'built' | 'planned';
 }
 
-/**
- * Every surface of 02_TARGET_PRODUCT, with its real status.
- *
- * Listing the planned ones is deliberate. 02 forbids a "botón pendiente" standing in for a core
- * function, so a planned surface is labelled as such rather than rendered as an empty page that
- * looks finished.
- */
 export const SURFACES: readonly Surface[] = [
   { id: 'field.my-day', label: 'Mi jornada', capability: 'execution.read', density: 'field', icon: '◉', status: 'built' },
   { id: 'planning.timeline', label: 'Planificación', capability: 'planning.read', density: 'operations', icon: '▤', status: 'built' },
   { id: 'execution.parts', label: 'Partes', capability: 'execution.read', density: 'operations', icon: '▦', status: 'built' },
-  { id: 'control.directives', label: 'Directivas', capability: 'control.apply', density: 'operations', icon: '⇄', status: 'built' },
-  { id: 'habilita.permits', label: 'Permisos', capability: 'habilita.read', density: 'operations', icon: '⬢', status: 'built' },
-  { id: 'habilita.events', label: 'Habilita Respond', capability: 'habilita.read', density: 'operations', icon: '▲', status: 'built' },
-  { id: 'trace', label: 'Trazabilidad', capability: 'trace.read', density: 'analysis', icon: '◈', status: 'built' },
-  { id: 'habilita.matrix', label: 'Habilita', capability: 'habilita.documental', density: 'operations', icon: '◉', status: 'built' },
+  { id: 'habilita.matrix', label: 'Habilitaciones', capability: 'habilita.read', density: 'operations', icon: '◉', status: 'built' },
   { id: 'review.queue', label: 'Revisión VDS', capability: 'review.read', density: 'operations', icon: '▷', status: 'built' },
   { id: 'commercial.queue', label: 'Certificación', capability: 'commercial.read', density: 'operations', icon: '◫', status: 'built' },
-  { id: 'billing.queue', label: 'Facturación', capability: 'billing.read', density: 'operations', icon: '▣', status: 'built' },
   { id: 'dashboard', label: 'Dashboard', capability: 'execution.read', density: 'analysis', icon: '▚', status: 'built' },
   { id: 'config', label: 'Configuración', capability: 'config.read', density: 'operations', icon: '⚙', status: 'built' },
+
+  // Built secondary capabilities. They stay out of the five primary menus unless the actor is a
+  // specialist/support identity; the functionality is preserved, only its product placement changes.
+  { id: 'control.directives', label: 'Directivas', capability: 'control.apply', density: 'operations', icon: '⇄', status: 'built' },
+  { id: 'habilita.permits', label: 'Permisos de trabajo', capability: 'habilita.read', density: 'operations', icon: '⬢', status: 'built' },
+  { id: 'habilita.events', label: 'Eventos Habilita', capability: 'habilita.read', density: 'operations', icon: '▲', status: 'built' },
+  { id: 'billing.queue', label: 'Facturación', capability: 'billing.read', density: 'operations', icon: '▣', status: 'built' },
+  { id: 'trace', label: 'Trazabilidad', capability: 'trace.read', density: 'analysis', icon: '◈', status: 'built' },
 ];
 
 export interface AppShellProps {
-  readonly actor: { readonly displayName: string; readonly capabilities: readonly string[] } | null;
-  readonly commands: readonly CommandInfo[];
+  readonly actor: {
+    readonly displayName: string;
+    readonly roles: readonly string[];
+    readonly capabilities: readonly string[];
+  } | null;
   readonly current: SurfaceId;
   readonly onNavigate: (surface: SurfaceId) => void;
   readonly onSignOut: () => void;
   readonly children: React.ReactNode;
-  /** Which providers are still fixtures, surfaced honestly (14). */
   readonly fixtureProviders?: readonly string[];
+}
+
+function surfaceSubtitle(surfaceId: SurfaceId, roles: readonly string[]): string {
+  const profile = productProfileForRoles(roles);
+
+  switch (surfaceId) {
+    case 'planning.timeline':
+      return 'Trabajos por contrato, recurso y día';
+    case 'execution.parts':
+      return profile === 'admin' ? 'Todos los partes de la base, por estado' : 'Partes y ejecución vinculados a la planificación';
+    case 'field.my-day':
+      return 'Trabajo de campo · ejecución de la jornada';
+    case 'habilita.matrix':
+      return 'Personal y recursos habilitados por operadora';
+    case 'review.queue':
+      return 'Responsable técnico VDS';
+    case 'commercial.queue':
+      return profile === 'client' ? 'Certificación del servicio' : 'Unidades comerciales y certificación';
+    case 'dashboard':
+      return profile === 'client' ? 'Dashboard del servicio' : 'Indicadores del servicio';
+    case 'config':
+      return 'Contratos, catálogos y usuarios';
+    case 'control.directives':
+      return 'Cambios operativos con recepción y aplicación trazables';
+    case 'habilita.permits':
+      return 'Permisos de trabajo y vigencias';
+    case 'habilita.events':
+      return 'Eventos, triage, casos y acciones';
+    case 'billing.queue':
+      return 'Líneas y lotes de facturación';
+    case 'trace':
+      return 'Decisiones, reglas y lineage';
+  }
 }
 
 export function AppShell({
   actor,
-  commands,
   current,
   onNavigate,
   onSignOut,
@@ -90,8 +117,17 @@ export function AppShell({
   const [theme, setTheme] = useState<'light' | 'dark' | null>(null);
 
   const surface = SURFACES.find((s) => s.id === current) ?? SURFACES[0]!;
-  // The rail shows what this actor could use. The server still decides on every call.
-  const visible = SURFACES.filter((s) => actor?.capabilities.includes(s.capability));
+  const baselineNavigation = actor ? primaryNavigationForRoles(actor.roles) : null;
+
+  const visible = actor
+    ? baselineNavigation
+      ? baselineNavigation
+          .map((id) => SURFACES.find((surfaceItem) => surfaceItem.id === id))
+          .filter((item): item is Surface => item !== undefined)
+      : SURFACES.filter((item) => actor.capabilities.includes(item.capability))
+    : [];
+
+  const roleLabel = actor ? profileLabel(actor.roles) : 'Sin perfil';
 
   return (
     <div
@@ -101,8 +137,6 @@ export function AppShell({
     >
       <nav className="vds-rail" aria-label="Navegación principal">
         <div className="vds-rail__brand">
-          {/* The brand mark keeps the VDS red. DS-01 restricts that red to identity and to the
-              critical signal, so it never doubles as an action colour. */}
           <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
             <rect width="32" height="32" rx="7" fill="var(--vds-brand)" />
             <path d="M8 8h4.2L16 19.2 19.8 8H24l-6 16h-4z" fill="#fff" />
@@ -110,10 +144,12 @@ export function AppShell({
           {!railCollapsed && (
             <span className="vds-rail__wordmark">
               <strong>VIENTOS DEL SUR</strong>
-              <small>Partes</small>
+              <small>Partes de campo</small>
             </span>
           )}
         </div>
+
+        {!railCollapsed && <div className="vds-rail__role">{roleLabel}</div>}
 
         <ul className="vds-rail__nav">
           {visible.map((item) => (
@@ -123,27 +159,29 @@ export function AppShell({
                 className="vds-rail__link"
                 aria-current={item.id === current ? 'page' : undefined}
                 onClick={() => onNavigate(item.id)}
-                title={item.status === 'planned' ? `${item.label} — especificada, aún no construida` : item.label}
+                title={item.label}
               >
                 <span className="vds-rail__icon" aria-hidden="true">
                   {item.icon}
                 </span>
-                {!railCollapsed && (
-                  <>
-                    <span>{item.label}</span>
-                    {item.status === 'planned' && <span className="vds-rail__planned">pendiente</span>}
-                  </>
-                )}
+                {!railCollapsed && <span>{item.label}</span>}
               </button>
             </li>
           ))}
         </ul>
 
         <div className="vds-rail__footer">
+          {actor && !railCollapsed && (
+            <div className="vds-rail__identity">
+              <strong>{actor.displayName}</strong>
+              <small>{roleLabel}</small>
+            </div>
+          )}
+
           <button
             type="button"
             className="vds-rail__link"
-            onClick={() => setRailCollapsed((v) => !v)}
+            onClick={() => setRailCollapsed((value) => !value)}
             aria-expanded={!railCollapsed}
           >
             <span className="vds-rail__icon" aria-hidden="true">
@@ -151,16 +189,22 @@ export function AppShell({
             </span>
             {!railCollapsed && <span>Contraer</span>}
           </button>
+
           <button
             type="button"
             className="vds-rail__link"
-            onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+            onClick={() => setTheme((value) => (value === 'dark' ? 'light' : 'dark'))}
           >
-            <span className="vds-rail__icon" aria-hidden="true">
-              ◐
-            </span>
+            <span className="vds-rail__icon" aria-hidden="true">◐</span>
             {!railCollapsed && <span>Tema</span>}
           </button>
+
+          {actor && (
+            <button type="button" className="vds-rail__link" onClick={onSignOut}>
+              <span className="vds-rail__icon" aria-hidden="true">↪</span>
+              {!railCollapsed && <span>Salir</span>}
+            </button>
+          )}
         </div>
       </nav>
 
@@ -168,32 +212,17 @@ export function AppShell({
         <header className="vds-topbar">
           <div>
             <h1>{surface.label}</h1>
-            {/* Context stays visible, which 01 lists as a KEEP. */}
-            <p className="vds-topbar__context">
-              {actor ? actor.displayName : 'Sin sesión'}
-              {actor && (
-                <>
-                  {' · '}
-                  <span className="vds-numeric">
-                    {commands.filter((c) => c.allowedForActor && c.implemented).length} comandos
-                    habilitados
-                  </span>
-                </>
-              )}
-            </p>
+            <p className="vds-topbar__context">{surfaceSubtitle(surface.id, actor?.roles ?? [])}</p>
           </div>
+
           <div className="vds-topbar__actions">
             {fixtureProviders.length > 0 && (
-              // 14: the UI leaves the provider mode visible. A TEST ERP reference must never be
-              // mistaken for a real one.
-              <span className="vds-chip vds-chip--test" title={`Proveedores fixture: ${fixtureProviders.join(', ')}`}>
-                MODO TEST · {fixtureProviders.length} proveedor(es) fixture
+              <span
+                className="vds-chip vds-chip--test"
+                title={`Proveedores fixture: ${fixtureProviders.join(', ')}`}
+              >
+                MODO TEST
               </span>
-            )}
-            {actor && (
-              <button type="button" className="vds-button vds-button--ghost" onClick={onSignOut}>
-                Salir
-              </button>
             )}
           </div>
         </header>
@@ -206,38 +235,27 @@ export function AppShell({
   );
 }
 
-/**
- * An honest placeholder.
- *
- * 02 forbids a "botón pendiente" substituting for a core function, and the plan's DoD requires that
- * no wave be presented as a finished product. So a surface that is specified but not built says so,
- * names what it will contain, and offers no controls that do nothing.
- */
 function PlannedSurface({ surface }: { readonly surface: Surface }): JSX.Element {
   const CONTENT: Record<string, { summary: string; wave: string; items: readonly string[] }> = {
     'habilita.matrix': {
       summary:
         'Matriz documental de requisitos por persona y recurso: administración de requisitos, ' +
-        'documentos, cumplimientos y evaluaciones. El circuito de eventos (Flash Report, triage, ' +
-        'caso, acciones, notificaciones) ya tiene su propia superficie en "Habilita Respond", y los ' +
-        'permisos de trabajo en "Permisos".',
-      wave: 'W4 (Respond & Learn ya construido); la administración documental queda para esta superficie',
+        'documentos, cumplimientos y evaluaciones.',
+      wave: 'W4',
       items: [
-        'Matriz como projection sobre requisitos, documentos, cumplimientos y evaluaciones',
-        'Alta y versionado de requisitos por tipo de sujeto (persona/recurso)',
-        'Carga y vigencia de documentos, con freshness explícito',
-        'Vista cruzada persona/recurso × requisito × contexto × fecha',
+        'Matriz sobre requisitos, documentos, cumplimientos y evaluaciones',
+        'Vigencia y estado por persona/recurso',
+        'Contexto y fecha de evaluación',
       ],
     },
     config: {
       summary:
-        'Maestros, contratos y versiones, items, unidades, tipos y componentes, y reglas versionadas ' +
-        'con publicación y preview de errores.',
+        'Maestros, contratos y versiones, items, unidades, tipos, componentes y reglas versionadas.',
       wave: 'W6',
       items: [
         'Publicación versionada con vigencia',
-        'Import de maestros: staging, validación, preview de discrepancias, publicación por owner',
-        'Configuración faltante visible como PENDIENTE_CONFIGURACION, nunca completada por defecto',
+        'Import de maestros con validación',
+        'Configuración faltante visible como PENDIENTE_CONFIGURACION',
       ],
     },
   };
@@ -260,10 +278,6 @@ function PlannedSurface({ surface }: { readonly surface: Surface }): JSX.Element
           </ul>
         </>
       )}
-      <p className="vds-planned__note">
-        No hay controles aquí a propósito: un botón que no hace nada es peor que una ausencia
-        declarada.
-      </p>
     </section>
   );
 }
