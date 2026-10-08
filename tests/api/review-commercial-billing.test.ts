@@ -10,6 +10,7 @@ import {
   envelope,
   get,
   getApp,
+  getPool,
   makeScenario,
   makeSession,
   post,
@@ -482,5 +483,90 @@ describe('read models', () => {
   it('404s for a billing lot that does not exist', async () => {
     const result = await get(`/billing/lots/${uuid()}`, { session: backoffice });
     expect(result.status).toBe(404);
+  });
+});
+
+describe('RUL-065 — an approved amendment flags its commercial units for recalculation', () => {
+  it('flips an ACEPTADA+VIGENTE unit to REQUIERE_RECALCULO, without touching its accepted state, and RUL-070 then refuses it', async () => {
+    const ctx = await closedUnitWithVersion();
+
+    const derived = await post<{ data: { subject: { id: string } } }>('/commercial/units', {
+      session: backoffice,
+      body: envelope({
+        payload: {
+          contractServiceId: ctx.contractServiceId,
+          contractItemId: ctx.contractItemId,
+          unitOfMeasureId: ctx.unitOfMeasureId,
+          sources: [
+            { executionUnitVersionId: ctx.executionUnitVersionId, executionAllocationId: ctx.executionAllocationId },
+          ],
+        },
+      }),
+    });
+    const ucId = derived.body.data.subject.id;
+    await post(`/commercial/units/${ucId}/complete-requirements`, {
+      session: backoffice,
+      body: envelope({ payload: { quantity: '1' } }),
+    });
+    await post(`/commercial/units/${ucId}/enter-review`, { session: backoffice, body: envelope({ payload: {} }) });
+    await post(`/commercial/units/${ucId}/accept`, { session: backoffice, body: envelope({ payload: {} }) });
+
+    const supervisorA = await makeSession({ role: 'supervisor' });
+    const supervisorB = await makeSession({ role: 'supervisor' });
+    const amendmentCreated = await post<{ data: { subject: { id: string } } }>('/execution/amendments', {
+      session: supervisorA,
+      body: envelope({
+        payload: {
+          targetKind: 'EXECUTION_UNIT',
+          executionUnitId: ctx.unitId,
+          fieldPath: 'result_reason',
+          oldValue: null,
+          newValue: 'cantidad corregida tras hallazgo de auditoria',
+          reason: 'La medicion original no reflejaba el trabajo real realizado',
+        },
+      }),
+    });
+    const amendmentId = amendmentCreated.body.data.subject.id;
+
+    const [beforeApproval] = await sql<{ supersession_state: string; state: string }>(
+      'SELECT supersession_state::text AS supersession_state, state::text AS state FROM commercial.commercial_units WHERE id = $1',
+      [ucId],
+    );
+    expect(beforeApproval!.supersession_state).toBe('VIGENTE');
+
+    const approved = await post(`/execution/amendments/${amendmentId}/approve`, {
+      session: supervisorB,
+      body: envelope({ payload: {} }),
+    });
+    expect(approved.status, JSON.stringify(approved.body)).toBe(200);
+
+    // Nothing processes the outbox yet — the job has not run.
+    const [stillVigente] = await sql<{ supersession_state: string }>(
+      'SELECT supersession_state::text AS supersession_state FROM commercial.commercial_units WHERE id = $1',
+      [ucId],
+    );
+    expect(stillVigente!.supersession_state).toBe('VIGENTE');
+
+    const { runCommercialRecalcJob } = await import('../../apps/worker/src/jobs/commercial-recalc.ts');
+    const result = await runCommercialRecalcJob(getPool());
+    expect(result.unitsFlagged).toContain(ucId);
+
+    const [afterRecalc] = await sql<{ supersession_state: string; state: string }>(
+      'SELECT supersession_state::text AS supersession_state, state::text AS state FROM commercial.commercial_units WHERE id = $1',
+      [ucId],
+    );
+    // C-030/C-034: the historical acceptance is untouched — only the parallel dimension moved.
+    expect(afterRecalc!.state).toBe('ACEPTADA');
+    expect(afterRecalc!.supersession_state).toBe('REQUIERE_RECALCULO');
+
+    const refused = await post('/billing/lines', {
+      session: backoffice,
+      body: envelope({ payload: { commercialUnitIds: [ucId] } }),
+    });
+    expect(refused.status).toBe(422);
+
+    // Idempotent: running the job again does not re-flag or error on an already-processed event.
+    const second = await runCommercialRecalcJob(getPool());
+    expect(second.outboxEventsProcessed).toBe(0);
   });
 });
