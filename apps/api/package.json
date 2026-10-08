@@ -9,8 +9,12 @@
     "@vds/contracts": "*",
     "@vds/kernel": "*",
     "@vds/rules": "*",
+    "@vds/typeparts": "*",
     "fastify": "5.12.5",
     "pg": "8.23.1"
   },
-  "scripts": { "dev": "node --watch src/server.ts", "start": "node src/server.ts" }
+  "scripts": {
+    "dev": "node --watch src/server.ts",
+    "start": "node src/server.ts"
+  }
 }

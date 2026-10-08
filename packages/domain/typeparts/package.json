@@ -1,0 +1,10 @@
+{
+  "name": "@vds/typeparts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TypePartBehavior: TP-01 intervencion, TP-02 transporte, TP-03 cuadrilla. One model, three strategies.",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": { "@vds/kernel": "*" },
+  "scripts": { "test": "vitest run" }
+}

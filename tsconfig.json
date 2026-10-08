@@ -11,6 +11,9 @@
       "path": "./packages/domain/rules"
     },
     {
+      "path": "./packages/domain/typeparts"
+    },
+    {
       "path": "./packages/adapters"
     },
     {
