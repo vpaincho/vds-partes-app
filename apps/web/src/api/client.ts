@@ -430,6 +430,104 @@ export const fetchPermits = (options: { state?: string; locationId?: string } = 
   return read<PermitRow[]>(`/habilita/permits${query ? `?${query}` : ''}`);
 };
 
+export interface HabilitaEventRow {
+  readonly id: string;
+  readonly code: string | null;
+  readonly state: string;
+  readonly initial_category: string;
+  readonly short_description: string;
+  readonly situation_controlled: boolean;
+  readonly occurred_at: string;
+  readonly reported_at: string;
+  readonly reported_by_name: string | null;
+  readonly location_code: string | null;
+  readonly location_name: string | null;
+  readonly unmapped_location: string | null;
+  readonly current_category: string | null;
+  readonly current_severity: string | null;
+  readonly case_id: string | null;
+  readonly case_state: string | null;
+}
+
+export const fetchHabilitaEvents = (options: { state?: string } = {}) => {
+  const params = new URLSearchParams();
+  if (options.state) params.set('state', options.state);
+  const query = params.toString();
+  return read<HabilitaEventRow[]>(`/habilita/events${query ? `?${query}` : ''}`);
+};
+
+export interface HabilitaEventDetail {
+  readonly event: HabilitaEventRow & {
+    readonly detected_at: string | null;
+    readonly discarded_at: string | null;
+    readonly discarded_reason: string | null;
+    readonly duplicate_of_id: string | null;
+    readonly closed_without_case_at: string | null;
+    readonly version: number;
+  };
+  readonly classifications: readonly {
+    readonly id: string;
+    readonly version_no: number;
+    readonly category: string;
+    readonly severity: string | null;
+    readonly event_type_code: string | null;
+    readonly justification: string | null;
+    readonly classified_at: string;
+    readonly classified_by_name: string | null;
+  }[];
+  readonly case: {
+    readonly id: string;
+    readonly code: string | null;
+    readonly state: string;
+    readonly owner_id: string | null;
+    readonly investigation_state: string;
+    readonly investigation_summary: string | null;
+    readonly opened_at: string;
+    readonly investigation_started_at: string | null;
+    readonly investigation_finished_at: string | null;
+    readonly ready_for_closure_at: string | null;
+    readonly closed_at: string | null;
+    readonly version: number;
+  } | null;
+  readonly actions: readonly {
+    readonly id: string;
+    readonly code: string | null;
+    readonly state: string;
+    readonly description: string;
+    readonly action_kind: string | null;
+    readonly is_blocking: boolean;
+    readonly responsible_id: string | null;
+    readonly responsible_name: string | null;
+    readonly due_at: string | null;
+    readonly implemented_at: string | null;
+    readonly verified_at: string | null;
+    readonly cancelled_at: string | null;
+    readonly cancellation_reason: string | null;
+  }[];
+  readonly notifications: readonly {
+    readonly id: string;
+    readonly obligation_code: string;
+    readonly recipient_role: string;
+    readonly responsible_id: string | null;
+    readonly responsible_name: string | null;
+    readonly due_at: string | null;
+    readonly status: string;
+    readonly resolved_at: string | null;
+    readonly resolution_note: string | null;
+  }[];
+  readonly caseLifecycle: readonly {
+    readonly event_type: string;
+    readonly from_state: string | null;
+    readonly to_state: string;
+    readonly actor_id: string | null;
+    readonly actor_name: string | null;
+    readonly reason: string | null;
+    readonly occurred_at: string;
+  }[];
+}
+
+export const fetchHabilitaEvent = (eventId: string) => read<HabilitaEventDetail>(`/habilita/events/${eventId}`);
+
 export interface TraceEntry {
   readonly decisionId: string;
   readonly decision: string;

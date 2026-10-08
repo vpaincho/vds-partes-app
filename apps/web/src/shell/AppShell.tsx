@@ -22,6 +22,7 @@ export type SurfaceId =
   | 'execution.parts'
   | 'control.directives'
   | 'habilita.permits'
+  | 'habilita.events'
   | 'habilita.matrix'
   | 'review.queue'
   | 'commercial.queue'
@@ -54,6 +55,7 @@ export const SURFACES: readonly Surface[] = [
   { id: 'execution.parts', label: 'Partes', capability: 'execution.read', density: 'operations', icon: '▦', status: 'built' },
   { id: 'control.directives', label: 'Directivas', capability: 'control.apply', density: 'operations', icon: '⇄', status: 'built' },
   { id: 'habilita.permits', label: 'Permisos', capability: 'habilita.read', density: 'operations', icon: '⬢', status: 'built' },
+  { id: 'habilita.events', label: 'Habilita Respond', capability: 'habilita.read', density: 'operations', icon: '▲', status: 'built' },
   { id: 'trace', label: 'Trazabilidad', capability: 'trace.read', density: 'analysis', icon: '◈', status: 'built' },
   { id: 'habilita.matrix', label: 'Habilita', capability: 'habilita.documental', density: 'operations', icon: '◉', status: 'planned' },
   { id: 'review.queue', label: 'Revisión VDS', capability: 'review.read', density: 'operations', icon: '▷', status: 'planned' },
@@ -213,15 +215,16 @@ function PlannedSurface({ surface }: { readonly surface: Surface }): JSX.Element
   const CONTENT: Record<string, { summary: string; wave: string; items: readonly string[] }> = {
     'habilita.matrix': {
       summary:
-        'Matriz documental de requisitos por persona y recurso, y el circuito de eventos: Flash ' +
-        'Report, triage, caso, acciones y notificaciones. Los permisos de trabajo ya tienen su ' +
-        'propia superficie.',
-      wave: 'W4 (Respond & Learn); la administración documental, en W4 junto al circuito',
+        'Matriz documental de requisitos por persona y recurso: administración de requisitos, ' +
+        'documentos, cumplimientos y evaluaciones. El circuito de eventos (Flash Report, triage, ' +
+        'caso, acciones, notificaciones) ya tiene su propia superficie en "Habilita Respond", y los ' +
+        'permisos de trabajo en "Permisos".',
+      wave: 'W4 (Respond & Learn ya construido); la administración documental queda para esta superficie',
       items: [
         'Matriz como projection sobre requisitos, documentos, cumplimientos y evaluaciones',
-        'Flash Report en ≤2 min con contexto autoderivado, standalone si hace falta',
-        'Caso con investigación y acciones de ciclo propio',
-        'Notificación como obligación persistida, no como envío optimista',
+        'Alta y versionado de requisitos por tipo de sujeto (persona/recurso)',
+        'Carga y vigencia de documentos, con freshness explícito',
+        'Vista cruzada persona/recurso × requisito × contexto × fecha',
       ],
     },
     'review.queue': {
