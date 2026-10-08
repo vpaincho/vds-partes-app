@@ -283,7 +283,11 @@ export function makeErpFixture(options: ErpFixtureOptions = {}): ErpPort {
         return {
           outcome: 'ACCEPTED',
           // The TEST- prefix is deliberate: a reference from a fixture must be unmistakable.
-          externalRef: `TEST-${submission.lotCode}-${submission.idempotencyKey.slice(0, 8)}`,
+          // The full idempotencyKey, never a slice of it: callers mint it as a UUIDv7, whose
+          // leading characters are a timestamp, not entropy — two submissions built moments apart
+          // (exactly what a fast test suite or a busy billing run produces) would share the same
+          // first 8 hex characters and collide on external_document_refs' unique constraint.
+          externalRef: `TEST-${submission.lotCode}-${submission.idempotencyKey}`,
         };
     }
   };
@@ -306,7 +310,7 @@ export function makeErpFixture(options: ErpFixtureOptions = {}): ErpPort {
       if (existing.outcome === 'UNKNOWN') {
         const resolved: ErpSubmissionOutcome = {
           outcome: 'ACCEPTED',
-          externalRef: `TEST-RECONCILED-${idempotencyKey.slice(0, 8)}`,
+          externalRef: `TEST-RECONCILED-${idempotencyKey}`,
         };
         submissions.set(idempotencyKey, resolved);
         return ok(resolved);
