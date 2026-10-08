@@ -92,6 +92,36 @@ p {
   font-size: var(--vds-text-xs);
 }
 
+
+.vds-rail__role {
+  padding: 0 var(--vds-space-3);
+  color: var(--vds-muted);
+  font-family: var(--vds-font-display);
+  font-size: var(--vds-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.vds-rail__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--vds-space-3);
+  border: 1px solid var(--vds-surface-border);
+  border-radius: var(--vds-radius-md);
+  background: var(--vds-surface-surface);
+}
+
+.vds-rail__identity strong {
+  font-size: var(--vds-text-sm);
+}
+
+.vds-rail__identity small {
+  color: var(--vds-muted);
+  font-size: var(--vds-text-xs);
+}
+
 .vds-rail__nav {
   list-style: none;
   margin: 0;
@@ -1029,6 +1059,18 @@ textarea.vds-input,
   flex-direction: column;
   gap: var(--vds-space-3);
   padding-top: var(--vds-space-3);
+}
+
+
+.vds-signin__technical {
+  border-top: 1px solid var(--vds-surface-border);
+  padding-top: var(--vds-space-3);
+}
+
+.vds-signin__technical summary {
+  cursor: pointer;
+  color: var(--vds-muted);
+  font-size: var(--vds-text-sm);
 }
 
 .vds-empty,
@@ -2063,5 +2105,60 @@ textarea.vds-input,
 
   .vds-permits__window {
     margin-left: 0;
+  }
+}
+
+
+/* --------------------------------------------------------------- Parts register */
+
+.vds-parts-register {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vds-space-4);
+}
+
+.vds-parts-register__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vds-space-3);
+}
+
+.vds-parts-register__filters {
+  display: flex;
+  flex-wrap: wrap;
+  border: 1px solid var(--vds-surface-border-strong);
+  border-radius: var(--vds-radius-md);
+  overflow: hidden;
+}
+
+.vds-parts-register__table-wrap {
+  overflow: auto;
+  border: 1px solid var(--vds-surface-border);
+  border-radius: var(--vds-radius-md);
+  background: var(--vds-surface-panel);
+}
+
+.vds-parts-register__table {
+  margin: 0;
+  min-width: 900px;
+}
+
+.vds-parts-register__detail-row td {
+  padding: 0;
+  background: var(--vds-surface-surface);
+}
+
+.vds-parts-register__detail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--vds-space-5);
+  padding: var(--vds-space-5);
+}
+
+@media (max-width: 900px) {
+  .vds-parts-register__detail {
+    grid-template-columns: 1fr;
   }
 }
