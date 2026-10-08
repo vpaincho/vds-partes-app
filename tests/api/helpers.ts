@@ -148,6 +148,17 @@ export async function get<T = unknown>(url: string, options: CallOptions = {}): 
   return { status: response.statusCode, body: response.json() as T };
 }
 
+export async function put<T = unknown>(url: string, options: CallOptions = {}): Promise<CallResult<T>> {
+  const instance = await getApp();
+  const response = await instance.inject({
+    method: 'PUT',
+    url,
+    ...(options.session ? { headers: { authorization: `Bearer ${options.session.token}` } } : {}),
+    payload: options.body ?? {},
+  });
+  return { status: response.statusCode, body: response.json() as T };
+}
+
 /**
  * A monotonic clock for fixtures.
  *
