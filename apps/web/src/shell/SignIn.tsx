@@ -19,6 +19,7 @@ import {
 } from '../api/client.ts';
 import {
   isPrimaryProductRole,
+  productProfileForRoles,
   profileDescription,
   profileLabel,
 } from './productProfile.ts';
@@ -38,10 +39,17 @@ export function SignIn({ onSignedIn }: SignInProps): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const primaryIdentities = useMemo(
-    () => identities.filter((identity) => identity.roles.some(isPrimaryProductRole)),
-    [identities],
-  );
+  const primaryIdentities = useMemo(() => {
+    const order = ['admin', 'planner', 'field', 'review', 'client'];
+    return identities
+      .filter((identity) => identity.roles.some(isPrimaryProductRole))
+      .slice()
+      .sort(
+        (a, b) =>
+          order.indexOf(productProfileForRoles(a.roles)) -
+          order.indexOf(productProfileForRoles(b.roles)),
+      );
+  }, [identities]);
   const technicalIdentities = useMemo(
     () => identities.filter((identity) => !identity.roles.some(isPrimaryProductRole)),
     [identities],
