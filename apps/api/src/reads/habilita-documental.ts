@@ -10,7 +10,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { instantNow, isDomainError, HTTP_STATUS } from '@vds/kernel';
 import { withConnection } from '../platform/db.ts';
-import { readableContractIds, unauthenticated } from '../platform/authz.ts';
+import { readableContractIdsAny, unauthenticated } from '../platform/authz.ts';
 
 const meta = (request: FastifyRequest) => ({ requestId: request.requestId, serverTime: instantNow() });
 
@@ -32,7 +32,7 @@ export async function registerHabilitaDocumentalReadRoutes(app: FastifyInstance)
     try {
       // Requirements/documents/compliances are not contract-scoped objects; this only asserts the
       // capability, the same way the dashboards do for execution.read.
-      readableContractIds(actor, 'habilita.documental');
+      readableContractIdsAny(actor, ['habilita.documental', 'habilita.read']);
 
       const data = await withConnection(async (db) => {
         const requirements = await db.query(
