@@ -30,6 +30,9 @@ import { registerPlanningCommands } from './commands/planning.ts';
 import { registerControlCommands } from './commands/control.ts';
 import { registerHabilitaCommands } from './commands/habilita.ts';
 import { registerHabilitaRespondCommands } from './commands/habilita-respond.ts';
+import { registerReviewCommands } from './commands/review.ts';
+import { registerCommercialCommands } from './commands/commercial.ts';
+import { registerBillingCommands } from './commands/billing.ts';
 import { registerReadRoutes } from './reads/routes.ts';
 import { registerHabilitaRespondReadRoutes } from './reads/habilita-respond.ts';
 import { registerSyncRoutes } from './sync/routes.ts';
@@ -132,6 +135,29 @@ const SUBJECT_ROUTES: Record<string, { path: string; idParam?: string }> = {
     path: '/habilita/notifications/:notificationId/resolve',
     idParam: 'notificationId',
   },
+  // review
+  'review.decisions.create': { path: '/review/decisions' },
+  'review.decisions.accept': { path: '/review/decisions/:decisionId/accept', idParam: 'decisionId' },
+  'review.decisions.observe': { path: '/review/decisions/:decisionId/observe', idParam: 'decisionId' },
+  'review.amendment-requests.create': { path: '/review/amendment-requests' },
+  'review.amendment-requests.resolve': {
+    path: '/review/amendment-requests/:requestId/resolve',
+    idParam: 'requestId',
+  },
+  // commercial
+  'commercial.units.derive': { path: '/commercial/units' },
+  'commercial.units.complete-requirements': {
+    path: '/commercial/units/:unitId/complete-requirements',
+    idParam: 'unitId',
+  },
+  'commercial.units.enter-review': { path: '/commercial/units/:unitId/enter-review', idParam: 'unitId' },
+  'commercial.units.accept': { path: '/commercial/units/:unitId/accept', idParam: 'unitId' },
+  'commercial.units.reject': { path: '/commercial/units/:unitId/reject', idParam: 'unitId' },
+  // billing
+  'billing.lines.build': { path: '/billing/lines' },
+  'billing.lots.create': { path: '/billing/lots' },
+  'billing.lots.validate': { path: '/billing/lots/:lotId/validate', idParam: 'lotId' },
+  'billing.lots.send': { path: '/billing/lots/:lotId/send', idParam: 'lotId' },
   // execution
   'execution.parts.prepare': { path: '/execution/parts/prepare' },
   'execution.units.create': { path: '/execution/units' },
@@ -192,6 +218,9 @@ export async function buildServer(options: ServerOptions): Promise<FastifyInstan
   registerControlCommands();
   registerHabilitaCommands();
   registerHabilitaRespondCommands();
+  registerReviewCommands();
+  registerCommercialCommands();
+  registerBillingCommands();
 
   const app = Fastify({
     logger: options.logger ?? false,
