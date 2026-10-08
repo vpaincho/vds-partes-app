@@ -1,23 +1,34 @@
 /**
  * Sign-in.
  *
- * Production authentication remains session based and server resolved.
- * In local development, the API exposes fixture identities and mints an ordinary platform.sessions
- * row for the selected identity. This is convenience only: every subsequent request still passes
- * through resolveActor(), scopes and capability checks.
+ * Product Baseline: the primary personas are Administrador, Planner, Operador, Validador VDS and
+ * Cliente. Technical roles remain available for development, but they are secondary and do not
+ * redefine the product's main personas.
+ *
+ * Authorization is still fully server-side. Selecting a DEV identity only creates a normal
+ * platform.sessions row; /me resolves its real roles/capabilities before the shell is rendered.
  */
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useMemo, useState, type JSX } from 'react';
 import {
   ApiError,
   createDevSession,
-  fetchCommands,
   fetchDevIdentities,
+  fetchSessionActor,
   setSession,
   type DevIdentity,
 } from '../api/client.ts';
+import {
+  isPrimaryProductRole,
+  profileDescription,
+  profileLabel,
+} from './productProfile.ts';
 
 export interface SignInProps {
-  readonly onSignedIn: (actor: { displayName: string; capabilities: readonly string[] }) => void;
+  readonly onSignedIn: (actor: {
+    displayName: string;
+    roles: readonly string[];
+    capabilities: readonly string[];
+  }) => void;
 }
 
 export function SignIn({ onSignedIn }: SignInProps): JSX.Element {
@@ -26,6 +37,15 @@ export function SignIn({ onSignedIn }: SignInProps): JSX.Element {
   const [devAvailable, setDevAvailable] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  const primaryIdentities = useMemo(
+    () => identities.filter((identity) => identity.roles.some(isPrimaryProductRole)),
+    [identities],
+  );
+  const technicalIdentities = useMemo(
+    () => identities.filter((identity) => !identity.roles.some(isPrimaryProductRole)),
+    [identities],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -44,14 +64,15 @@ export function SignIn({ onSignedIn }: SignInProps): JSX.Element {
     };
   }, []);
 
-  async function finishSignIn(sessionId: string, displayName: string): Promise<void> {
+  async function finishSignIn(sessionId: string): Promise<void> {
     setSession(sessionId);
     try {
-      const result = await fetchCommands();
-      const capabilities = [
-        ...new Set(result.data.filter((c) => c.allowedForActor).map((c) => c.capability)),
-      ];
-      onSignedIn({ displayName, capabilities });
+      const actor = await fetchSessionActor();
+      onSignedIn({
+        displayName: actor.data.displayName,
+        roles: actor.data.roles,
+        capabilities: actor.data.capabilities,
+      });
     } catch (cause) {
       setSession(null);
       throw cause;
@@ -63,7 +84,7 @@ export function SignIn({ onSignedIn }: SignInProps): JSX.Element {
     setError(null);
     try {
       const session = await createDevSession(identity.identityId);
-      await finishSignIn(session.data.sessionId, session.data.displayName);
+      await finishSignIn(session.data.sessionId);
     } catch (cause) {
       setError(
         cause instanceof ApiError ? cause.message : 'No se pudo crear la sesión de desarrollo.',
@@ -77,7 +98,7 @@ export function SignIn({ onSignedIn }: SignInProps): JSX.Element {
     setBusy(true);
     setError(null);
     try {
-      await finishSignIn(token.trim(), 'Sesión activa');
+      await finishSignIn(token.trim());
     } catch (cause) {
       setError(
         cause instanceof ApiError && cause.code === 'UNAUTHENTICATED'
@@ -91,6 +112,22 @@ export function SignIn({ onSignedIn }: SignInProps): JSX.Element {
     }
   }
 
+  const identityButton = (identity: DevIdentity) => (
+    <button
+      key={identity.identityId}
+      type="button"
+      className="vds-signin__identity"
+      disabled={busy}
+      onClick={() => void signInWithIdentity(identity)}
+    >
+      <span>
+        <strong>{identity.displayName}</strong>
+        <small>{profileDescription(identity.roles)}</small>
+      </span>
+      <span className="vds-signin__roles">{profileLabel(identity.roles)}</span>
+    </button>
+  );
+
   return (
     <main className="vds-signin">
       <section className="vds-signin__card" aria-labelledby="signin-title">
@@ -99,29 +136,26 @@ export function SignIn({ onSignedIn }: SignInProps): JSX.Element {
         {devAvailable && (
           <>
             <div className="vds-signin__dev-banner">
-              <strong>DEV · FIXTURE_TEST</strong>
-              <span>Elegí una identidad seed para recorrer la aplicación local.</span>
+              <strong>DEV · PRODUCT BASELINE</strong>
+              <span>Elegí uno de los cinco perfiles principales de la aplicación.</span>
             </div>
 
-            <div className="vds-signin__identities" aria-label="Identidades de desarrollo">
-              {identities.map((identity) => (
-                <button
-                  key={identity.identityId}
-                  type="button"
-                  className="vds-signin__identity"
-                  disabled={busy}
-                  onClick={() => void signInWithIdentity(identity)}
-                >
-                  <span>
-                    <strong>{identity.displayName}</strong>
-                    <small>{identity.subjectRef}</small>
-                  </span>
-                  <span className="vds-signin__roles">
-                    {identity.roles.length > 0 ? identity.roles.join(' · ') : 'sin rol'}
-                  </span>
-                </button>
-              ))}
+            <div className="vds-signin__identities" aria-label="Perfiles principales">
+              {primaryIdentities.map(identityButton)}
             </div>
+
+            {technicalIdentities.length > 0 && (
+              <details className="vds-signin__technical">
+                <summary>Perfiles técnicos de prueba</summary>
+                <p className="vds-signin__note">
+                  Existen para probar capabilities especializadas. No forman parte de las cinco
+                  personas principales definidas por la Product Baseline.
+                </p>
+                <div className="vds-signin__identities">
+                  {technicalIdentities.map(identityButton)}
+                </div>
+              </details>
+            )}
           </>
         )}
 
