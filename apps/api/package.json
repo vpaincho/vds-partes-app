@@ -6,6 +6,7 @@
   "description": "Business API: command pipeline, authorization, read models, sync endpoints.",
   "main": "src/server.ts",
   "dependencies": {
+    "@vds/adapters": "*",
     "@vds/contracts": "*",
     "@vds/kernel": "*",
     "@vds/rules": "*",
