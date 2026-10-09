@@ -1,0 +1,12 @@
+{
+  "name": "Vientos del Sur · Partes de campo",
+  "short_name": "VDS Partes",
+  "lang": "es-AR",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F2F4F7",
+  "theme_color": "#13212C",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

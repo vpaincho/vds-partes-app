@@ -1,0 +1,20 @@
+{
+  "name": "vds-partes-app",
+  "version": "0.6.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build && node scripts/service-worker.mjs",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "jspdf": "2.5.1",
+    "jspdf-autotable": "3.8.2"
+  },
+  "devDependencies": {
+    "jsdom": "^30.1.2",
+    "vite": "^6.4.1"
+  }
+}
