@@ -5,6 +5,7 @@ import { initializeAccounts, currentAccount, scopedState, routeAllowed, actionAl
 import { createAdminConsole } from '../src/admin/console.js';
 import { createTelemetry } from '../src/intelligence/telemetry.js';
 import { createControlHost } from '../src/intelligence/control-host.js';
+import { installViewportPages } from '../src/core/viewport-pages.js';
 import { createQuickPart } from '../src/features/quick-part.js';
 import { evaluateWork } from '../src/intelligence/documents.js';
 import { JSDOM } from 'jsdom';
@@ -25,7 +26,7 @@ function boot(saved){
   globalThis.window=w;globalThis.document=w.document;globalThis.FormData=w.FormData;
   w.structuredClone=structuredClone;
   if(saved)w.localStorage.setItem('vds-partes-web-1',saved);
-  Object.assign(w,{initializeAccounts,currentAccount,scopedState,routeAllowed,actionAllowed,createLocalIdentityProvider,createAdminConsole,createTelemetry,createControlHost,createQuickPart,evaluateWork});
+  Object.assign(w,{installViewportPages,initializeAccounts,currentAccount,scopedState,routeAllowed,actionAllowed,createLocalIdentityProvider,createAdminConsole,createTelemetry,createControlHost,createQuickPart,evaluateWork});
   w.createLocalRepository=createLocalRepository;w.createFeatureHost=createFeatureHost;w.jsPDF=jsPDF;
   w.eval(source+'\nwindow.qa={state:()=>S,action:A,render,checks,buildPdf,ui:()=>UI};');
   const doc=w.document;
@@ -201,13 +202,12 @@ test('admin can explicitly grant document management to planner without granting
 });
 
 
-test('operator enters original daily report directly and tools follow section context',async()=>{
-  const app=boot();await app.login('darce');const s=app.w.qa.state(),p=s.partes.find(p=>p.id===s.sel);assert.equal(s.route,'o-edit');assert.equal(s.fastMode,false);assert.equal(app.doc.querySelector('#quick-part'),null);
-  assert.equal(app.doc.querySelectorAll('.steps [data-a="o-step"]').length,5);
-  assert.ok(app.doc.querySelector('.edbody [data-module="materials"]'));assert.equal(app.doc.querySelector('.edbody [data-module="capture"]'),null);
-  const count=p.ejec.reg.length;app.w.qa.action['o-step']({i:'3'});assert.ok(app.doc.querySelector('.edbody [data-module="capture"]'));assert.ok(app.doc.querySelector('.edbody [data-module="evidence"]'));
-  app.w.qa.action['module-open']({module:'capture',work:p.pl});app.w.qa.action['module-home']();assert.equal(s.route,'o-edit');assert.equal(s.sel,p.id);assert.equal(s.step,3);assert.equal(p.ejec.reg.length,count);
-  app.w.qa.action['o-step']({i:'4'});assert.ok(app.doc.querySelector('.edbody [data-module="handover"]'));assert.ok(app.doc.querySelector('.edbody [data-module="logbook"]'));assert.ok(app.doc.querySelector('canvas[data-sig="op"]'));app.dispose();
+test('operator has no sidebar or secondary module links and offers task camera and previous day',async()=>{
+  const app=boot();await app.login('darce');const s=app.w.qa.state(),p=s.partes.find(p=>p.id===s.sel);assert.equal(s.route,'o-edit');assert.equal(s.fastMode,false);assert.equal(app.doc.querySelector('.rail'),null);assert.equal(app.doc.querySelector('#quick-part'),null);
+  assert.equal(app.doc.querySelectorAll('.steps [data-a="o-step"]').length,5);assert.equal(app.doc.querySelector('.edbody [data-a="module-open"]'),null);
+  assert.ok(app.doc.querySelector('.top [data-a="o-previous-day"]'));assert.ok(app.doc.querySelector('.top .task-camera input[capture="environment"]'));
+  const count=p.ejec.reg.length;app.w.qa.action['o-step']({i:'3'});assert.equal(app.doc.querySelectorAll('input[data-task-index]').length,count);assert.equal(app.doc.querySelector('.edbody [data-a="module-open"]'),null);
+  app.w.qa.action['o-step']({i:'4'});assert.ok(app.doc.querySelector('canvas[data-sig="op"]'));assert.equal(p.ejec.reg.length,count);app.dispose();
 });
 
 test('operator hour suggestions are explicit and preserve current edits and absent people',async()=>{
@@ -221,4 +221,12 @@ test('original operator editor blocks unsafe send and offers recovery of existin
   const app=boot();await app.login('darce');const s=app.w.qa.state(),p=s.partes.find(p=>p.id===s.sel);p.ejec.check.epp=false;const count=s.partes.length;
   app.w.qa.action['o-step']({i:'4'});assert.equal(app.doc.querySelector('[data-a="o-send"]').disabled,true);app.w.qa.action['o-send']();assert.equal(p.estado,'curso');assert.equal(s.partes.length,count);
   s.quickDrafts={[p.id]:{notes:'Borrador anterior pendiente',_baseVersion:p.updatedAt||''}};app.w.qa.render();assert.ok(app.doc.querySelector('.operator-legacy [data-a="quick-open"]'));app.w.qa.action['quick-open']();assert.equal(app.doc.querySelector('[name="notes"]').value,'Borrador anterior pendiente');app.dispose();
+});
+
+test('task camera stores a photo in the original report linked to its task',async()=>{
+  const app=boot();await app.login('darce');app.w.qa.action['o-step']({i:'3'});const s=app.w.qa.state(),p=s.partes.find(p=>p.id===s.sel),task=p.ejec.reg[0];
+  app.w.FileReader=class{readAsDataURL(){this.result='data:image/png;base64,aW1hZ2U=';this.onload()}};
+  app.w.Image=class{width=600;height=400;set src(value){this.onload?.()}};
+  const input=app.doc.querySelector('input[data-task-index="0"]'),file=new app.w.File(['image'],'tarea.png',{type:'image/png'});Object.defineProperty(input,'files',{value:[file]});input.dispatchEvent(new app.w.Event('change',{bubbles:true}));
+  const photo=p.ejec.fotos.at(-1);assert.equal(photo.activityId,task.id);assert.equal(photo.partId,p.id);assert.equal(photo.workId,p.pl);assert.ok(photo.src);assert.match(photo.cap,/tarea/);app.dispose();
 });

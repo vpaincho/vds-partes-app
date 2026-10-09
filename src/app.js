@@ -12,6 +12,8 @@ import './styles/baseline.css';
 import './styles/app.css';
 import './styles/login.css';
 import './styles/operator.css';
+import './styles/viewport.css';
+import { installViewportPages } from './core/viewport-pages.js';
 window.jspdf = { jsPDF };
 
 const KEY='vds-partes-web-1';
@@ -292,7 +294,7 @@ refreshIdentity();
 if(S.user==='operador')S.fastMode=false;
 
 const UI={modal:null,drawer:null,toast:null,login:{u:'',p:'',err:''},vcom:'',verr:'',csig:null,hot:false,sig:'',resetArm:false,delArm:null,admEst:'',newT:{},newI:{}};
-let toastT=null;
+let toastT=null;const viewportMemory=new Map();
 const CT=id=>S.contratos[id];
 const impN=(ct,code)=>{const x=(CT(ct).imps||[]).find(i=>i[0]===code);return x?x[1]:''};
 const byId=id=>S.partes.find(p=>p.id===id);
@@ -410,7 +412,7 @@ function render(){
   scr.innerHTML=h;
   scr.querySelectorAll('[data-keep]').forEach(el=>{if(keep[el.dataset.keep]!=null)el.scrollTop=keep[el.dataset.keep]});
   UI.sig=sig;
-  initSigs();save();features?.afterRender();
+  initSigs();save();features?.afterRender();installViewportPages(scr,{key:[S.accountId,S.route,S.sel,S.step].join('|'),remember:viewportMemory});
 }
 function toast(m){UI.toast=m;clearTimeout(toastT);toastT=setTimeout(()=>{UI.toast=null;const t=$('#screen .toast');if(t)t.remove()},3600)}
 function allowedRoute(route){return routeAllowed(S.user,route)||!!features?.find(route)}
@@ -460,7 +462,7 @@ function shell(){
     <nav>${navs.map(([k,l,i],index)=>`${index===primaryCount?(r==='operador'?`<details class="operator-tools" ${S.route.startsWith('x-')?'open':''}><summary>Herramientas de campo</summary><div>`:'<div class="nav-section">Herramientas de trabajo</div>'):''}<button class="nav" data-a="nav" data-r="${k}"${curR===k?' aria-current="page"':''} title="${l}">${ic(i)}<span>${l}</span>${badge(k)}</button>`).join('')}${r==='operador'&&navs.length>primaryCount?'</div></details>':''}</nav>
     <div class="who"><span class="av" title="${esc(u.n)}">${esc(u.ini)}</span><div class="wn"><b>${esc(u.n)}</b><small>${esc(u.cargo)}</small></div><button class="ibtn rl" data-a="logout" aria-label="Cerrar sesión" title="Cerrar sesión">${ic('out')}</button></div>
   </aside><section class="main">${topbar()}${view()}${UI.drawer?drawer():''}</section>`;
-  return r==='operador'?`<div class="operator-shell">${body}</div>`:body;
+  return r==='operador'?`<div class="operator-shell">${body.replace(/<aside class="rail[\s\S]*?<\/aside>/,'')}</div>`:body;
 }
 function topbar(){
   const R=S.route;let t='',s='',right='';
@@ -473,8 +475,8 @@ function topbar(){
   if(R==='p-plan'){t='Planificación';s='Trabajos por contrato, recurso y día';right=date+nb}
   else if(R==='p-list'){t='Partes diarios';s='Todos los partes de la base';right=date+nb}
   else if(R==='p-hab'){t='Habilitaciones de ingreso';s=isAdm()?'Tocá una habilitación para editarla':'Personal y vehículos habilitados por operadora';right=date}
-  else if(R==='o-day'){t='Mi jornada';s=recOf(USERS.operador.rec).n+' · '+fDayL(TODAY);right=sync}
-  else if(R==='o-edit'){const p=cur(),tt=trab(p.pl);return `<header class="top"><button class="btn ghost" data-a="nav" data-r="${S.back||'o-day'}">${ic('left')}${S.back&&S.back!=='o-day'?'Volver':'Cambiar parte'}</button><div class="ttl"><h1>Parte diario</h1><div class="sub"><span class="mono">${p.id}</span> · ${fDay(p.fecha)} · ${p.pl} día ${p.dia+1} de ${tt?tt.dias:'—'} · ${esc(recOf(p.rec).n)}</div></div><span class="sp"></span><div class="tr">${ptTag(p.ptw)}${prioB(p.prio)}${pill(p.estado)}${S.user==='operador'?sync:''}</div></header>`}
+  else if(R==='o-day'){t='Mi jornada';s=recOf(USERS.operador.rec).n+' · '+fDayL(TODAY);right=sync+'<button class="ibtn" data-a="logout" aria-label="Cerrar sesión">'+ic('out')+'</button>'}
+  else if(R==='o-edit'){const p=cur(),tt=trab(p.pl);return `<header class="top"><button class="btn ghost" data-a="nav" data-r="${S.back||'o-day'}">${ic('left')}${S.back&&S.back!=='o-day'?'Volver':'Cambiar parte'}</button><div class="ttl"><h1>Parte diario</h1><div class="sub"><span class="mono">${p.id}</span> · ${fDay(p.fecha)} · ${p.pl} día ${p.dia+1} de ${tt?tt.dias:'—'} · ${esc(recOf(p.rec).n)}${S.user==='operador'?' · '+esc(meN()):''}</div></div><span class="sp"></span><div class="tr">${ptTag(p.ptw)}${prioB(p.prio)}${pill(p.estado)}${S.user==='operador'?`<button class="btn" data-a="o-previous-day">${ic('doc')}Día anterior</button><label class="btn task-camera">${ic('cam')}Foto<input type="file" accept="image/*" capture="environment" aria-label="Capturar foto del parte"></label><button class="ibtn" data-a="logout" aria-label="Cerrar sesión">${ic('out')}</button>`:''}</div></header>`}
   else if(R==='v-inbox'){t='Aprobación de partes';s='El planner revisa y aprueba lo que cargan las cuadrillas';right=date}
   else if(R==='c-inbox'){t='Certificación de partes';s=isAdm()?'Todas las operadoras':OPS[USERS.cliente.op]+' · contratos con Vientos del Sur';right=date}
   else if(R==='c-dash'){t='Dashboard del servicio';s=(isAdm()?OPS[S.dop]:OPS[USERS.cliente.op])+' · datos de partes aprobados';right=date}
@@ -737,13 +739,12 @@ function vEdit(){
   </div>`;
 }
 function operatorContext(p,step){
-  const modules=[['materials','documents'],[],[],['capture','evidence','issues','changes','live'],['handover','logbook']][step]||[];
-  const tools=features.contextLinks(p.pl,modules);
+  const tools='';
   let summary='';
   if(step===0){
     const reservations=S.extensions?.enabled?.materials!==false?(S.extensions?.records.materials||[]).filter(r=>r.workId===p.pl):[];
     summary=reservations.length?`<section class="pnl operator-reservation"><h3>${ic('doc')}Reserva de materiales</h3>${reservations.map(r=>`<div><b class="mono">${esc(r.reservation||'Código pendiente')}</b><span class="sm"> · ${esc(r.status||'Sin estado')} · ${esc(r.pickup||'Retiro por confirmar')}</span><p>${(r.items||[]).map(x=>`${esc(x.description)} · ${esc(x.requested)} ${esc(x.unit)}`).join('<br>')}</p></div>`).join('')}<p class="sm">Datos del planner · reserva emitida por la operadora. Consulta; los cambios se gestionan con planificación.</p></section>`:'';
-    summary+=controls.summary(trab(p.pl));
+    summary+=controls.summary(trab(p.pl)).replace(/<button[^>]*>[\s\S]*?<\/button>/g,'');
   }
   return summary+tools;
 }
@@ -819,7 +820,7 @@ function stReg(p,e){
     return `<tr class="cat c-${r.c}"><td style="width:170px"><select class="inp" id="f-rc${i}" data-bind="e:reg.${i}.c" data-rr aria-label="Categoría">${TORD.map(k=>`<option value="${k}"${r.c===k?' selected':''}>${TCAT[k]}</option>`).join('')}</select></td>
     <td style="width:112px">${tin(`e:reg.${i}.de`,r.de,false,'Desde')}</td><td style="width:112px">${tin(`e:reg.${i}.a`,r.a,false,'Hasta')}</td>
     <td>${dCell}</td><td style="width:96px">${qCell}</td><td style="width:100px">${uCell}</td>
-    <td class="num" style="width:70px">${fmtH(dur(r.de,r.a))}</td><td style="width:44px"><button class="ibtn del" data-a="o-delr" data-i="${i}" aria-label="Quitar tramo">${ic('trash')}</button></td></tr>`}).join('');
+    <td class="num" style="width:70px">${fmtH(dur(r.de,r.a))}</td><td style="width:44px"><button class="ibtn del" data-a="o-delr" data-i="${i}" aria-label="Quitar tramo">${ic('trash')}</button><label class="task-camera ibtn" title="Foto de esta tarea">${ic('cam')}<input type="file" accept="image/*" capture="environment" data-task-index="${i}" aria-label="Capturar foto de ${esc(r.d||TCAT[r.c])}"></label></td></tr>`}).join('');
   const pr=prod(p),pend=p.prev.filter(d=>!e.reg.some(x=>x.c==='op'&&x.d===d));
   return `<datalist id="dl-cat">${cat.map(([d])=>`<option value="${esc(d)}"></option>`).join('')}</datalist>
   <div class="pnl"><h3>Tareas y tiempos del día<span class="sp"></span><span class="sm">Una fila por tramo, en orden</span></h3>
@@ -1163,6 +1164,7 @@ const A={
     p.dataOrigin=t.dataOrigin==='recorded'?'recorded':'example';p.createdAt=new Date().toISOString();p.fin=p.dia>=t.dias-1?'fin':'sigue';p.ejec=newEjec(p);S.fastMode=false;S.partes.push(p);S.sel=p.id;S.step=0;S.back='o-day';go('o-edit')},
   'o-open':d=>{S.fastMode=false;S.sel=d.id;S.back='o-day';const p=byId(d.id);S.step=0;if(p.estado==='obs'){const c=errs(p)[0];if(c)S.step=STEP_OF[c[2]]}go('o-edit')},
   'o-step':d=>{S.fastMode=false;S.step=Number(d.i);render()},
+  'o-previous-day':()=>{const p=cur();const previous=S.partes.filter(x=>x.rec===USERS.operador.rec&&x.ejec&&x.fecha===(p?addDays(p.fecha,-1):addDays(TODAY,-1))).sort((a,b)=>a.id.localeCompare(b.id))[0];if(!previous){toast('No hay parte registrado para el día anterior.');render();return}A.sum({id:previous.id})},
   'o-check':d=>{const e=cur().ejec;e.check[d.k]=!e.check[d.k];render()},
   'o-ptnow':()=>{const p=cur(),e=p.ejec;e.permiso=e.permiso||{num:'',firmo:'',hora:''};e.permiso.hora=hm();if(!e.permiso.firmo)e.permiso.firmo=OPSUP[p.op];render()},
   'o-clima':()=>{toast('Fuente de clima pendiente. Registrá la observación real en campo.');render()},
@@ -1221,9 +1223,9 @@ function submitHab(){const f=UI.modal.f;const k=f.s+'|'+f.op;
   if(f.sin)delete S.hab[k];else{if(!f.vence){toast('Elegí la fecha de vencimiento');render();return}S.hab[k]={vence:f.vence}}
   UI.modal=null;toast(`Habilitación de ${f.s} para ${OPS[f.op]} actualizada`);render()}
 function onFiles(inp){
-  const e=cur().ejec;const files=[...inp.files].slice(0,8);let pending=files.length;
+  const p=cur();if(!p||S.user==='operador'&&!['curso','obs'].includes(p.estado))return;const e=p.ejec,task=inp.dataset.taskIndex!==undefined?e.reg[Number(inp.dataset.taskIndex)]:null;if(inp.dataset.taskIndex!==undefined&&!task)return;if(task)task.id??=crypto.randomUUID();const files=[...inp.files].slice(0,8);let pending=files.length;
   files.forEach(file=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,900/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
-    e.fotos.push({src:c.toDataURL('image/jpeg',.75),cap:file.name.replace(/\.[^.]+$/,'')});if(--pending===0)render()};im.onerror=()=>{if(--pending===0)render()};im.src=r.result};r.readAsDataURL(file)});
+    if(!task||e.reg.includes(task))e.fotos.push({src:c.toDataURL('image/jpeg',.75),cap:(task?(task.d||TCAT[task.c])+' · ':'')+file.name.replace(/\.[^.]+$/,''),...(task?{activityId:task.id,partId:p.id,workId:p.pl}:{}),capturedAt:new Date().toISOString()});if(--pending===0)render()};im.onerror=()=>{if(--pending===0)render()};im.src=r.result};r.readAsDataURL(file)});
 }
 
 

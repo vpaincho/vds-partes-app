@@ -31,3 +31,11 @@ El guardado continúa siendo local. La firma usa una superficie clara y tinta os
 Pruebas de base conservadas, con expectativas de ruta adaptadas al ingreso directo y pruebas de borradores antiguos ejecutadas por recuperación explícita. Tres nuevas pruebas comprueban herramientas por sección y retorno, sugerencias sin sobrescritura y envío bloqueado/recuperación de borrador. Build de Vite.
 
 Revisión visual en navegador/tablet pendiente. El objetivo de menos de dos minutos todavía requiere un piloto medido con partes normales y excepciones. La telemetría existente registra duración activa y fricción, sin garantizar ese objetivo por diseño. La siguiente iteración debe revisar densidad de Personal y Tareas, orientación de tablet y desplazamiento horizontal.
+
+## Revisión 2 · operario centrado en carga
+
+Se elimina completamente la barra lateral de operario. La cabecera ofrece Cambiar parte, Día anterior, Foto y Salir. Los módulos de pedidos adicionales, novedades/acciones, captura rápida, evidencia por actividad y seguimiento dejan de ser accesos en su interfaz. Los módulos y registros permanecen disponibles para los roles que los gestionan; operario agrega una tarea y un comentario en el registro habitual. Reservas y materiales siguen visibles como contexto en Inicio.
+
+Cada tramo tiene un selector de foto con `capture="environment"`: los navegadores compatibles pueden ofrecer cámara, y otros ofrecen selección de archivo. La fotografía queda en el registro original del parte con `activityId`, `partId`, `workId`, fecha de captura y descripción de tarea. Se conserva el PDF y la galería original de Cierre. Foto de cabecera adjunta al parte sin inventar una tarea ejecutada. Día anterior consulta el día calendario previo; si no existe un parte, informa esa ausencia.
+
+La navegación por viewport se aplica a los espacios de contenido de los cuatro roles: páginas de paneles, filas cuando una tabla es larga y columnas cuando no entran. Los nodos y sus valores se conservan; no se borran registros ni se clonan campos. Paneles excepcionalmente altos usan navegación de detalle. No se exige scroll continuo de página. La alineación final, fragmentación de paneles y ajuste por tamaño de tablet todavía requieren revisión visual en navegador real; las pruebas DOM de geometría simulada no acreditan esos aspectos.
