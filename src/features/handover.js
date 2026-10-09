@@ -2,6 +2,7 @@ import { createRecordModule, field } from './shared.js';
 export default createRecordModule({
   id:'handover', title:'Relevo y pendientes', description:'Continuidad entre jornadas y entrega a la próxima cuadrilla', icon:'day',
   roles:['admin','planner','operador'], createLabel:'Entrega de jornada',
+  prepare:(ctx,r)=>{if(r.id||!r.workId)return r;const parts=ctx.state().partes.filter(p=>p.pl===r.workId&&p.fecha===ctx.today()&&p.ejec);const activities=parts.flatMap(p=>p.ejec.reg.filter(x=>x.c==='op').map(x=>x.d+(x.q?' · '+x.q+' '+x.u:'')));const issues=(ctx.state().extensions?.records.issues||[]).filter(x=>x.workId===r.workId&&x.status!=='Resuelta');return {...r,completed:r.completed??activities.join('\n'),pending:r.pending??issues.map(x=>x.title+' · '+x.owner).join('\n')};},
   fields:(ctx,r)=>field(ctx,'title','Resumen de la entrega',r.title,{required:true})+
     field(ctx,'date','Jornada',r.date||ctx.today(),{type:'date',required:true})+
     field(ctx,'completed','Qué quedó terminado',r.completed,{type:'textarea'})+

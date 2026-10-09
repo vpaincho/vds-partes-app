@@ -4,6 +4,10 @@ import { createLocalRepository } from './core/storage.js';
 import { createFeatureHost } from './features/registry.js';
 import { initializeAccounts, currentAccount, scopedState, routeAllowed, actionAllowed, createLocalIdentityProvider } from './core/access.js';
 import { createAdminConsole } from './admin/console.js';
+import { createTelemetry } from './intelligence/telemetry.js';
+import { createControlHost } from './intelligence/control-host.js';
+import { createQuickPart } from './features/quick-part.js';
+import { evaluateWork } from './intelligence/documents.js';
 import './styles/baseline.css';
 import './styles/app.css';
 window.jspdf = { jsPDF };
@@ -13,7 +17,7 @@ const repository=createLocalRepository(localStorage, KEY);
 let storageError='';
 let features;
 const TODAY=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Argentina/Buenos_Aires'}).format(new Date());
-let rawState=null, identity, adminConsole;
+let rawState=null, identity, adminConsole, telemetry, controls, quickPart;
 const DW=1366,DH=1024;
 const SH0='06:00',SHW=840;
 
@@ -255,10 +259,10 @@ function seed(){
 
 /* ---------- state ---------- */
 let S=null;
-function fresh(){const s=seed();return {v:5,trabajos:s.T,partes:s.P,contratos:JSON.parse(JSON.stringify(CONTRATOS0)),hab:seedHab(),user:null,route:'login',back:null,sel:null,step:0,
+function fresh(){const s=seed();s.T.forEach(t=>t.dataOrigin='example');s.P.forEach(p=>p.dataOrigin='example');return {v:5,trabajos:s.T,partes:s.P,contratos:JSON.parse(JSON.stringify(CONTRATOS0)),hab:seedHab(),user:null,route:'login',back:null,sel:null,step:0,
   vf:'env',vsel:null,vop:'all',cf:'apr',csel:null,pf:'all',lop:'all',lct:'all',lrec:'all',lq:'',hf:'p',hq:'',hbad:false,pv:'gantt',fop:'all',fct:'all',gs:'2026-09-28',ws:mondayOf(TODAY),ms:TODAY.slice(0,7),dop:'AUP',dct:'all',dimp:'all',rmin:false,offline:false}}
 function load(){const x=repository.load();return x&&x.v===5&&Array.isArray(x.partes)&&Array.isArray(x.trabajos)?x:null}
-function save(){try{repository.save(rawState||S);storageError=''}catch(error){storageError='No se pudo guardar. Exportá una copia de los datos antes de cerrar la app.';let box=document.getElementById('storage-error');if(!box){box=document.createElement('div');box.id='storage-error';box.className='storage-error';box.setAttribute('role','alert');document.getElementById('screen').append(box)}box.hidden=false;box.textContent=storageError}}
+function save(){try{repository.save(rawState||S);storageError=''}catch(error){telemetry?.event('storage_error');storageError='No se pudo guardar. Exportá una copia de los datos antes de cerrar la app.';let box=document.getElementById('storage-error');if(!box){box=document.createElement('div');box.id='storage-error';box.className='storage-error';box.setAttribute('role','alert');document.getElementById('screen').append(box)}box.hidden=false;box.textContent=storageError}}
 try { S=load()||fresh(); } catch(error) { storageError='No se pudo leer el almacenamiento local. Exportá los datos y revisá el espacio disponible.'; S=fresh(); }
 // Shift evaluation fixtures to the current date; existing saved records are never shifted.
 if (!localStorage.getItem(KEY)) {
@@ -270,6 +274,7 @@ if (!localStorage.getItem(KEY)) {
 }
 
 rawState=S;
+telemetry=createTelemetry(()=>rawState,{visible:()=>document.visibilityState!=='hidden'});
 initializeAccounts(rawState,BASE_USERS);
 S=scopedState(rawState);
 identity=createLocalIdentityProvider(()=>rawState);
@@ -349,7 +354,7 @@ function checks(p){
   const srt=e.reg.slice().sort((a,b)=>mins(a.de)-mins(b.de));
   for(let i=1;i<srt.length;i++){if(mins(srt[i].de)<mins(srt[i-1].a))out.push(['warn',`Tramos superpuestos: ${srt[i-1].de}–${srt[i-1].a} y ${srt[i].de}–${srt[i].a}`,'Tareas'])}
   p.prev.filter(d=>!ops.some(x=>x.d===d)).forEach(d=>out.push(['warn',`Tarea prevista sin informar hoy: ${d}`,'Tareas']));
-  if(e.clima&&Number(e.clima.r)>=60&&!e.reg.some(t=>t.c==='vi'))out.push(['warn',`Ráfagas de ${e.clima.r} km/h sin parada por viento registrada`,'Tareas']);
+
   const esp=e.reg.filter(t=>t.c==='es').reduce((s,t)=>s+dur(t.de,t.a),0);
   if(esp>60)out.push([e.obs.trim()?'warn':'err',`Espera de operadora de ${fmtH(esp)}${e.obs.trim()?' (justificada en observaciones)':': justificar en observaciones'}`,e.obs.trim()?'Tareas':'Cierre']);
   if(!p.sup||!p.rt)out.push(['err','Falta supervisor responsable o responsable técnico','Cierre']);
@@ -385,8 +390,10 @@ function newEjec(p){
 /* ---------- render ---------- */
 function render(){
   refreshIdentity();
+  document.documentElement.style.setProperty('--accent',S.organization?.accent||'#C21F35');
   if(S.user&&!allowedRoute(S.route))S.route=HOME[S.user];
   if(S.route==='o-edit'&&(!cur()||(S.user==='operador'&&!['curso','obs'].includes(cur().estado))))S.route=HOME[S.user];
+  telemetry?.route(S.route,S.sel,S.user==='operador'&&S.fastMode!==false?'quick':S.step);
   const scr=$('#screen');
   const sig=[S.route,S.step,S.sel,S.vsel,S.csel,S.vf,S.cf,S.pv,UI.modal?UI.modal.kind:'',UI.drawer].join('|');
   const keep={};
@@ -403,7 +410,8 @@ function render(){
 function toast(m){UI.toast=m;clearTimeout(toastT);toastT=setTimeout(()=>{UI.toast=null;const t=$('#screen .toast');if(t)t.remove()},3600)}
 function allowedRoute(route){return routeAllowed(S.user,route)||!!features?.find(route)}
 function go(route){if(!allowedRoute(route)){toast('Tu perfil no tiene acceso a esta vista.');render();return}S.route=route;UI.drawer=null;render()}
-function brand(){return `<div class="brand"><svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true" style="flex:none"><rect width="32" height="32" rx="7" fill="var(--accent)"/><path d="M8 8h4.2L16 19.2 19.8 8H24l-6 16h-4z" fill="#FFFFFF"/></svg><div><b>VIENTOS DEL SUR</b><small>Partes de campo</small></div></div>`}
+function brand(){const org=S.organization||{};return `<div class="brand">${org.logo?`<img class="company-logo" src="${esc(org.logo)}" alt="${esc(org.companyName)}">`:'<svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true" style="flex:none"><rect width="32" height="32" rx="7" fill="var(--accent)"/><path d="M8 8h4.2L16 19.2 19.8 8H24l-6 16h-4z" fill="#FFFFFF"/></svg>'}<div><b>${esc(org.companyName||'VIENTOS DEL SUR')}</b><small>${esc(org.productName||'Trama')} · Friquarks</small></div></div>`}
+
 const selF=(id,bind,opts,cur,attrs)=>`<select class="inp" id="${id}" data-bind="${bind}" data-rr${attrs||''}>${opts.map(([v,l])=>`<option value="${esc(v)}"${String(v)===String(cur)?' selected':''}>${esc(l)}</option>`).join('')}</select>`;
 
 function login(){
@@ -436,7 +444,11 @@ function shell(){
     planner:[['p-plan','Planificación','gantt'],['v-inbox','Aprobación de partes','shield'],['p-list','Partes','list'],['p-hab','Habilitaciones','badge']],
     operador:[['o-day','Mi jornada','day']],
     cliente:[['c-dash','Dashboard','chart'],['c-inbox','Certificación','stamp']]}[r];
-  navs.push(...(features?.navigation(r)||[]));
+  const featureNav=features?.navigation(r)||[];
+  navs.unshift(...featureNav.filter(([route])=>['x-product','x-operations'].includes(route)));
+  const primaryCount=navs.length;
+  navs.push(...featureNav.filter(([route])=>!['x-product','x-operations','x-quick'].includes(route)));
+
   const badge=k=>{let n=0;
     if(k==='v-inbox')n=S.partes.filter(p=>p.estado==='env'&&!p.cola).length;
     if(k==='o-day')n=S.partes.filter(p=>p.rec===USERS.operador.rec&&p.estado==='obs').length;
@@ -446,7 +458,7 @@ function shell(){
     return n?`<span class="cnt" aria-label="${n} pendientes">${n}</span>`:''};
   const curR=S.route==='o-edit'?(S.back||'o-day'):S.route;
   return `<aside class="rail${S.rmin?' min':''}"><div class="rtop">${brand()}<button class="rtog" data-a="rail" aria-label="${S.rmin?'Expandir menú':'Contraer menú'}" title="${S.rmin?'Expandir menú':'Contraer menú'}">${ic(S.rmin?'dbr':'dbl')}</button></div><div class="rrole">${ROLE_N[r]}</div>
-    <nav>${navs.map(([k,l,i])=>`<button class="nav" data-a="nav" data-r="${k}"${curR===k?' aria-current="page"':''} title="${l}">${ic(i)}<span>${l}</span>${badge(k)}</button>`).join('')}</nav>
+    <nav>${navs.map(([k,l,i],index)=>`${index===primaryCount?'<div class="nav-section">Herramientas de trabajo</div>':''}<button class="nav" data-a="nav" data-r="${k}"${curR===k?' aria-current="page"':''} title="${l}">${ic(i)}<span>${l}</span>${badge(k)}</button>`).join('')}</nav>
     <div class="who"><span class="av" title="${esc(u.n)}">${esc(u.ini)}</span><div class="wn"><b>${esc(u.n)}</b><small>${esc(u.cargo)}</small></div><button class="ibtn rl" data-a="logout" aria-label="Cerrar sesión" title="Cerrar sesión">${ic('out')}</button></div>
   </aside><section class="main">${topbar()}${view()}${UI.drawer?drawer():''}</section>`;
 }
@@ -678,7 +690,7 @@ function sumHtml(p){
   const e=p.ejec,t=trab(p.pl),c=CT(p.ct),s=sums(p);
   if(!e)return '<div class="empty">Este día todavía no tiene parte cargado.</div>';
   const cl=e.clima,w=e.permiso;
-  return `<div class="docp"><div class="dband"><div><b>VIENTOS DEL SUR</b><small>Parte diario de servicio</small></div><div class="r"><b style="font-family:var(--f-mono);letter-spacing:0">${p.id}</b><small>${fDayL(p.fecha)} · ${EST[p.estado]}</small></div></div>
+  return `<div class="docp"><div class="dband"><div><b>${esc(S.organization?.companyName||'VIENTOS DEL SUR')}</b><small>Parte diario de servicio</small></div><div class="r"><b style="font-family:var(--f-mono);letter-spacing:0">${p.id}</b><small>${fDayL(p.fecha)} · ${EST[p.estado]}</small></div></div>
   <div class="dsec"><h4>Datos del servicio</h4><div class="dkv"><div><span>Contrato</span>${p.ct}</div><div><span>Imputación</span>${esc(p.imp||'—')}</div><div><span>Centro de costo</span>${p.cc}</div><div><span>Cliente</span>${OPS[p.op]}</div><div><span>Pozo / locación</span>${esc(p.yac)} · ${esc(p.pozo)}</div><div><span>Recurso</span>${recOf(p.rec).n}</div><div><span>Trabajo</span>${p.pl} · día ${p.dia+1} de ${t?t.dias:'—'}</div><div><span>Prioridad</span>${PRIO[p.prio]}</div><div><span>Llegada a instalación</span>${e.llegada||'—'}</div><div><span>Supervisor responsable</span>${esc(p.sup)||'—'}</div><div><span>Responsable técnico</span>${esc(p.rt)||'—'}</div><div><span>Al cierre del día</span>${finTxt(p)}</div></div></div>
   <div class="dsec"><h4>Clima, permiso y seguridad</h4><div class="dkv"><div><span>Temperatura</span>${cl&&cl.t!==''?cl.t+' °C':'—'}</div><div><span>Viento / ráfagas</span>${cl?`${cl.v||'—'} / ${cl.r||'—'} km/h ${cl.dir}`:'—'}</div><div><span>Condición</span>${cl?cl.cond:'—'}</div><div><span>Checklist</span>${e.check.charla&&e.check.epp?'Completo':'Incompleto'}</div><div><span>Permiso operadora</span>${p.ptw?(w&&w.num?esc(w.num):'Falta'):'No requiere'}</div><div><span>Firmó</span>${p.ptw&&w&&w.firmo?esc(w.firmo)+' · '+esc(w.hora):'—'}</div></div></div>
   <div class="dsec"><h4>Personal · ${s.pers} presentes · ${fmtH(s.hh)} hombre</h4><div class="scrollx"><table class="tbl"><thead><tr><th>Persona</th><th>Rol</th><th class="num">Ingreso base</th><th class="num">Llegada zona</th><th class="num">Salida</th><th class="num">Horas</th><th>Habilitación</th></tr></thead><tbody>${e.personal.map(x=>`<tr><td>${esc(x.n)}</td><td>${esc(x.rol)}</td><td class="num">${x.pres?x.base||'—':'Ausente'}</td><td class="num">${x.pres?x.zona||'—':''}</td><td class="num">${x.pres?x.out||'—':''}</td><td class="num">${x.pres&&x.base&&x.out?fmtH(dur(x.base,x.out)):'—'}</td><td>${habTxt(hab(x.n,p.op,p.fecha))}</td></tr>`).join('')}</tbody></table></div></div>
@@ -709,6 +721,7 @@ function baselineDay(){
 }
 const tin=(bind,v,dis,lab)=>`<input type="time" class="inp" id="f-${bind.replace(/[^a-z0-9]/gi,'-')}" data-bind="${bind}" data-rr value="${esc(v)}"${dis?' disabled':''} aria-label="${esc(lab||'Hora')}">`;
 function vEdit(){
+  if(S.user==='operador'&&S.fastMode!==false&&quickPart?.enabled())return quickPart.render(cur());
   const p=cur(),st=S.step,e=p.ejec;
   const body=[stInicio,stPersonal,stEquipos,stReg,stCierre][st](p,e);
   const ban=p.estado==='obs'&&p.dec?`<div class="banner">${ic('back')}<div><b>Devuelto por ${esc(p.dec.who)} · ${esc(p.dec.t)}</b>${esc(p.dec.com)}</div></div>`:'';
@@ -716,7 +729,7 @@ function vEdit(){
   const er=errs(p).length;
   const last=admEdit?`<button class="btn pri lg" data-a="a-save">${ic('check')}Guardar cambios</button>`:`<button class="btn pri lg" data-a="o-send"${er?' disabled':''}>${ic('send')}${p.estado==='obs'?'Reenviar corregido':p.fin==='fin'?'Enviar y cerrar trabajo':'Enviar para aprobación'}</button>`;
   return `<div class="edhead"><div class="meta"><span>Contrato <b class="mono">${p.ct}</b></span><span>Imputación <b class="mono">${esc(p.imp||'—')}</b></span><span>Cliente <b>${OPS[p.op]}</b></span><span>Pozo / locación <b>${esc(p.yac)} · ${esc(p.pozo)}</b></span><span>Supervisor <b>${esc(p.sup)}</b></span>${admEdit?'<span><b style="color:var(--accent)">Edición de administración</b></span>':''}</div></div>
-  ${features?.contextLinks(p.pl)||''}<nav class="steps" aria-label="Secciones del parte">${STEPS.map((s,i)=>`<button class="stp${stepOk(p,i)&&i!==st?' ok':''}" data-a="o-step" data-i="${i}"${i===st?' aria-current="step"':''}><i>${stepOk(p,i)&&i!==st?ic('check'):i+1}</i>${s}</button>`).join('')}</nav>
+  ${features?.contextLinks(p.pl)||''}${S.user==='operador'&&quickPart?.enabled()?'<button class="btn sm2" data-a="quick-open">Volver al parte rápido</button>':''}<nav class="steps" aria-label="Secciones del parte">${STEPS.map((s,i)=>`<button class="stp${stepOk(p,i)&&i!==st?' ok':''}" data-a="o-step" data-i="${i}"${i===st?' aria-current="step"':''}><i>${stepOk(p,i)&&i!==st?ic('check'):i+1}</i>${s}</button>`).join('')}</nav>
   <div class="edbody" data-keep="e">${ban}${body}</div>
   <div class="edfoot"><span class="saved${S.offline?' off':''}">${ic(S.offline?'nowifi':'cloud')}${S.offline?'Guardado en la tablet · pendiente de conexión con la base de datos':'Guardado automático'}</span>
     ${st>0?`<button class="btn lg" data-a="o-step" data-i="${st-1}">${ic('left')}${STEPS[st-1]}</button>`:''}
@@ -741,12 +754,12 @@ function stInicio(p,e){
       <div class="clima">
         <div class="fld"><label for="c-t" title="Temperatura">Temp. °C</label><input class="inp" type="number" id="c-t" data-bind="e:clima.t" data-rr value="${esc(cl.t)}"></div>
         <div class="fld"><label for="c-v" title="Viento km/h">Viento</label><input class="inp" type="number" id="c-v" data-bind="e:clima.v" data-rr value="${esc(cl.v)}"></div>
-        <div class="fld"><label for="c-r" title="Ráfagas km/h">Ráfagas</label><input class="inp${Number(cl.r)>=60?' bad':''}" type="number" id="c-r" data-bind="e:clima.r" data-rr value="${esc(cl.r)}"></div>
+        <div class="fld"><label for="c-r" title="Ráfagas km/h">Ráfagas</label><input class="inp${false?' bad':''}" type="number" id="c-r" data-bind="e:clima.r" data-rr value="${esc(cl.r)}"></div>
         <div class="fld"><label for="c-d">Dirección</label><select class="inp" id="c-d" data-bind="e:clima.dir" data-rr>${DIRS.map(d=>`<option${cl.dir===d?' selected':''}>${d}</option>`).join('')}</select></div>
         <div class="fld"><label for="c-c">Condición</label><select class="inp" id="c-c" data-bind="e:clima.cond" data-rr>${CONDS.map(d=>`<option${cl.cond===d?' selected':''}>${d}</option>`).join('')}</select></div>
       </div>
-      <div class="csrc"><span>Viento y ráfagas en km/h.</span>${e.clima&&e.clima.src==='app'?`<span>${ic('cloud')}</span><span>Tomado de la app de clima · ${esc(e.clima.at||'')}</span>`:e.clima?'<span>Cargado a mano</span>':''}<span class="sp"></span><button class="btn sm2" data-a="o-clima">${ic('wind')}Tomar de la app de clima</button></div>
-      ${Number(cl.r)>=60?`<div class="windhint" style="margin-top:10px">${ic('wind')}<div>Ráfagas sobre 60 km/h: suspender izajes y trabajos en altura y registrar la parada por viento en Tareas y tiempos.</div></div>`:''}
+      <div class="csrc"><span>Viento y ráfagas en km/h.</span>${e.clima&&e.clima.src==='app'?`<span>${ic('cloud')}</span><span>Dato de evaluación / fuente por verificar · ${esc(e.clima.at||'')}</span>`:e.clima?'<span>Cargado a mano</span>':''}<span class="sp"></span><button class="btn sm2" data-a="o-clima">${ic('wind')}Fuente automática pendiente</button></div>
+      ${false?`<div class="windhint" style="margin-top:10px">${ic('wind')}<div>Registrá las condiciones y las paradas que correspondan según el procedimiento aprobado para esta actividad.</div></div>`:''}
     </div>
     <div class="pnl"><h3>Antes de empezar</h3><div class="togs">${tg('charla','Charla de seguridad de 5 minutos','Con todo el personal presente')}${tg('epp','EPP verificado','Casco, anteojos, guantes, calzado y ropa ignífuga')}</div></div>
   </div></div>`;
@@ -801,7 +814,7 @@ function stReg(p,e){
   <div class="regadd">${TORD.map(k=>`<button class="chip add sm3" data-a="o-addr" data-c="${k}"><span class="cdot c-${k}"></span>${k==='op'?'Tarea operativa':TCAT[k]}</button>`).join('')}${pend.map(d=>`<button class="chip add sm3" data-a="o-addr" data-c="op" data-d="${esc(d)}">${ic('plus')}${esc(d)} <span class="n">prevista</span></button>`).join('')}</div></div>
   <div class="pnl"><h3>Resumen del día<span class="sp"></span><span class="sm">${fmtH(sums(p).jor)} registradas · de 06:00 a 20:00</span></h3>${tbar(p)}</div>
   <div class="pnl"><h3>Producción del día</h3>${pr.length?`<table class="tbl"><thead><tr><th>Tarea</th><th class="num">Cantidad</th></tr></thead><tbody>${pr.map(x=>`<tr><td>${esc(x.d)}</td><td class="num">${x.q?num(x.q)+' '+esc(x.u):'—'}</td></tr>`).join('')}</tbody></table>`:'<p class="sm" style="margin:0">Todavía no hay tareas operativas.</p>'}</div>
-  <div class="windhint">${ic('wind')}<div><b>Parada por viento:</b> registrala con la velocidad de las ráfagas en km/h cuando superan 60 km/h y se suspenden izajes o trabajos en altura. La operadora la reconoce como tiempo no imputable a la cuadrilla.</div></div>`;
+  <div class="windhint">${ic('wind')}<div><b>Parada por viento:</b> registrá duración, ráfagas observadas y contexto. Los límites operativos y el tratamiento comercial dependen del procedimiento y contrato aplicables.</div></div>`;
 }
 function trabTotals(t,extraP){
   const ps=S.partes.filter(p=>p.pl===t.id&&p.ejec);
@@ -882,7 +895,7 @@ function detail(p,role){
   <div class="stats"><div class="stat"><b>${s.pers}</b><span>Personas</span></div><div class="stat"><b>${fmtH(s.hh)}</b><span>Horas hombre</span></div><div class="stat"><b>${fmtH(s.jor)}</b><span>Tiempo registrado</span></div><div class="stat"><b>${num(s.km)}</b><span>Km recorridos</span></div></div>
   <div class="pnl"><h3>Controles automáticos<span class="sp"></span>${ne?`<span class="flag err">${ne} bloqueante${ne>1?'s':''}</span>`:`<span class="flag ok">${ic('check')}Sin bloqueos</span>`}</h3>${c.length?c.map(([l,m])=>`<div class="chk ${l}">${ic(l==='err'?'err':'alert')}<span>${esc(m)}</span></div>`).join(''):`<div class="chk ok">${ic('okc')}<span>El parte cumple todos los controles.</span></div>`}</div>
   <div class="grid2">
-    <div class="pnl"><h3>${ic('sun')}Clima</h3>${cl?`<div class="grid3"><div class="stat"><b>${esc(cl.t)}°</b><span>Temperatura</span></div><div class="stat"><b class="${Number(cl.r)>=60?'errc':''}">${esc(cl.r)}</b><span>Ráfagas km/h ${esc(cl.dir)}</span></div><div class="stat"><b style="font-size:17px;padding-top:6px">${esc(cl.cond)}</b><span>${cl.src==='app'?'App de clima':'Manual'}</span></div></div>`:'<span class="errc">Sin datos de clima</span>'}</div>
+    <div class="pnl"><h3>${ic('sun')}Clima</h3>${cl?`<div class="grid3"><div class="stat"><b>${esc(cl.t)}°</b><span>Temperatura</span></div><div class="stat"><b class="${false?'errc':''}">${esc(cl.r)}</b><span>Ráfagas km/h ${esc(cl.dir)}</span></div><div class="stat"><b style="font-size:17px;padding-top:6px">${esc(cl.cond)}</b><span>${cl.src==='app'?'Ejemplo / fuente por verificar':'Manual'}</span></div></div>`:'<span class="errc">Sin datos de clima</span>'}</div>
     <div class="pnl"><h3>${ic('sign')}Permiso de la operadora</h3>${p.ptw?(w&&w.num&&w.firmo?`<dl class="kv"><dt>Nº</dt><dd class="mono">${esc(w.num)}</dd><dt>Firmó</dt><dd>${esc(w.firmo)} · ${esc(w.hora)}</dd></dl>`:'<span class="errc">Falta la firma de la operadora</span>'):'<span class="sm">No requiere</span>'}</div>
   </div>
   <div class="pnl"><h3>Tareas y tiempos</h3>${tbar(p)}<div class="scrollx" style="margin-top:12px"><table class="tbl"><thead><tr><th class="num">Desde</th><th class="num">Hasta</th><th>Categoría</th><th>Tarea / detalle</th><th class="num">Cantidad</th></tr></thead><tbody>${e.reg.slice().sort((a,b)=>mins(a.de)-mins(b.de)).map(x=>`<tr><td class="num">${x.de}</td><td class="num">${x.a}</td><td style="white-space:nowrap"><span class="cdot c-${x.c}"></span>${TCAT[x.c]}</td><td>${esc(x.d)||'—'}${x.det?` <span class="sm">· ${esc(x.det)}</span>`:''}</td><td class="num">${regQ(x)}</td></tr>`).join('')}</tbody></table></div></div>
@@ -973,7 +986,7 @@ function buildPdf(p){
   const cl=x=>String(x??'').replace(/[–—]/g,'-').replace(/→/g,'->');
   let y=0;
   doc.setFillColor(194,31,53);doc.rect(0,0,W,24,'F');
-  doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(16);doc.text('VIENTOS DEL SUR',M,11);
+  doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(16);doc.text(cl(S.organization?.companyName||'VIENTOS DEL SUR'),M,11);
   doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.text('Parte diario de servicio - resumen',M,18);
   doc.setFont('helvetica','bold');doc.setFontSize(15);doc.text(p.id,W-M,11,{align:'right'});
   doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.text(cl(`${fDayL(p.fecha)} · ${EST[p.estado]}`),W-M,18,{align:'right'});
@@ -1015,7 +1028,7 @@ function buildPdf(p){
   const ph=e.fotos.filter(f=>f.src);
   if(ph.length){doc.addPage();y=18;sec('Registro fotográfico');y+=2;ph.forEach((f,i)=>{const col=i%2,row=Math.floor(i/2)%3;if(i&&i%6===0){doc.addPage();y=20}const x=M+col*93,yy=y+row*76;try{doc.addImage(f.src,'JPEG',x,yy,88,64)}catch(er){}doc.setFontSize(8);doc.setTextColor(92,105,118);doc.text(cl(f.cap),x,yy+69)})}
   const n=doc.getNumberOfPages();
-  for(let i=1;i<=n;i++){doc.setPage(i);doc.setFontSize(7.5);doc.setTextColor(137,148,160);doc.text(cl(`VDS Partes de campo · ${p.id} · generado el ${fDay(TODAY)} 2026 ${hm()}`),M,290);doc.text(`Página ${i} de ${n}`,W-M,290,{align:'right'})}
+  for(let i=1;i<=n;i++){doc.setPage(i);doc.setFontSize(7.5);doc.setTextColor(137,148,160);doc.text(cl(`${S.organization?.companyName||'VDS'} · ${S.organization?.productName||'Trama'} · ${p.id} · generado ${TODAY} ${hm()}`),M,290);doc.text(`Página ${i} de ${n}`,W-M,290,{align:'right'})}
   return doc.output('blob');
 }
 async function downloadPdf(id){
@@ -1062,6 +1075,7 @@ function setBind(path,val){
   if(root==='s'&&['user','accountId','accounts','partes','trabajos','contratos','extensions'].includes(keys[0]))return;
   let o=root==='m'?UI.modal.f:root==='e'?cur().ejec:root==='p'?cur():root==='l'?UI.login:root==='v'||root==='u'?UI:root==='n'?UI.newT:root==='i'?UI.newI:root==='s'?S:null;
   if(!o)return;
+  if(['e','p'].includes(root))cur().updatedAt=new Date().toISOString();
   if(root==='e'&&keys[0]==='clima'){if(!o.clima)o.clima={t:'',v:'',r:'',dir:'O',cond:'Despejado',src:'manual'};o.clima.src='manual'}
   if(root==='e'&&keys[0]==='permiso'&&!o.permiso)o.permiso={num:'',firmo:'',hora:''};
   for(let k=0;k<keys.length-1;k++)o=o[keys[k]];
@@ -1085,7 +1099,7 @@ function moveT(t,inicio,dias,why){
 }
 const whoCli=p=>S.user==='cliente'?USERS.cliente.n+' · '+OPS[p.op]:meN()+' (admin)';
 const A={
-  logout:()=>{S.accountId=null;S.user=null;S.route='login';UI.drawer=null;UI.modal=null;render()},
+  logout:()=>{telemetry.pause();S.accountId=null;S.user=null;S.route='login';UI.drawer=null;UI.modal=null;render()},
   nav:d=>{if(d.r!=='o-edit')S.back=null;go(d.r)},
   rail:()=>{S.rmin=!S.rmin;render()},
   sync:()=>{toast('Los datos se guardan en este dispositivo. La conexión multiusuario está pendiente.');render()},
@@ -1100,6 +1114,7 @@ const A={
   'p-cell':d=>openTrab(d.rec,d.d),
   't-open':d=>{UI.drawer=d.id;UI.delArm=null;render()},
   't-edit':()=>openTrab(null,null,UI.drawer),
+  't-copy':()=>{if(!canPlan())return;openTrab(null,null,UI.drawer);UI.modal.edit=null;UI.modal.f.inicio=TODAY;toast('Planificación preparada desde el trabajo anterior. Revisá fechas y asignaciones.');render()},
   'close-drawer':()=>{UI.drawer=null;render()},
   't-dias':d=>{const t=trab(UI.drawer);const nd=t.dias+Number(d.d);if(nd<minDias(t)||nd>30)return;moveT(t,t.inicio,nd);render()},
   't-prio':d=>{const t=trab(UI.drawer);if(t.prio===d.p)return;t.hist.push({t:nowT(),who:meN(),a:`Prioridad: ${PRIO[t.prio]} → ${PRIO[d.p]}`,c:''});t.prio=d.p;render()},
@@ -1132,12 +1147,12 @@ const A={
   'c-delimp':d=>{const c=CT(d.ct);const x=c.imps[Number(d.i)];if(S.trabajos.some(t=>t.imp===x[0])){toast(`${x[0]} está en uso por trabajos: no se puede quitar`);render();return}if(c.imps.length<=1){toast('El contrato necesita al menos una imputación');render();return}c.imps.splice(Number(d.i),1);toast(`Quitada: ${x[0]}`);render()},
   'sent-ok':()=>{UI.modal=null;S.route='o-day';render()},
   'o-start':d=>{const t=trab(d.pl);const existing=parteOf(t.id,TODAY);if(existing){if(['curso','obs'].includes(existing.estado))A['o-open']({id:existing.id});else{toast('El parte de ese trabajo y fecha ya fue enviado.');render()}return}if(!covers(t,TODAY)||t.cierre){toast('El trabajo no está disponible para iniciar hoy.');render();return}const p=Object.assign(snap(t,TODAY),{id:nextPD(),estado:'curso',dec:null,cert:null,ext:null,cierreObs:'',hist:[{t:'25 sep 16:10',who:'Laura Méndez',a:'Planificado',c:''},{t:nowT(),who:meN(),a:'Parte iniciado',c:''}]});
-    p.fin=p.dia>=t.dias-1?'fin':'sigue';p.ejec=newEjec(p);S.partes.push(p);S.sel=p.id;S.step=0;S.back='o-day';go('o-edit')},
-  'o-open':d=>{S.sel=d.id;S.back='o-day';const p=byId(d.id);S.step=0;if(p.estado==='obs'){const c=errs(p)[0];if(c)S.step=STEP_OF[c[2]]}go('o-edit')},
-  'o-step':d=>{S.step=Number(d.i);render()},
+    p.dataOrigin=t.dataOrigin==='recorded'?'recorded':'example';p.createdAt=new Date().toISOString();p.fin=p.dia>=t.dias-1?'fin':'sigue';p.ejec=newEjec(p);S.fastMode=true;S.partes.push(p);S.sel=p.id;S.step=0;S.back='o-day';go('o-edit')},
+  'o-open':d=>{S.fastMode=true;S.sel=d.id;S.back='o-day';const p=byId(d.id);S.step=0;if(p.estado==='obs'){const c=errs(p)[0];if(c)S.step=STEP_OF[c[2]]}go('o-edit')},
+  'o-step':d=>{S.fastMode=false;S.step=Number(d.i);render()},
   'o-check':d=>{const e=cur().ejec;e.check[d.k]=!e.check[d.k];render()},
   'o-ptnow':()=>{const p=cur(),e=p.ejec;e.permiso=e.permiso||{num:'',firmo:'',hora:''};e.permiso.hora=hm();if(!e.permiso.firmo)e.permiso.firmo=OPSUP[p.op];render()},
-  'o-clima':()=>{const e=cur().ejec;e.clima={t:'11',v:'42',r:'68',dir:'SO',cond:'Ventoso',src:'app',at:hm()};toast('Clima actualizado desde la app de la tablet');render()},
+  'o-clima':()=>{toast('Fuente de clima pendiente. Registrá la observación real en campo.');render()},
   'o-pres':d=>{const x=cur().ejec.personal[d.i];x.pres=!x.pres;render()},
   'o-allz':()=>{const ps=cur().ejec.personal,j=ps[0];ps.forEach(x=>{if(x!==j&&x.pres){x.base=j.base;x.zona=j.zona;x.out=j.out}});render()},
   'o-addp':d=>{cur().ejec.personal.push({n:d.n,rol:ROLEP[d.n]||'Operario',base:'',zona:'',out:'',pres:true,add:true});render()},
@@ -1152,7 +1167,7 @@ const A={
   'o-sigclear':()=>{cur().ejec.firma=null;render()},
   'o-fin':d=>{const p=cur();p.fin=d.v;if(d.v==='ext'&&!p.ext)p.ext={dias:1,motivo:''};render()},
   'o-extd':d=>{const p=cur();p.ext.dias=Math.max(1,Math.min(10,p.ext.dias+Number(d.d)));render()},
-  'o-send':()=>{const p=cur();if(errs(p).length)return;const re=p.estado==='obs';const t=trab(p.pl);p.estado='env';p.dec=null;delete p.cola;
+  'o-send':()=>{const p=cur();if(S.quickDrafts?.[p.id]){toast('Guardá los cambios del parte rápido antes de enviar.');render();return}if(errs(p).length){telemetry.blocked(errs(p).length);toast('Revisá los controles pendientes antes de enviar.');render();return}const re=p.estado==='obs';const t=trab(p.pl);p.estado='env';p.dec=null;delete p.cola;p.submittedAt=new Date().toISOString();p.documentSnapshot=evaluateWork(S,t,p.fecha,{now:TODAY});telemetry.finish(p.id);
     p.hist.push({t:nowT(),who:meN(),a:re?'Reenviado con correcciones':'Enviado para aprobación',c:''});
     if(p.fin==='fin'&&!t.cierre){const ant=p.dia<t.dias-1;t.cierre={fecha:p.fecha,parte:p.id,who:meN(),t:nowT(),obs:p.cierreObs,anticipado:ant};
       if(ant){const old=t.dias;t.dias=p.dia+1;t.hist.push({t:nowT(),who:meN(),a:`Trabajo cerrado antes de lo planificado: ${old} → ${t.dias} días`,c:p.cierreObs})}else t.hist.push({t:nowT(),who:meN(),a:'Trabajo cerrado por el jefe de cuadrilla',c:p.cierreObs})}
@@ -1160,15 +1175,15 @@ const A={
     UI.modal={kind:'sent',id:p.id};render()},
   'v-filter':d=>{S.vf=d.f;S.vsel=null;UI.vcom='';UI.verr='';render()},
   'v-sel':d=>{S.vsel=d.id;UI.vcom='';UI.verr='';render()},
-  'v-ok':()=>{const p=byId(S.vsel);if(errs(p).length)return;const com=UI.vcom.trim();p.estado='apr';p.dec={d:'ok',who:meN(),t:nowT(),com};p.hist.push({t:nowT(),who:meN(),a:'Aprobado',c:com});UI.vcom='';toast(`${p.id} aprobado · pasa a certificación de ${OPS[p.op]}`);S.vsel=null;render()},
+  'v-ok':()=>{const p=byId(S.vsel);if(errs(p).length)return;const com=UI.vcom.trim();p.estado='apr';p.approvedAt=new Date().toISOString();p.dec={d:'ok',who:meN(),t:nowT(),com};p.hist.push({t:nowT(),who:meN(),a:'Aprobado',c:com});UI.vcom='';toast(`${p.id} aprobado · pasa a certificación de ${OPS[p.op]}`);S.vsel=null;render()},
   'v-obs':()=>{const p=byId(S.vsel);const com=UI.vcom.trim();if(!com){UI.verr='Escribí qué tiene que corregir la cuadrilla para poder devolver el parte.';render();setTimeout(()=>{const t=$('#v-com');if(t)t.focus()},20);return}
-    p.estado='obs';p.dec={d:'obs',who:meN(),t:nowT(),com};p.hist.push({t:nowT(),who:meN(),a:'Devuelto con observaciones',c:com});UI.vcom='';toast(`${p.id} devuelto a ${recOf(p.rec).n}`);S.vsel=null;render()},
+    p.estado='obs';p.returnedAt=new Date().toISOString();p.dec={d:'obs',who:meN(),t:nowT(),com};p.hist.push({t:nowT(),who:meN(),a:'Devuelto con observaciones',c:com});UI.vcom='';toast(`${p.id} devuelto a ${recOf(p.rec).n}`);S.vsel=null;render()},
   'c-filter':d=>{S.cf=d.f;S.csel=null;UI.vcom='';UI.verr='';UI.csig=null;render()},
   'c-sel':d=>{S.csel=d.id;UI.vcom='';UI.verr='';UI.csig=null;render()},
   'c-sigclear':()=>{UI.csig=null;render()},
-  'c-ok':()=>{const p=byId(S.csel);if(!UI.csig){UI.verr='Firmá en el recuadro para certificar el parte.';render();return}const com=UI.vcom.trim();const who=whoCli(p);p.estado='cert';p.cert={d:'ok',who,t:nowT(),com,firma:UI.csig};p.hist.push({t:nowT(),who,a:'Certificado y firmado',c:com});UI.vcom='';UI.csig=null;toast(`${p.id} certificado y firmado`);S.csel=null;render()},
+  'c-ok':()=>{const p=byId(S.csel);if(!UI.csig){UI.verr='Firmá en el recuadro para certificar el parte.';render();return}const com=UI.vcom.trim();const who=whoCli(p);p.estado='cert';p.certifiedAt=new Date().toISOString();p.cert={d:'ok',who,t:nowT(),com,firma:UI.csig};p.hist.push({t:nowT(),who,a:'Certificado y firmado',c:com});UI.vcom='';UI.csig=null;toast(`${p.id} certificado y firmado`);S.csel=null;render()},
   'c-obs':()=>{const p=byId(S.csel);const com=UI.vcom.trim();if(!com){UI.verr='Escribí el motivo de la observación para que VDS pueda corregir el parte.';render();setTimeout(()=>{const t=$('#v-com');if(t)t.focus()},20);return}
-    const who=whoCli(p);p.estado='obs';p.dec={d:'obs',who,t:nowT(),com};p.hist.push({t:nowT(),who,a:'Observado por el cliente',c:com});UI.vcom='';UI.csig=null;toast(`${p.id} observado · vuelve a VDS`);S.csel=null;render()}
+    const who=whoCli(p);p.estado='obs';p.returnedAt=new Date().toISOString();p.dec={d:'obs',who,t:nowT(),com};p.hist.push({t:nowT(),who,a:'Observado por el cliente',c:com});UI.vcom='';UI.csig=null;toast(`${p.id} observado · vuelve a VDS`);S.csel=null;render()}
 };
 function submitTrab(){
   const M=UI.modal,f=M.f;M.err={};
@@ -1184,7 +1199,7 @@ function submitTrab(){
     t.hist.push({t:nowT(),who:meN(),a:'Editado: '+(ch.join(', ')||'sin cambios'),c:''});UI.modal=null;UI.drawer=t.id;toast(`${t.id} actualizado`);render();return}
   const n=Math.max(...S.trabajos.map(t=>Number(t.id.slice(3))))+1;
   const id='PL-'+String(n).padStart(3,'0');
-  const t=Object.assign({id,cierre:null,ext:null,hist:[{t:nowT(),who:meN(),a:'Planificado',c:''}]},vals);
+  const t=Object.assign({id,dataOrigin:'recorded',createdAt:new Date().toISOString(),cierre:null,ext:null,hist:[{t:nowT(),who:meN(),a:'Planificado',c:''}]},vals);
   S.trabajos.push(t);UI.modal=null;
   const cl=clashes(t);toast(`${id} planificado · ${recOf(f.rec).n}, ${fDay(f.inicio)} → ${fDay(tEnd(t))}${cl.length?' · se superpone con '+cl.map(x=>x.id).join(', '):''}`);render();
 }
@@ -1201,13 +1216,15 @@ function onFiles(inp){
 features=createFeatureHost({
   state:()=>S, esc, ic, today:()=>TODAY, work:trab, person:meN,
   save, render, toast, go, home:()=>HOME[S.user],
-  contract:CT, operators:OPS, equipment:EQ,
+  contract:CT, operators:OPS, equipment:EQ,resources:RECURSOS,
   download:(name,content,type='application/json')=>{const blob=new Blob([content],{type});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),5000)},
   operatorResource:()=>USERS.operador.rec,
   exportState:()=>repository.export(rawState)
 });
 adminConsole=createAdminConsole({state:()=>rawState,esc,roles:ROLE_N,resources:RECURSOS,operators:OPS,render,toast,person:meN,refreshIdentity});
-Object.assign(A, features.actions,adminConsole.actions);
+controls=createControlHost({state:()=>S,people:ALLP,equipment:EQ,operators:OPS,person:meN,today:()=>TODAY,render,toast,esc});
+quickPart=createQuickPart({state:()=>S,part:cur,work:trab,unit:unitOf,checks,esc,today:()=>TODAY,render,toast,save,send:()=>A['o-send'](),blocked:()=>telemetry.blocked(1)});
+Object.assign(A, features.actions,adminConsole.actions,controls.actions,quickPart.actions);
 for(const [name,handler] of Object.entries(A))A[name]=(data={})=>{
   if(!actionAllowed(S.user,name)){toast('Tu perfil no tiene permiso para esta acción.');render();return}
   if(data.id&&['sum','pdf','o-open','v-sel','c-sel','a-edit','a-est'].includes(name)&&!byId(data.id)){toast('Parte fuera de tu alcance.');render();return}
@@ -1218,9 +1235,11 @@ for(const [name,handler] of Object.entries(A))A[name]=(data={})=>{
   if(name==='o-open'&&S.user==='operador'&&!['curso','obs'].includes(byId(data.id)?.estado))return;
   if(name.startsWith('o-')&&!['o-start','o-open'].includes(name)&&!cur())return;
   if(name.startsWith('o-')&&!['o-start','o-open','o-step'].includes(name)&&S.user==='operador'&&cur()&&!['curso','obs'].includes(cur().estado))return;
+  telemetry.interaction();telemetry.event('action',{action:name,route:S.route,module:data.module||'',target:data.r||''});
+  if(name.startsWith('o-')&&!['o-open','o-step','o-start','o-sigclear','o-send'].includes(name)&&cur())cur().updatedAt=new Date().toISOString();
   return handler(data);
 };
-function drawer(){return baselineDrawer().replace('<div class="db" data-keep="d">','<div class="db" data-keep="d">'+features.contextLinks(UI.drawer))}
+function drawer(){const t=trab(UI.drawer);return baselineDrawer().replace('<div class="db" data-keep="d">','<div class="db" data-keep="d">'+features.contextLinks(UI.drawer)+(t?controls.summary(t):'')+(canPlan()?'<button class="btn sm2" data-a="t-copy">Usar como plantilla de planificación</button>':''))}
 function vDay(){return baselineDay()+features.journeyLinks()}
 
 const scr=$('#screen');
@@ -1230,14 +1249,16 @@ scr.addEventListener('click',ev=>{
   if(t&&!t.disabled&&scr.contains(t)){ev.preventDefault();const f=A[t.dataset.a];if(f)f(t.dataset);return}
   if(!ev.target.closest('input,select,textarea,label,canvas,button,a,.gbar,.b')){scr.classList.add('hs');clearTimeout(hsT);hsT=setTimeout(()=>scr.classList.remove('hs'),650)}
 });
-scr.addEventListener('input',ev=>{const b=ev.target.dataset&&ev.target.dataset.bind;if(b&&!('rr' in ev.target.dataset&&ev.target.type==='search')){setBind(b,ev.target.value);save()}});
+scr.addEventListener('input',ev=>{quickPart.capture(ev.target.form);if(ev.target.form?.id==='quick-part'){telemetry.interaction(ev.target.name);save()}const b=ev.target.dataset&&ev.target.dataset.bind;if(b&&!('rr' in ev.target.dataset&&ev.target.type==='search')){telemetry.interaction(b);setBind(b,ev.target.value);save()}});
 scr.addEventListener('change',ev=>{
+  quickPart.capture(ev.target.form);if(ev.target.form?.id==='quick-part'){telemetry.interaction(ev.target.name);save()}
   if(ev.target.type==='file'){onFiles(ev.target);return}
   const b=ev.target.dataset&&ev.target.dataset.bind;if(!b)return;
   setBind(b,ev.target.value);
   if('rr' in ev.target.dataset)render();else save();
 });
 scr.addEventListener('submit',async ev=>{ev.preventDefault();
+  if(controls.handleSubmit(ev)||quickPart.handleSubmit(ev))return;
   if(ev.target.id.startsWith('admin-')){await adminConsole.submit(ev.target);return}
   if(features.handleSubmit(ev))return;
   if(ev.target.id==='loginf'){
@@ -1282,6 +1303,10 @@ scr.addEventListener('pointerup',endDrag);scr.addEventListener('pointercancel',e
 
 S.offline=!navigator.onLine;
 for(const event of ['online','offline'])window.addEventListener(event,()=>{S.offline=!navigator.onLine;render()});
+document.addEventListener('visibilitychange',()=>{telemetry.pause();if(document.visibilityState!=='hidden')telemetry.route(S.route,S.sel,S.step);save()});
+window.addEventListener('pagehide',()=>{telemetry.pause();save()});
+window.addEventListener('error',()=>{telemetry.event('runtime_error');save()});
+window.addEventListener('unhandledrejection',()=>{telemetry.event('runtime_error');save()});
 render();
 
 if(import.meta.env.PROD && 'serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});

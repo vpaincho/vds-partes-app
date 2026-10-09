@@ -28,7 +28,8 @@ Mantiene datos de ejemplo; sus fechas se desplazan al día actual únicamente en
 - `src/core/storage.js`: adaptador de persistencia local. La futura conexión a la base debe contemplar operaciones asíncronas, sesión, permisos, conflictos y migración; no basta sustituir una URL.
 - `src/features/registry.js`: registro de módulos y host compartido.
 - `src/features/model.js`: datos adicionales separados en `state.extensions`, validaciones e historial de cambios.
-- Un archivo por funcionalidad: `handover`, `issues`, `changes`, `materials`, `logbook`, `capture`, `evidence`, `live`.
+- Un archivo por funcionalidad: `handover`, `issues`, `changes`, `materials`, `logbook`, `capture`, `evidence`, `live`, `product-control`, `operations-control`, `document-control`, `quick-part`.
+- `src/intelligence/`: cálculos independientes de telemetría, operación y requisitos documentales; host de formularios y acciones de los centros.
 
 Administración → Configuración permite activar o desactivar cada módulo. Desactivarlo retira sus accesos y conserva sus registros; reactivarlo recupera los datos. Cada módulo define sus campos, validaciones, tarjetas y perfiles en su archivo. Quitar un módulo del registro elimina su funcionalidad sin modificar las pantallas originales. Los registros se vinculan al ID del trabajo; no crean ítems de facturación automáticamente.
 
@@ -39,9 +40,9 @@ Administración → Configuración permite activar o desactivar cada módulo. De
 | Adicionales | Solicitud e impacto; decisión del planner/admin, separada de certificación |
 | Materiales y reservas | Pedido, código manual, retiro, instrucciones y cantidades solicitadas, retiradas y usadas |
 | Bitácora | Historia por trabajo, locación y equipo a partir de partes y registros adicionales |
-| Captura rápida | Notas y dictado si el navegador lo admite; incorporación revisada a observaciones de un parte editable |
+| Captura rápida | Notas y dictado si el navegador lo admite; incorporación revisada a observaciones o a una actividad estructurada de un parte editable |
 | Evidencias | Foto comprimida, actividad, etapa, fecha y ubicación descriptiva |
-| Avance de jornada | Objetivo, avance, unidad, estado, bloqueo y siguiente paso |
+| Avance de jornada | Objetivo, avance derivado del parte o declarado manualmente, unidad, bloqueo y siguiente paso |
 
 ## Reservas de la operadora
 
@@ -51,8 +52,23 @@ Los estados y campos son provisionales y fácilmente modificables. Antes de inte
 
 ## Validación
 
-`npm test` ejecuta 11 pruebas de integración. Verifica login y vistas originales, los cinco pasos del parte y generación PDF; creación, modificación, consulta y persistencia de reservas; validaciones; relevo, novedades, adicionales, captura, avance y bitácora; desactivación sin pérdida de registros y fotografía contextual. Son pruebas DOM con JSDOM; no reemplazan pruebas visuales, servicio offline, micrófono o dispositivos reales.
+`npm test` ejecuta 24 pruebas DOM y de cálculos. Verifica login y vistas originales, los cinco pasos del parte y generación PDF; creación, modificación, consulta y persistencia de reservas; validaciones; relevo, novedades, adicionales, captura, avance y bitácora; desactivación sin pérdida de registros y fotografía contextual. Además verifica centros separados por rol, métricas sin datos inventados, documentos aprobados y vencidos, permisos documentales delegados, parte rápido con bloqueo de seguridad y envío, borradores, identidad visual, reutilización de planificación, actividades capturadas y turnos que cruzan medianoche. Las pruebas DOM con JSDOM no reemplazan pruebas visuales, servicio offline, micrófono o dispositivos reales.
 
 ## Vistas por rol y administración
 
 La identidad de cada usuario se separó del rol. Se conservan las vistas originales de planner, operario y cliente, y se agregaron Usuarios y accesos y Administración del sistema para admin. El operario consulta su recurso y el cliente su operadora; administración accede a todos los registros. Se pueden editar los datos de contratos y centros de costo además de los catálogos originales. Ver [accesos y conexión de datos](docs/access-and-data.md) para la matriz completa, implementación y conexión pendiente al backend.
+
+
+## Centros de control y carga breve
+
+Los centros tienen propósitos y datos diferentes:
+
+| Perfil | Centro | Decisión que facilita |
+| --- | --- | --- |
+| Admin | Producto | Qué cambio de la app priorizar a partir de errores, fricción, tiempos observados y uso de módulos |
+| Planner | Operación | Qué preparación, asignación o coordinación revisar a partir de tiempos, producción, partes pendientes, documentación y reservas |
+| Operario | Parte rápido | Confirmar y completar la jornada habitual; abrir los cinco pasos para excepciones |
+
+Ver [guía de evaluación y límites de los centros](docs/control-centers.md). La métrica de dos minutos es un objetivo a validar con usuarios: esta versión no acredita todavía cumplirlo en campo. Las recomendaciones operativas son reglas explicables, no un optimizador conectado a pronósticos, caminos o portales de operadoras.
+
+Administración del sistema permite configurar nombre de empresa, logo y color; “Trama” es un nombre provisional editable y la interfaz conserva la firma de Friquarks. La configuración se aplica a la interfaz y los textos de los PDF. El manifest de instalación mantiene el nombre VDS: falta personalizarlo por instalación y resolver dominio, tenants y backend antes de ofrecer marca blanca completa.

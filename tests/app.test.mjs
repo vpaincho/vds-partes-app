@@ -3,6 +3,10 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { initializeAccounts, currentAccount, scopedState, routeAllowed, actionAllowed, createLocalIdentityProvider } from '../src/core/access.js';
 import { createAdminConsole } from '../src/admin/console.js';
+import { createTelemetry } from '../src/intelligence/telemetry.js';
+import { createControlHost } from '../src/intelligence/control-host.js';
+import { createQuickPart } from '../src/features/quick-part.js';
+import { evaluateWork } from '../src/intelligence/documents.js';
 import { JSDOM } from 'jsdom';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
@@ -21,7 +25,7 @@ function boot(saved){
   globalThis.window=w;globalThis.document=w.document;globalThis.FormData=w.FormData;
   w.structuredClone=structuredClone;
   if(saved)w.localStorage.setItem('vds-partes-web-1',saved);
-  Object.assign(w,{initializeAccounts,currentAccount,scopedState,routeAllowed,actionAllowed,createLocalIdentityProvider,createAdminConsole});
+  Object.assign(w,{initializeAccounts,currentAccount,scopedState,routeAllowed,actionAllowed,createLocalIdentityProvider,createAdminConsole,createTelemetry,createControlHost,createQuickPart,evaluateWork});
   w.createLocalRepository=createLocalRepository;w.createFeatureHost=createFeatureHost;w.jsPDF=jsPDF;
   w.eval(source+'\nwindow.qa={state:()=>S,action:A,render,checks,buildPdf,ui:()=>UI};');
   const doc=w.document;
@@ -64,7 +68,7 @@ test('handover, issue resolution, additional request, capture, live progress and
   open('issues');app.fill('[name="title"]','Pérdida de aceite');app.fill('[name="description"]','Revisar interno');app.fill('[name="owner"]','Mantenimiento');app.fill('[name="status"]','Resuelta');await app.submit();assert.equal(app.w.qa.state().extensions.records.issues.length,0);app.fill('[name="resolution"]','Manguera reemplazada');await app.submit();assert.equal(app.w.qa.state().extensions.records.issues[0].status,'Resuelta');
   open('changes');app.fill('[name="title"]','Ampliar cerco');app.fill('[name="requestedBy"]','Supervisor operadora');app.fill('[name="description"]','40 metros más');await app.submit();assert.equal(app.w.qa.state().extensions.records.changes[0].status,'Informado');
   open('capture');app.fill('[name="title"]','Espera permiso');app.fill('[name="description"]','Esperamos al supervisor');await app.submit();const r=app.w.qa.state().extensions.records.capture[0];app.w.qa.action['capture-to-part']({id:r.id});assert.ok(r.incorporatedPart);const p=app.w.qa.state().partes.find(p=>p.id===r.incorporatedPart);assert.match(p.ejec.obs,/Esperamos al supervisor/);const before=p.ejec.obs;app.w.qa.action['capture-to-part']({id:r.id});assert.equal(p.ejec.obs,before);
-  open('live');app.fill('[name="title"]','Cerco');app.fill('[name="target"]','100');app.fill('[name="completed"]','80');await app.submit();assert.match(app.doc.body.textContent,/80%/);
+  open('live');app.fill('[name="source"]','Manual');app.fill('[name="title"]','Cerco');app.fill('[name="target"]','100');app.fill('[name="completed"]','80');await app.submit();assert.match(app.doc.body.textContent,/80%/);
   open('logbook');assert.match(app.doc.body.textContent,/Entrega día/);assert.match(app.doc.body.textContent,/Ampliar cerco/);app.dispose();
 });
 
@@ -126,4 +130,49 @@ test('planner approves and assigned client certifies with individual identity; o
   for(const [name,value] of Object.entries({username:'certificador',name:'Supervisor Nuevo',role:'cliente',operator:p.op,password:'firma2026'}))app.fill(`[name="${name}"]`,value);await adminSubmit(app,'#admin-user-form');
   app.w.qa.action.logout();await app.login('certificador','firma2026');app.w.qa.action.nav({r:'c-inbox'});app.w.qa.action['c-sel']({id:p.id});app.w.qa.ui().csig='seed';app.w.qa.action['c-ok']();assert.equal(p.estado,'cert');assert.match(p.cert.who,/Supervisor Nuevo/);
   app.w.qa.action.logout();await app.login('darce');const sent=app.w.qa.state().partes.find(p=>p.estado==='cert');assert.ok(sent);app.w.qa.action['o-open']({id:sent.id});assert.equal(app.w.qa.state().route,'o-day');app.dispose();
+});
+
+test('control centers are distinct by role, stay empty without genuine measurements, and support product improvement tracking',async()=>{
+  const app=boot();await app.login('sherrera');assert.ok(app.doc.querySelector('nav [data-r="x-product"]'));assert.equal(app.doc.querySelector('nav [data-r="x-operations"]'),null);app.w.qa.action.nav({r:'x-product'});assert.match(app.doc.body.textContent,/Sin medición/);assert.match(app.doc.body.textContent,/Producto · datos de uso local/);assert.equal(app.w.qa.state().telemetry.sessions.length,0);
+  for(const [name,value]of Object.entries({title:'Reducir escritura',evidence:'Piloto de 10 jornadas',hypothesis:'Precarga de horarios confirmados',owner:'Producto'}))app.fill(`#product-opportunity [name="${name}"]`,value);await adminSubmit(app,'#product-opportunity');const opportunity=app.w.qa.state().productOpportunities[0];assert.ok(opportunity.id);assert.equal(opportunity.status,'Por evaluar');const form=app.doc.querySelector('[data-product-update]');form.querySelector('[name="status"]').value='Priorizada';form.dispatchEvent(new app.w.Event('submit',{bubbles:true,cancelable:true}));assert.equal(opportunity.status,'Priorizada');assert.equal(opportunity.history.length,1);
+  app.w.qa.action.logout();await app.login('lmendez');assert.equal(app.doc.querySelector('nav [data-r="x-product"]'),null);assert.ok(app.doc.querySelector('nav [data-r="x-operations"]'));app.w.qa.action.nav({r:'x-operations'});assert.match(app.doc.body.textContent,/Sin cantidades registradas/);assert.match(app.doc.body.textContent,/Solo registros cargados/);app.fill('[data-bind="s:opsExamples"]','yes');app.doc.querySelector('[data-bind="s:opsExamples"]').dispatchEvent(new app.w.Event('change',{bubbles:true}));assert.match(app.doc.body.textContent,/Incluye datos de ejemplo/);app.w.qa.action.nav({r:'x-product'});assert.equal(app.w.qa.state().route,'x-operations');app.dispose();
+});
+
+test('document matrix is manageable by admin, approved evidence is required, planner reads and operator sees only own work',async()=>{
+  const app=boot();await app.login('sherrera');app.w.qa.action['module-open']({module:'documents',work:'PL-092'});assert.match(app.doc.body.textContent,/Matriz documental pendiente/);
+  for(const [name,value]of Object.entries({title:'Curso específico',kind:'Personal',subject:'Diego Arce',operator:'AUP',owner:'Control documental',noticeDays:'15'}))app.fill(`#document-requirement [name="${name}"]`,value);await adminSubmit(app,'#document-requirement');const r=app.w.qa.state().documentControl.requirements[0];assert.ok(r);
+  const p=app.w.qa.state().partes.find(p=>p.pl==='PL-092');const date=p.fecha;app.fill('#document-evidence [name="subject"]','Diego Arce');app.fill('#document-evidence [name="reference"]','Documento revisado en origen');app.fill('#document-evidence [name="validFrom"]',date);app.fill('#document-evidence [name="validTo"]',new Date(Date.parse(date)+60*86400000).toISOString().slice(0,10));await adminSubmit(app,'#document-evidence');assert.match(app.doc.body.textContent,/Pendiente de validación/);
+  app.fill('#document-evidence [name="subject"]','Diego Arce');app.fill('#document-evidence [name="reference"]','Nueva versión revisada');app.fill('#document-evidence [name="validFrom"]',date);app.fill('#document-evidence [name="validTo"]',new Date(Date.parse(date)+60*86400000).toISOString().slice(0,10));app.fill('#document-evidence [name="status"]','Aprobado');await adminSubmit(app,'#document-evidence');assert.match(app.doc.body.textContent,/En regla/);
+  app.w.qa.action.logout();await app.login('lmendez');app.w.qa.action['module-open']({module:'documents',work:'PL-092'});assert.equal(app.doc.querySelector('#document-requirement'),null);assert.match(app.doc.body.textContent,/En regla/);
+  app.w.qa.action.logout();await app.login('darce');app.w.qa.action['module-open']({module:'documents',work:'PL-092'});assert.equal(app.doc.querySelector('#document-evidence'),null);assert.match(app.doc.body.textContent,/Diego Arce/);assert.doesNotMatch(app.doc.body.textContent,/PL-093/);app.dispose();
+});
+
+test('quick part never confirms automatically, retains unsaved draft through signature rendering, and preserves original exceptions',async()=>{
+  const app=boot();await app.login('darce');const p=app.w.qa.state().partes.find(p=>p.estado==='curso');app.w.qa.action['o-open']({id:p.id});assert.ok(app.doc.querySelector('#quick-part'));assert.equal(app.doc.querySelector('[name="confirmed"]').checked,false);const qty=p.ejec.reg.find(r=>r.c==='op').q;
+  app.doc.querySelector('#quick-part').dispatchEvent(new app.w.Event('submit',{bubbles:true,cancelable:true}));assert.match(app.doc.body.textContent,/Confirmá personal/);assert.equal(p.ejec.reg.find(r=>r.c==='op').q,qty);
+  app.fill('[name="notes"]','Pendiente para próxima jornada');app.w.qa.render();assert.equal(app.doc.querySelector('[name="notes"]').value,'Pendiente para próxima jornada');app.doc.querySelector('[name="confirmed"]').checked=true;app.doc.querySelector('[name="confirmed"]').dispatchEvent(new app.w.Event('change',{bubbles:true}));app.doc.querySelector('#quick-part').dispatchEvent(new app.w.Event('submit',{bubbles:true,cancelable:true}));assert.equal(p.ejec.obs,'Pendiente para próxima jornada');assert.equal(p.ejec.reg.find(r=>r.c==='op').q,qty);
+  app.w.qa.action['quick-detail']({step:'3'});assert.ok(app.doc.querySelector('.steps'));assert.equal(app.doc.querySelector('#quick-part'),null);app.w.qa.action['quick-open']();assert.ok(app.doc.querySelector('#quick-part'));assert.ok(app.w.qa.state().telemetry.sessions.some(x=>x.partId===p.id));app.dispose();
+});
+
+test('handover reuses recorded activity, live advance derives quantities, and structured capture adds a reviewed event once',async()=>{
+  const app=boot();await app.login('darce');const p=app.w.qa.state().partes.find(p=>p.pl==='PL-092'&&p.estado==='curso');app.w.qa.action['module-open']({module:'handover',work:p.pl});assert.match(app.doc.querySelector('[name="completed"]').value,/Limpieza de locación/);
+  app.w.qa.action['module-open']({module:'live',work:p.pl});app.fill('[name="title"]','Limpieza de locación');app.fill('[name="target"]','900');app.fill('[name="unit"]','m²');await app.submit();assert.match(app.doc.body.textContent,/50%/);
+  app.w.qa.action['module-open']({module:'capture',work:p.pl});for(const [name,value]of Object.entries({title:'Trabajo de tarde',description:'Limpieza sector norte',activity:'Limpieza de locación',from:'13:00',to:'14:00',quantity:'100',unit:'m²'}))app.fill(`[name="${name}"]`,value);await app.submit();const r=app.w.qa.state().extensions.records.capture[0];app.w.qa.action['capture-to-activity']({id:r.id});assert.equal(r.incorporatedPart,p.id);const count=p.ejec.reg.length;app.w.qa.action['capture-to-activity']({id:r.id});assert.equal(p.ejec.reg.length,count);app.w.qa.action['module-open']({module:'live',work:p.pl});assert.match(app.doc.body.textContent,/61%/);app.dispose();
+});
+
+test('company identity is configurable and planner can reuse planning without changing the source',async()=>{
+  const app=boot();await app.login('sherrera');app.w.qa.action.nav({r:'a-system'});app.fill('#admin-brand-form [name="companyName"]','Empresa Prueba');app.fill('#admin-brand-form [name="productName"]','Trama');await adminSubmit(app,'#admin-brand-form');assert.match(app.doc.querySelector('.brand').textContent,/Empresa Prueba/);assert.match(app.doc.querySelector('.brand').textContent,/Friquarks/);
+  app.w.qa.action.logout();await app.login('lmendez');const t=app.w.qa.state().trabajos.find(t=>t.id==='PL-092'),before=t.inicio;app.w.qa.action['t-open']({id:t.id});app.w.qa.action['t-copy']();assert.ok(app.doc.querySelector('#trabf'));assert.equal(app.w.qa.ui().modal.edit,null);assert.equal(t.inicio,before);assert.equal(app.w.qa.ui().modal.f.ct,t.ct);app.dispose();
+});
+
+test('quick part can save and send an explicitly confirmed daily report while preserving safety checks and telemetry',async()=>{
+  const app=boot();await app.login('darce');const p=app.w.qa.state().partes.find(p=>p.pl==='PL-092'&&p.estado==='curso');app.w.qa.action['o-open']({id:p.id});
+  for(const name of ['confirmed','common','talk','ppe']){const input=app.doc.querySelector(`[name="${name}"]`);input.checked=true;input.dispatchEvent(new app.w.Event('change',{bubbles:true}));}
+  for(const [name,value]of Object.entries({base:'06:30',zone:'07:35',out:'18:30',arrival:'07:35',temperature:'11',gust:'45',permit:'PT-REAL-REVISADO',signer:'Supervisor',permitTime:'07:30',km0:'200000',km1:'200000',quantity1:'20',from1:'11:00',to1:'12:00',quantity2:'10',from2:'12:00',to2:'13:00',notes:'Trabajo continúa mañana'}))app.fill(`[name="${name}"]`,value);
+  p.ejec.firma='seed';const send=()=>{const form=app.doc.querySelector('#quick-part');form.dispatchEvent(new app.w.SubmitEvent('submit',{bubbles:true,cancelable:true,submitter:form.querySelector('[value="send"]')}));};send();assert.equal(p.estado,'curso');assert.ok(app.w.qa.checks(p).some(x=>x[0]==='err'&&x[1].includes('MB-08')));assert.equal(app.w.qa.state().telemetry.sessions.filter(s=>s.completedAt).length,0);
+  app.w.qa.state().hab['MB-08|AUP'].vence='2099-12-31';const confirmation=app.doc.querySelector('[name="confirmed"]');confirmation.checked=true;confirmation.dispatchEvent(new app.w.Event('change',{bubbles:true}));send();assert.equal(p.estado,'env',JSON.stringify({checks:app.w.qa.checks(p),error:app.doc.querySelector('.quick-error')?.textContent}));assert.ok(p.submittedAt);assert.ok(p.documentSnapshot);assert.equal(p.ejec.check.epp,true);assert.equal(app.w.qa.state().telemetry.sessions.filter(s=>s.completedAt).length,1);assert.match(app.doc.body.textContent,/Parte listo para aprobación local/);app.dispose();
+});
+
+test('admin can explicitly grant document management to planner without granting admin access',async()=>{
+  const app=boot();await app.login('sherrera');app.w.qa.action.nav({r:'a-users'});app.w.qa.action['admin-user-edit']({id:'lmendez'});app.fill('[name="documentPermission"]','yes');await adminSubmit(app,'#admin-user-form');app.w.qa.action.logout();await app.login('lmendez');app.w.qa.action['module-open']({module:'documents',work:'PL-092'});assert.ok(app.doc.querySelector('#document-requirement'));assert.equal(app.doc.querySelector('nav [data-r="a-users"]'),null);app.dispose();
 });

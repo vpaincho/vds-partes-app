@@ -29,7 +29,7 @@ export function scopedState(state){
 }
 export function routeAllowed(role,route){return ROLE_ROUTES[role]?.includes(route)||false}
 const adminActions=new Set(['a-del','a-reopen','a-hab','h-sin','a-est','a-edit','a-save','c-addtask','c-deltask','c-addimp','c-delimp']);
-const plannerActions=new Set(['p-new','p-cell','t-edit','t-dias','t-prio','x-ok','x-no','m-ptw','m-prio','m-dias','m-tarea','m-padd','m-pdel','m-eadd','m-edel']);
+const plannerActions=new Set(['p-new','p-cell','t-edit','t-copy','t-dias','t-prio','x-ok','x-no','m-ptw','m-prio','m-dias','m-tarea','m-padd','m-pdel','m-eadd','m-edel']);
 export function actionAllowed(role,name){
   if(!role)return name==='logout';
   if(name.startsWith('admin-')||adminActions.has(name))return role==='admin';

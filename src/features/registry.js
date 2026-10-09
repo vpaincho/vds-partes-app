@@ -1,3 +1,7 @@
+import product from './product-control.js';
+import operations from './operations-control.js';
+import documents from './document-control.js';
+import quick from './quick-part.js';
 import handover from './handover.js';
 import issues from './issues.js';
 import changes from './changes.js';
@@ -11,7 +15,7 @@ import { field } from './shared.js';
 
 // A module contributes its own view, fields, parsing and permissions.
 // Removing an import/entry removes it from the app; switching it off preserves records.
-export const featureModules = [handover, issues, changes, materials, logbook, capture, evidence, live];
+export const featureModules = [handover, issues, changes, materials, logbook, capture, evidence, live, product, operations, documents, quick];
 
 export function createFeatureHost(ctx) {
   const drafts={},errors={};let recognition=null;
@@ -24,12 +28,12 @@ export function createFeatureHost(ctx) {
   const visibleRecord=r=>works().some(t=>t.id===r.workId);
   const records=(id,filter=true)=>store().records[id].filter(r=>visibleRecord(r)&&(!filter||!ctx.state().extWork||ctx.state().extWork==='all'||r.workId===ctx.state().extWork));
   const workLabel=id=>{const t=ctx.work(id);return t?`${t.id} · ${t.yac} · ${t.pozo}`:'Trabajo no disponible'};
-  const draft=id=>drafts[id]||{workId:ctx.state().extWork==='all'?'':ctx.state().extWork};
+  const draft=id=>{const d=drafts[id]||{workId:ctx.state().extWork==='all'?'':ctx.state().extWork};return get(id)?.prepare?.(ctx,d)||d};
   const workField=value=>field(ctx,'workId','Trabajo',value||works()[0]?.id,{required:true,options:works().map(t=>[t.id,workLabel(t.id)])});
   const filter=id=>`<div class="feature-filter"><div class="fld"><label for="module-work-filter">Trabajo</label><select class="inp" id="module-work-filter" data-bind="s:extWork" data-rr>${[['all','Todos mis trabajos'],...works().map(t=>[t.id,workLabel(t.id)])].map(([v,l])=>`<option value="${ctx.esc(v)}" ${(ctx.state().extWork||'all')===v?'selected':''}>${ctx.esc(l)}</option>`).join('')}</select></div><button class="btn" data-a="module-export" data-module="${id}">Exportar registros</button></div>`;
   const formError=id=>errors[id]?`<p class="field-error" role="alert">${ctx.esc(errors[id])}</p>`:'';
   const findRecord=(module,id)=>{const m=get(module);if(!enabled(m))throw new Error('Módulo no disponible para tu perfil.');const r=records(m.id,false).find(r=>r.id===id);if(!r)throw new Error('Registro no disponible.');return r};
-  const contextLinks=workId=>`<div class="module-links">${featureModules.filter(enabled).map(m=>`<button class="btn sm2" data-a="module-open" data-module="${m.id}" data-work="${ctx.esc(workId||'all')}">${ctx.ic(m.icon)}${ctx.esc(m.title)}</button>`).join('')}</div>`;
+  const contextLinks=workId=>`<div class="module-links">${featureModules.filter(m=>enabled(m)&&m.contextual!==false).map(m=>`<button class="btn sm2" data-a="module-open" data-module="${m.id}" data-work="${ctx.esc(workId||'all')}">${ctx.ic(m.icon)}${ctx.esc(m.title)}</button>`).join('')}</div>`;
   const card=(m,r)=>`<article class="feature-card"><div class="feature-meta"><span>${ctx.esc(workLabel(r.workId))}</span>${r.status?`<span class="feature-status">${ctx.esc(r.status)}</span>`:''}</div><h3>${ctx.esc(r.title)}</h3>${m.details(ctx,r)}<div class="feature-meta">${ctx.esc(r.createdBy)} · actualizado ${ctx.esc(new Date(r.updatedAt).toLocaleString('es-AR'))}${r.history.length?` · ${r.history.length} revisión(es)`:''}</div><div class="feature-actions">${canEdit(m)?`<button class="btn sm2" data-a="module-edit" data-module="${m.id}" data-id="${r.id}">Editar</button>`:''}${m.extraActions?.(ctx,r)||''}</div></article>`;
   const actions={
     'module-home':()=>ctx.go(ctx.home()),
@@ -51,6 +55,15 @@ export function createFeatureHost(ctx) {
       recognition.onerror=()=>{status.textContent='No se pudo dictar. Revisá el permiso de micrófono o escribí la nota.'};
       recognition.onend=()=>{recognition=null;if(status.textContent.startsWith('Escuchando'))status.textContent='Dictado finalizado.'};recognition.start();
     },
+    'capture-to-activity':d=>{
+      try{const r=findRecord('capture',d.id);const p=ctx.state().partes.find(p=>p.pl===r.workId&&p.fecha===r.date&&['curso','obs'].includes(p.estado)&&p.ejec);if(!p)throw new Error('Abrí un parte editable para ese trabajo y fecha.');if(r.incorporatedPart)throw new Error('Este evento ya fue incorporado.');
+      const category={Actividad:'op',Traslado:'tr',Espera:'es',Parada:'vi'}[r.kind];if(!category||!r.activity||!r.from||!r.to||r.from>=r.to)throw new Error('Revisá tipo, actividad y horario del evento.');
+      if(category==='op'&&(!(Number(r.quantity)>0)||!r.unit))throw new Error('La actividad operativa requiere cantidad y unidad.');
+      if(p.ejec.reg.some(x=>r.from<x.a&&r.to>x.de))throw new Error('El evento se superpone a un tramo existente. Revisá antes de incorporar.');
+      p.ejec.reg.push({id:crypto.randomUUID(),c:category,d:r.activity,de:r.from,a:r.to,q:r.quantity||'',u:r.unit||'',det:r.description});
+      upsertRecord(store().records.capture,{status:'Incorporado al parte',incorporatedPart:p.id,incorporation:'activity'},{id:r.id,actor:ctx.person()});ctx.toast('Evento incorporado como actividad');ctx.render();
+      }catch(error){ctx.toast(error.message);ctx.render()}
+    },
     'capture-to-part':d=>{
       const r=findRecord('capture',d.id);const p=ctx.state().partes.find(p=>p.pl===r.workId&&p.fecha===r.date&&['curso','obs'].includes(p.estado)&&p.ejec);
       if(!p){ctx.toast('Abrí primero un parte editable para ese trabajo y fecha.');ctx.render();return}
@@ -67,7 +80,7 @@ export function createFeatureHost(ctx) {
     try{
       if(!works().some(t=>t.id===fd.get('workId')))throw new Error('Elegí un trabajo de tu ámbito.');
       let record;
-      if(m.id==='evidence'){record=Object.fromEntries(fd);const file=fd.get('photo');record.photo=file?.size?await imageData(file):current.photo;if(!record.photo)throw new Error('Agregá una fotografía.');}
+      if(m.id==='evidence'){record=Object.fromEntries(fd);const file=fd.get('photo');record.photo=file?.size?await imageData(file):current.photo;if(record.recordRef){const [partId,activityId]=record.recordRef.split('|');const p=ctx.state().partes.find(p=>p.id===partId&&p.pl===record.workId);if(!p?.ejec.reg.some(x=>x.id===activityId))throw new Error('La actividad seleccionada no pertenece a ese trabajo.');record.partId=partId;record.activityId=activityId}if(!record.photo)throw new Error('Agregá una fotografía.');}
       else record=m.parse(fd);
       if(m.id==='changes'&&ctx.state().user==='operador')record.status=current.status||'Informado';
       if(m.id==='handover'&&current.id){record.readBy=null;record.readAt=null;}

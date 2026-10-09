@@ -7,7 +7,8 @@ export default createRecordModule({
     field(ctx,'kind','Tipo',r.kind||'Actividad',{options:['Actividad','Traslado','Espera','Parada','Novedad'].map(x=>[x,x])})+
     field(ctx,'description','Nota / transcripción para revisar',r.description,{type:'textarea',required:true})+
     `<div class="feature-toolbar"><button class="btn" type="button" data-a="capture-voice">Dictar nota</button><span id="voice-status" class="sm" role="status"></span></div>`+
+    `<details><summary>Datos estructurados para incorporar a una actividad</summary>${field(ctx,'activity','Actividad o motivo',r.activity)}${field(ctx,'from','Desde',r.from,{type:'time'})}${field(ctx,'to','Hasta',r.to,{type:'time'})}${field(ctx,'quantity','Cantidad',r.quantity,{type:'number',min:0,step:'any'})}${field(ctx,'unit','Unidad',r.unit)}</details>`+
     field(ctx,'status','Estado del borrador',r.status||'Pendiente de revisión',{options:['Pendiente de revisión','Revisado','Incorporado al parte'].map(x=>[x,x])}),
   details:(ctx,r)=>`<p>${ctx.esc(r.description)}</p><div class="feature-meta">${ctx.esc(r.kind)} · ${ctx.esc(r.date)} ${ctx.esc(r.time)}</div>`,
-  extraActions:(ctx,r)=>`<button class="btn sm2" data-a="capture-to-part" data-id="${r.id}">Incorporar como nota al parte</button>`
+  extraActions:(ctx,r)=>`<button class="btn sm2" data-a="capture-to-part" data-id="${r.id}">Incorporar como nota al parte</button>${r.activity&&r.from&&r.to?`<button class="btn sm2" data-a="capture-to-activity" data-id="${r.id}">Incorporar como actividad revisada</button>`:''}`
 });
