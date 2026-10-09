@@ -2,3 +2,8 @@
 .DS_Store
 Thumbs.db
 node_modules/
+dist/
+.sites-runtime/
+.env
+.env.*
+!.env.example

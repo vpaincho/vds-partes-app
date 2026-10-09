@@ -1,71 +1,74 @@
 # VDS · Partes de campo
 
-Prototipo navegable de la app de tablet de **Vientos del Sur** para gestionar partes de servicio con las operadoras.
+Aplicación web basada en la versión original `f6579e565bbacf97c7d15985893959003256533b` de `jmalo-star/vds-partes-app`. Conserva las pantallas y el circuito del parte diario, con la interfaz ocupando el navegador sin marco de tablet ni controles exteriores de demostración.
 
-Circuito: **Planificación → Parte diario → Aprobación (planner) → Certificación con firma del cliente**.
+## Ejecutar
 
-> Es un prototipo de interfaz: no tiene backend. Los datos son de ejemplo y se guardan en el navegador (`localStorage`). El botón "Reiniciar demo" vuelve a los datos iniciales.
+Requiere Node.js 22 o superior.
 
-## Usuarios de prueba
-
-Clave para todos: `vds2026`
-
-| Rol | Usuario | Qué hace |
-|---|---|---|
-| Administrador | `sherrera` | Ve y cambia todo: trabajos, estados de partes, habilitaciones, imputaciones y catálogo de tareas |
-| Planner | `lmendez` | Planifica los trabajos (Gantt, por recurso, mes), aprueba o devuelve los partes y aprueba pedidos de más días |
-| Operador | `darce` | Completa el parte diario en campo (Cuadrilla 03) y cierra el trabajo |
-| Cliente | `grivas` | Austral Petróleo: dashboard del servicio y certificación de partes con firma |
-
-## Qué incluye
-
-- **Planificación por contrato e imputación**: el contrato define cliente, centro de costos, recursos y catálogo de tareas. Cada contrato puede tener varias imputaciones de cuenta del cliente, y el trabajo se carga en una.
-- **Personas y equipos por separado** en cada trabajo, con su habilitación de ingreso al yacimiento y aviso si ya están asignados a otro trabajo esas fechas.
-- Indicador de si el trabajo requiere permiso de trabajo firmado por el supervisor de la operadora.
-- Vistas Gantt, calendario por recurso y calendario mensual, con ocupación en % y **filtro por cliente y contrato**.
-- Trabajos de varios días: un parte por día. El último día (o antes, si se terminó) el jefe de cuadrilla hace el cierre total. Si necesita más días, lo pide desde el parte y el planner lo aprueba.
-- En el Gantt los trabajos se estiran, acortan o mueven arrastrando la barra.
-- Parte diario estándar en 5 pasos: inicio (llegada a instalación, permiso, clima y checklist), personal (ingreso a base, llegada a zona y salida), equipos (km actual y observación), tareas y tiempos en una sola hoja, y cierre.
-- Tareas y tiempos: operativo, traslado, espera de operadora (con motivo: permiso de trabajo, responsable operadora, espera de un tercero, almacén), parada por viento (con velocidad en km/h), standby y refrigerio.
-- Controles automáticos: los bloqueantes impiden enviar; las tareas no realizadas o los km faltantes son alertas que dejan continuar.
-- Aprobación de partes por el planner, con filtro por cliente.
-- Certificación del cliente con firma en pantalla.
-- Dashboard del cliente con filtros por contrato e imputación: horas hombre, tiempos, horas por imputación, esperas por motivo, producción, recursos y estado de partes y trabajos.
-- Listado de partes con filtros por cliente, contrato, recurso, estado y búsqueda.
-- Habilitaciones con búsqueda y filtro de vencidas o por vencer.
-- Resumen del parte y descarga en PDF.
-- Menú lateral que se contrae.
-- Modo sin señal simulado.
-
-## Correrlo localmente
-
-Es un único archivo estático. Abrí `index.html` en el navegador, o levantá un servidor local:
-
-```bash
-npx serve .
+```sh
+npm ci
+npm run dev
+npm test
+npm run build
 ```
 
-## Publicarlo en Vercel
+Vercel compila con Vite y sirve `dist/`. El manifest y el service worker permiten instalar la app y abrir los recursos locales luego de una primera carga completa en HTTPS. Las fuentes externas necesitan conexión en la primera descarga. El diseño se adapta a tablets; queda pendiente validar visualmente en dispositivos reales, incluyendo teclado, cámara, firma y orientación.
 
-1. En [vercel.com](https://vercel.com), **Add New → Project** e importá este repositorio.
-2. Framework preset: **Other**. Sin comando de build. Output directory: la raíz del repo.
-3. **Deploy**. Cada push a `main` vuelve a publicar.
+## Estado de esta versión
 
-## Estructura
+Es una base frontend modular para evaluación, todavía **no un sistema multiusuario de producción**. Los datos y las fotos se guardan en localStorage por navegador; no hay sincronización entre tablets, autenticación de servidor ni copias centralizadas. No usar datos operativos reales hasta conectar y verificar esos servicios. El espacio local es limitado: hay avisos de error y exportación JSON para respaldo. La interfaz muestra que el guardado es local.
 
-```
-index.html   # toda la app: estilos, datos de ejemplo y lógica
-README.md
-```
+Mantiene datos de ejemplo; sus fechas se desplazan al día actual únicamente en la primera carga. Mantiene los accesos de evaluación originales con contraseña `vds2026`: `sherrera` (administración), `lmendez` (planner), `darce` (operador), `grivas` (cliente). Los permisos locales son para evaluación, no constituyen autorización segura de backend. Administración puede crear cuentas, asignar rol/recurso/operadora, cambiar contraseñas y desactivar usuarios; estos cambios todavía son locales.
 
-Las librerías de PDF (jsPDF y jspdf-autotable) y las fuentes se cargan desde CDN.
+## Estructura y módulos
 
-## Cómo modificar
+- `src/app.js`: lógica y pantallas originales, con puntos de extensión para menú, configuración y contexto del trabajo.
+- `src/styles/baseline.css`: estilos originales. `app.css`: viewport, tablet y nuevos módulos.
+- `src/core/storage.js`: adaptador de persistencia local. La futura conexión a la base debe contemplar operaciones asíncronas, sesión, permisos, conflictos y migración; no basta sustituir una URL.
+- `src/features/registry.js`: registro de módulos y host compartido.
+- `src/features/model.js`: datos adicionales separados en `state.extensions`, validaciones e historial de cambios.
+- Un archivo por funcionalidad: `handover`, `issues`, `changes`, `materials`, `logbook`, `capture`, `evidence`, `live`, `product-control`, `operations-control`, `document-control`, `quick-part`.
+- `src/intelligence/`: cálculos independientes de telemetría, operación y requisitos documentales; host de formularios y acciones de los centros.
 
-- **Datos de ejemplo** (contratos con imputaciones, recursos, personal, equipos, habilitaciones, trabajos): en `index.html`, constantes `CONTRATOS0`, `RECURSOS`, `CREW`, `EQ` y las funciones `seedHab()` y `seedTrabajos()`.
-- **Categorías de tiempo y motivos de espera**: constantes `TCAT` y `ESP`.
-- **Reglas del parte**: función `checks(p)`.
-- **Pantallas**: funciones `vPlan`, `vGantt`, `vWeek`, `vMonth`, `vDay`, `vEdit`, `vInbox`, `detail`, `vDash` y `vConf`.
-- **PDF**: función `buildPdf(p)`.
+Administración → Configuración permite activar o desactivar cada módulo. Desactivarlo retira sus accesos y conserva sus registros; reactivarlo recupera los datos. Cada módulo define sus campos, validaciones, tarjetas y perfiles en su archivo. Quitar un módulo del registro elimina su funcionalidad sin modificar las pantallas originales. Los registros se vinculan al ID del trabajo; no crean ítems de facturación automáticamente.
 
-Si cambiás la estructura de los datos, subí la versión en la constante `KEY` para que los navegadores no carguen datos viejos guardados.
+| Módulo | Alcance inicial |
+| --- | --- |
+| Relevo | Trabajo realizado, pendientes, condiciones, próximo paso y confirmación de lectura |
+| Novedades | Responsable, prioridad, vencimiento, estado y resolución |
+| Adicionales | Solicitud e impacto; decisión del planner/admin, separada de certificación |
+| Materiales y reservas | Pedido, código manual, retiro, instrucciones y cantidades solicitadas, retiradas y usadas |
+| Bitácora | Historia por trabajo, locación y equipo a partir de partes y registros adicionales |
+| Captura rápida | Notas y dictado si el navegador lo admite; incorporación revisada a observaciones o a una actividad estructurada de un parte editable |
+| Evidencias | Foto comprimida, actividad, etapa, fecha y ubicación descriptiva |
+| Avance de jornada | Objetivo, avance derivado del parte o declarado manualmente, unidad, bloqueo y siguiente paso |
+
+## Reservas de la operadora
+
+Los materiales pertenecen a la operadora. Esta app registra el seguimiento del pedido y la reserva, no administra un depósito propio ni genera un código externo. Planner/admin cargan y modifican; el operario consulta número, materiales e instrucciones. El código se exige al declarar la reserva recibida o avanzar al retiro. Se registra historial al editar.
+
+Los estados y campos son provisionales y fácilmente modificables. Antes de integrar: confirmar quién genera la reserva, documento o sistema de origen, formato del código, responsables, retiros parciales, devoluciones y consumos informados a la operadora. No hay OCR ni conexión con su sistema en esta versión.
+
+## Validación
+
+`npm test` ejecuta 24 pruebas DOM y de cálculos. Verifica login y vistas originales, los cinco pasos del parte y generación PDF; creación, modificación, consulta y persistencia de reservas; validaciones; relevo, novedades, adicionales, captura, avance y bitácora; desactivación sin pérdida de registros y fotografía contextual. Además verifica centros separados por rol, métricas sin datos inventados, documentos aprobados y vencidos, permisos documentales delegados, parte rápido con bloqueo de seguridad y envío, borradores, identidad visual, reutilización de planificación, actividades capturadas y turnos que cruzan medianoche. Las pruebas DOM con JSDOM no reemplazan pruebas visuales, servicio offline, micrófono o dispositivos reales.
+
+## Vistas por rol y administración
+
+La identidad de cada usuario se separó del rol. Se conservan las vistas originales de planner, operario y cliente, y se agregaron Usuarios y accesos y Administración del sistema para admin. El operario consulta su recurso y el cliente su operadora; administración accede a todos los registros. Se pueden editar los datos de contratos y centros de costo además de los catálogos originales. Ver [accesos y conexión de datos](docs/access-and-data.md) para la matriz completa, implementación y conexión pendiente al backend.
+
+
+## Centros de control y carga breve
+
+Los centros tienen propósitos y datos diferentes:
+
+| Perfil | Centro | Decisión que facilita |
+| --- | --- | --- |
+| Admin | Producto | Qué cambio de la app priorizar a partir de errores, fricción, tiempos observados y uso de módulos |
+| Planner | Operación | Qué preparación, asignación o coordinación revisar a partir de tiempos, producción, partes pendientes, documentación y reservas |
+| Operario | Parte rápido | Confirmar y completar la jornada habitual; abrir los cinco pasos para excepciones |
+
+Ver [guía de evaluación y límites de los centros](docs/control-centers.md). La métrica de dos minutos es un objetivo a validar con usuarios: esta versión no acredita todavía cumplirlo en campo. Las recomendaciones operativas son reglas explicables, no un optimizador conectado a pronósticos, caminos o portales de operadoras.
+
+Administración del sistema permite configurar nombre de empresa, logo y color; “Trama” es un nombre provisional editable y la interfaz conserva la firma de Friquarks. La configuración se aplica a la interfaz y los textos de los PDF. El manifest de instalación mantiene el nombre VDS: falta personalizarlo por instalación y resolver dominio, tenants y backend antes de ofrecer marca blanca completa.
