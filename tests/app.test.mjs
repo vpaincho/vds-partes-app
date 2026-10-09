@@ -31,10 +31,33 @@ function boot(saved){
   const doc=w.document;
   const fill=(selector,value)=>{const input=doc.querySelector(selector);assert.ok(input,selector);input.value=value;input.dispatchEvent(new w.Event('input',{bubbles:true}));};
   const click=(selector)=>{const el=doc.querySelector(selector);assert.ok(el,selector);el.click();};
-  const login=async(id,password='vds2026')=>{fill('#lu',id);fill('#lp',password);doc.querySelector('#loginf').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));for(let i=0;i<200&&doc.querySelector('#loginf button')?.disabled;i++)await new Promise(resolve=>setTimeout(resolve,5));};
+  const login=async(id,password='vds2026')=>{fill('#lu',id);fill('#lp',password);doc.querySelector('#loginf').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));for(let i=0;i<200&&doc.querySelector('#loginf button[type="submit"]')?.disabled;i++)await new Promise(resolve=>setTimeout(resolve,5));};
   const submit=async()=>{doc.querySelector('form[data-module]').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));await new Promise(resolve=>setTimeout(resolve,0));};
   return{dom,w,doc,fill,click,login,submit,dispose:()=>w.close()};
 }
+
+test('login controls preserve entered credentials and restore keyboard focus',()=>{
+  const app=boot();app.fill('#lu','lmendez');app.fill('#lp','vds2026');
+  app.click('[data-login-control="password"]');assert.equal(app.doc.querySelector('#lp').type,'text');assert.equal(app.doc.activeElement.id,'lp');
+  app.click('[data-login-control="theme"]');assert.equal(app.doc.querySelector('.login-scene').dataset.appearance,'light');
+  assert.equal(app.doc.querySelector('#lu').value,'lmendez');assert.equal(app.doc.querySelector('#lp').value,'vds2026');
+  assert.equal(app.doc.querySelector('[data-login-control="theme"]').getAttribute('aria-pressed'),'true');
+  assert.doesNotMatch(app.doc.body.innerHTML,/undefined/);app.click('[data-login-control="password"]');assert.equal(app.doc.querySelector('#lp').type,'password');app.dispose();
+});
+
+test('login reads autofilled values, shows busy state, and leaves role screens outside login theme',async()=>{
+  const app=boot();app.doc.querySelector('#lu').value='darce';app.doc.querySelector('#lp').value='vds2026';
+  app.doc.querySelector('#loginf').dispatchEvent(new app.w.Event('submit',{bubbles:true,cancelable:true}));
+  const button=app.doc.querySelector('#loginf button[type="submit"]');assert.equal(button.disabled,true);assert.equal(button.getAttribute('aria-busy'),'true');
+  for(let i=0;i<200&&app.doc.querySelector('#loginf button[type="submit"]')?.disabled;i++)await new Promise(resolve=>setTimeout(resolve,5));
+  assert.equal(app.w.qa.state().route,'o-day');assert.equal(app.doc.querySelector('.login-scene'),null);app.dispose();
+});
+
+test('invalid login keeps accessible feedback and permits correction',async()=>{
+  const app=boot();await app.login('lmendez','incorrecta');assert.equal(app.w.qa.state().user,null);
+  assert.ok(app.doc.querySelector('#login-error[role="alert"]'));assert.equal(app.doc.querySelector('#lp').getAttribute('aria-describedby'),'login-error');
+  assert.equal(app.doc.querySelector('#loginf button[type="submit"]').disabled,false);await app.login('lmendez');assert.equal(app.w.qa.state().route,'p-plan');app.dispose();
+});
 
 test('replica baseline: login, planner views, operator five steps and PDF',async()=>{
   const app=boot();await app.login('lmendez');assert.match(app.doc.body.textContent,/Planificación/);

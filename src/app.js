@@ -10,6 +10,7 @@ import { createQuickPart } from './features/quick-part.js';
 import { evaluateWork } from './intelligence/documents.js';
 import './styles/baseline.css';
 import './styles/app.css';
+import './styles/login.css';
 window.jspdf = { jsPDF };
 
 const KEY='vds-partes-web-1';
@@ -100,6 +101,7 @@ const P_IC={
   okc:'<circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/>',
   cam:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
   wind:'<path d="M3 8h10a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h7"/>',
+  moon:'<path d="M20.9 13.2A9 9 0 0 1 10.8 3.1 9 9 0 1 0 20.9 13.2Z"/>',
   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   trash:'<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/>',
   right:'<path d="M5 12h14M13 6l6 6-6 6"/>',
@@ -415,26 +417,20 @@ function brand(){const org=S.organization||{};return `<div class="brand">${org.l
 const selF=(id,bind,opts,cur,attrs)=>`<select class="inp" id="${id}" data-bind="${bind}" data-rr${attrs||''}>${opts.map(([v,l])=>`<option value="${esc(v)}"${String(v)===String(cur)?' selected':''}>${esc(l)}</option>`).join('')}</select>`;
 
 function login(){
-  const L=UI.login;
-  const winds=[120,200,280,360,440,520,600,680,760].map((y,i)=>`<path d="M${-40+i*14} ${y} C 160 ${y-40}, 320 ${y+36}, 500 ${y-6} S 760 ${y-30}, 820 ${y+4}" style="stroke:var(--rail-hi)" stroke-width="${i%3?1.4:2.4}" fill="none" stroke-linecap="round"/>`).join('');
-  return `<div class="login">
-  <div class="lbrand"><svg class="wind" viewBox="0 0 700 992" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${winds}</svg>
-    ${brand()}
-    <h2>Lo que pasa en la locación, <em>registrado una sola vez.</em></h2>
-    <p>Planificación por contrato e imputación, parte diario estándar, aprobación y certificación firmada por el cliente en la misma herramienta. Los registros quedan guardados en este dispositivo.</p>
-    <ol class="lsteps"><li><span>01</span><b>Planificación</b>Planner</li><li><span>02</span><b>Parte diario</b>Operador en campo</li><li><span>03</span><b>Aprobación</b>Planner</li><li><span>04</span><b>Certificación</b>Cliente, con firma</li></ol>
-    <div class="lloc">Base Comodoro Rivadavia · Cuenca Golfo San Jorge</div>
-  </div>
-  <div class="lform">
-    <h3>Ingresar</h3>
-    <form id="loginf" novalidate>
-      <div class="fld"><label for="lu">Usuario</label><input id="lu" class="inp${L.err?' bad':''}" data-bind="l:u" value="${esc(L.u)}" autocomplete="off" placeholder="ej. darce"></div>
-      <div class="fld"><label for="lp">Contraseña</label><input id="lp" type="password" class="inp${L.err?' bad':''}" data-bind="l:p" value="${esc(L.p)}" placeholder="••••••"></div>
-      ${L.err?`<div class="ferr">${esc(L.err)}</div>`:''}
-      <button class="btn pri lg" type="submit">Ingresar</button>
-    </form>
-    <p class="sm">Entorno de evaluación local · acceso con los usuarios configurados.</p>
-  </div></div>`;
+  const L=UI.login,dark=L.appearance!=='light';
+  const eye=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>${L.showPassword?'<path d="m3 3 18 18"/>':''}</svg>`;
+  return `<div class="login-scene" data-appearance="${dark?'dark':'light'}">
+    <div class="login-background" aria-hidden="true"></div>
+    <header class="login-header">${brand()}<button class="login-mode" type="button" data-login-control="theme" aria-label="Cambiar a modo ${dark?'diurno':'nocturno'}" aria-pressed="${!dark}">${ic(dark?'sun':'moon')}<span>Modo ${dark?'diurno':'nocturno'}</span></button></header>
+    <div class="login-content"><section class="login-story" aria-label="Sistema de partes de campo"><span class="login-eyebrow">OPERACIÓN · TRAZABILIDAD · CONTROL</span><h1>Cada jornada.<br>Un registro claro.</h1><p>Del trabajo planificado a lo que ocurre en campo.</p><div class="login-process" aria-label="Circuito del sistema: planificar el trabajo, registrar la jornada y certificar el parte"><span class="login-process-step">${ic('gantt')}<span><b>Planificar</b><small>Organizar el trabajo</small></span></span><i aria-hidden="true"></i><span class="login-process-step">${ic('doc')}<span><b>Registrar</b><small>Capturar la jornada</small></span></span><i aria-hidden="true"></i><span class="login-process-step">${ic('stamp')}<span><b>Certificar</b><small>Validar el parte</small></span></span></div><div class="login-location"><span class="login-region">Patagonia Argentina</span></div></section>
+    <section class="login-card" aria-labelledby="login-title"><div class="login-card-heading"><span class="login-kicker">SISTEMA DE PARTES</span><h2 id="login-title">Ingresar a tu operación</h2><p>Tu cuenta habilita la vista correspondiente a tu rol.</p></div>
+    <form id="loginf" novalidate><div class="login-field"><label for="lu">Usuario</label><input id="lu" name="username" data-bind="l:u" value="${esc(L.u)}" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Tu usuario" required ${L.err?'aria-invalid="true" aria-describedby="login-error"':''}></div>
+    <div class="login-field"><label for="lp">Contraseña</label><div class="login-password"><input id="lp" name="password" type="${L.showPassword?'text':'password'}" data-bind="l:p" value="${esc(L.p)}" autocomplete="current-password" placeholder="Tu contraseña" required ${L.err?'aria-invalid="true" aria-describedby="login-error"':''}><button type="button" data-login-control="password" aria-label="${L.showPassword?'Ocultar':'Mostrar'} contraseña" aria-pressed="${!!L.showPassword}">${eye}</button></div></div>
+    ${L.err?`<p class="login-error" id="login-error" role="alert">${ic('alert')}${esc(L.err)}</p>`:''}
+    <button class="login-submit" type="submit"><span>Ingresar</span>${ic('right')}</button></form>
+    <div class="login-access-note">${ic('badge')}<p>Acceso administrado por tu empresa.<br>Si necesitás una cuenta, contactá a su administrador.</p></div>
+    <div class="login-local-note"><span class="login-local-dot" aria-hidden="true"></span><span>Versión de evaluación · registros locales en este dispositivo</span></div></section></div>
+  </div>`;
 }
 
 function shell(){
@@ -1245,6 +1241,12 @@ function vDay(){return baselineDay()+features.journeyLinks()}
 const scr=$('#screen');
 let hsT=null,drag=null;
 scr.addEventListener('click',ev=>{
+  const loginControl=ev.target.closest('[data-login-control]');
+  if(loginControl&&!S.user){ev.preventDefault();UI.login.u=$('#lu').value;UI.login.p=$('#lp').value;
+    if(loginControl.dataset.loginControl==='theme')UI.login.appearance=UI.login.appearance==='light'?'dark':'light';
+    else UI.login.showPassword=!UI.login.showPassword;
+    render();const target=loginControl.dataset.loginControl==='password'?$('#lp'):scr.querySelector('[data-login-control="theme"]');target.focus();return}
+
   const t=ev.target.closest('[data-a]');
   if(t&&!t.disabled&&scr.contains(t)){ev.preventDefault();const f=A[t.dataset.a];if(f)f(t.dataset);return}
   if(!ev.target.closest('input,select,textarea,label,canvas,button,a,.gbar,.b')){scr.classList.add('hs');clearTimeout(hsT);hsT=setTimeout(()=>scr.classList.remove('hs'),650)}
@@ -1262,7 +1264,7 @@ scr.addEventListener('submit',async ev=>{ev.preventDefault();
   if(ev.target.id.startsWith('admin-')){await adminConsole.submit(ev.target);return}
   if(features.handleSubmit(ev))return;
   if(ev.target.id==='loginf'){
-    const L=UI.login,username=L.u,password=L.p;const button=ev.target.querySelector('button[type="submit"]');button.disabled=true;
+    const L=UI.login,username=ev.target.querySelector('#lu').value,password=ev.target.querySelector('#lp').value;L.u=username;L.p=password;const button=ev.target.querySelector('button[type="submit"]');button.disabled=true;button.setAttribute('aria-busy','true');button.innerHTML='<span class="login-spinner" aria-hidden="true"></span><span>Ingresando…</span>';
     try{const account=await identity.signIn(username,password);S.accountId=account.id;refreshIdentity();S.route=HOME[account.role];S.back=null;S.sel=null;S.vsel=null;S.csel=null;S.extWork='all';S.dct='all';S.dimp='all';UI.drawer=null;UI.modal=null;UI.login={u:'',p:'',err:''};}
     catch(error){UI.login.err=error.message}
     render();return;
