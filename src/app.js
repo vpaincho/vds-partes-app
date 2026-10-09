@@ -11,6 +11,7 @@ import { evaluateWork } from './intelligence/documents.js';
 import './styles/baseline.css';
 import './styles/app.css';
 import './styles/login.css';
+import './styles/operator.css';
 window.jspdf = { jsPDF };
 
 const KEY='vds-partes-web-1';
@@ -287,6 +288,8 @@ function refreshIdentity(){
   USERS[account.role]={id:account.username,n:account.name,cargo:account.job,ini:account.name.split(/\s+/).slice(0,2).map(x=>x[0]).join(''),rec:account.resource,op:account.operator};
 }
 refreshIdentity();
+// Resume into the original report; preserve legacy drafts for explicit recovery.
+if(S.user==='operador')S.fastMode=false;
 
 const UI={modal:null,drawer:null,toast:null,login:{u:'',p:'',err:''},vcom:'',verr:'',csig:null,hot:false,sig:'',resetArm:false,delArm:null,admEst:'',newT:{},newI:{}};
 let toastT=null;
@@ -395,7 +398,7 @@ function render(){
   document.documentElement.style.setProperty('--accent',S.organization?.accent||'#C21F35');
   if(S.user&&!allowedRoute(S.route))S.route=HOME[S.user];
   if(S.route==='o-edit'&&(!cur()||(S.user==='operador'&&!['curso','obs'].includes(cur().estado))))S.route=HOME[S.user];
-  telemetry?.route(S.route,S.sel,S.user==='operador'&&S.fastMode!==false?'quick':S.step);
+  telemetry?.route(S.route,S.sel,S.user==='operador'&&S.fastMode===true?'quick':S.step);
   const scr=$('#screen');
   const sig=[S.route,S.step,S.sel,S.vsel,S.csel,S.vf,S.cf,S.pv,UI.modal?UI.modal.kind:'',UI.drawer].join('|');
   const keep={};
@@ -438,7 +441,7 @@ function shell(){
   const navs={
     admin:[['p-plan','Planificación','gantt'],['v-inbox','Aprobación de partes','shield'],['p-list','Partes','list'],['p-hab','Habilitaciones','badge'],['c-inbox','Certificación','stamp'],['c-dash','Dashboard cliente','chart'],['a-conf','Configuración','cog'],['a-users','Usuarios y accesos','badge'],['a-system','Administración del sistema','cog']],
     planner:[['p-plan','Planificación','gantt'],['v-inbox','Aprobación de partes','shield'],['p-list','Partes','list'],['p-hab','Habilitaciones','badge']],
-    operador:[['o-day','Mi jornada','day']],
+    operador:[['o-day','Mis partes','doc']],
     cliente:[['c-dash','Dashboard','chart'],['c-inbox','Certificación','stamp']]}[r];
   const featureNav=features?.navigation(r)||[];
   navs.unshift(...featureNav.filter(([route])=>['x-product','x-operations'].includes(route)));
@@ -453,10 +456,11 @@ function shell(){
     if(k==='c-inbox')n=S.partes.filter(p=>p.estado==='apr'&&(r==='admin'||p.op===USERS.cliente.op)).length;
     return n?`<span class="cnt" aria-label="${n} pendientes">${n}</span>`:''};
   const curR=S.route==='o-edit'?(S.back||'o-day'):S.route;
-  return `<aside class="rail${S.rmin?' min':''}"><div class="rtop">${brand()}<button class="rtog" data-a="rail" aria-label="${S.rmin?'Expandir menú':'Contraer menú'}" title="${S.rmin?'Expandir menú':'Contraer menú'}">${ic(S.rmin?'dbr':'dbl')}</button></div><div class="rrole">${ROLE_N[r]}</div>
-    <nav>${navs.map(([k,l,i],index)=>`${index===primaryCount?'<div class="nav-section">Herramientas de trabajo</div>':''}<button class="nav" data-a="nav" data-r="${k}"${curR===k?' aria-current="page"':''} title="${l}">${ic(i)}<span>${l}</span>${badge(k)}</button>`).join('')}</nav>
+  const body=`<aside class="rail${S.rmin?' min':''}"><div class="rtop">${brand()}<button class="rtog" data-a="rail" aria-label="${S.rmin?'Expandir menú':'Contraer menú'}" title="${S.rmin?'Expandir menú':'Contraer menú'}">${ic(S.rmin?'dbr':'dbl')}</button></div><div class="rrole">${ROLE_N[r]}</div>
+    <nav>${navs.map(([k,l,i],index)=>`${index===primaryCount?(r==='operador'?`<details class="operator-tools" ${S.route.startsWith('x-')?'open':''}><summary>Herramientas de campo</summary><div>`:'<div class="nav-section">Herramientas de trabajo</div>'):''}<button class="nav" data-a="nav" data-r="${k}"${curR===k?' aria-current="page"':''} title="${l}">${ic(i)}<span>${l}</span>${badge(k)}</button>`).join('')}${r==='operador'&&navs.length>primaryCount?'</div></details>':''}</nav>
     <div class="who"><span class="av" title="${esc(u.n)}">${esc(u.ini)}</span><div class="wn"><b>${esc(u.n)}</b><small>${esc(u.cargo)}</small></div><button class="ibtn rl" data-a="logout" aria-label="Cerrar sesión" title="Cerrar sesión">${ic('out')}</button></div>
   </aside><section class="main">${topbar()}${view()}${UI.drawer?drawer():''}</section>`;
+  return r==='operador'?`<div class="operator-shell">${body}</div>`:body;
 }
 function topbar(){
   const R=S.route;let t='',s='',right='';
@@ -470,7 +474,7 @@ function topbar(){
   else if(R==='p-list'){t='Partes diarios';s='Todos los partes de la base';right=date+nb}
   else if(R==='p-hab'){t='Habilitaciones de ingreso';s=isAdm()?'Tocá una habilitación para editarla':'Personal y vehículos habilitados por operadora';right=date}
   else if(R==='o-day'){t='Mi jornada';s=recOf(USERS.operador.rec).n+' · '+fDayL(TODAY);right=sync}
-  else if(R==='o-edit'){const p=cur(),tt=trab(p.pl);return `<header class="top"><button class="btn ghost" data-a="nav" data-r="${S.back||'o-day'}">${ic('left')}${S.back&&S.back!=='o-day'?'Volver':'Mi jornada'}</button><div class="ttl"><h1>Parte diario</h1><div class="sub"><span class="mono">${p.id}</span> · ${fDay(p.fecha)} · ${p.pl} día ${p.dia+1} de ${tt?tt.dias:'—'}</div></div><span class="sp"></span><div class="tr">${ptTag(p.ptw)}${prioB(p.prio)}${pill(p.estado)}${S.user==='operador'?sync:''}</div></header>`}
+  else if(R==='o-edit'){const p=cur(),tt=trab(p.pl);return `<header class="top"><button class="btn ghost" data-a="nav" data-r="${S.back||'o-day'}">${ic('left')}${S.back&&S.back!=='o-day'?'Volver':'Cambiar parte'}</button><div class="ttl"><h1>Parte diario</h1><div class="sub"><span class="mono">${p.id}</span> · ${fDay(p.fecha)} · ${p.pl} día ${p.dia+1} de ${tt?tt.dias:'—'} · ${esc(recOf(p.rec).n)}</div></div><span class="sp"></span><div class="tr">${ptTag(p.ptw)}${prioB(p.prio)}${pill(p.estado)}${S.user==='operador'?sync:''}</div></header>`}
   else if(R==='v-inbox'){t='Aprobación de partes';s='El planner revisa y aprueba lo que cargan las cuadrillas';right=date}
   else if(R==='c-inbox'){t='Certificación de partes';s=isAdm()?'Todas las operadoras':OPS[USERS.cliente.op]+' · contratos con Vientos del Sur';right=date}
   else if(R==='c-dash'){t='Dashboard del servicio';s=(isAdm()?OPS[S.dop]:OPS[USERS.cliente.op])+' · datos de partes aprobados';right=date}
@@ -717,7 +721,7 @@ function baselineDay(){
 }
 const tin=(bind,v,dis,lab)=>`<input type="time" class="inp" id="f-${bind.replace(/[^a-z0-9]/gi,'-')}" data-bind="${bind}" data-rr value="${esc(v)}"${dis?' disabled':''} aria-label="${esc(lab||'Hora')}">`;
 function vEdit(){
-  if(S.user==='operador'&&S.fastMode!==false&&quickPart?.enabled())return quickPart.render(cur());
+  if(S.user==='operador'&&S.fastMode===true&&quickPart?.enabled())return quickPart.render(cur());
   const p=cur(),st=S.step,e=p.ejec;
   const body=[stInicio,stPersonal,stEquipos,stReg,stCierre][st](p,e);
   const ban=p.estado==='obs'&&p.dec?`<div class="banner">${ic('back')}<div><b>Devuelto por ${esc(p.dec.who)} · ${esc(p.dec.t)}</b>${esc(p.dec.com)}</div></div>`:'';
@@ -725,13 +729,26 @@ function vEdit(){
   const er=errs(p).length;
   const last=admEdit?`<button class="btn pri lg" data-a="a-save">${ic('check')}Guardar cambios</button>`:`<button class="btn pri lg" data-a="o-send"${er?' disabled':''}>${ic('send')}${p.estado==='obs'?'Reenviar corregido':p.fin==='fin'?'Enviar y cerrar trabajo':'Enviar para aprobación'}</button>`;
   return `<div class="edhead"><div class="meta"><span>Contrato <b class="mono">${p.ct}</b></span><span>Imputación <b class="mono">${esc(p.imp||'—')}</b></span><span>Cliente <b>${OPS[p.op]}</b></span><span>Pozo / locación <b>${esc(p.yac)} · ${esc(p.pozo)}</b></span><span>Supervisor <b>${esc(p.sup)}</b></span>${admEdit?'<span><b style="color:var(--accent)">Edición de administración</b></span>':''}</div></div>
-  ${features?.contextLinks(p.pl)||''}${S.user==='operador'&&quickPart?.enabled()?'<button class="btn sm2" data-a="quick-open">Volver al parte rápido</button>':''}<nav class="steps" aria-label="Secciones del parte">${STEPS.map((s,i)=>`<button class="stp${stepOk(p,i)&&i!==st?' ok':''}" data-a="o-step" data-i="${i}"${i===st?' aria-current="step"':''}><i>${stepOk(p,i)&&i!==st?ic('check'):i+1}</i>${s}</button>`).join('')}</nav>
-  <div class="edbody" data-keep="e">${ban}${body}</div>
-  <div class="edfoot"><span class="saved${S.offline?' off':''}">${ic(S.offline?'nowifi':'cloud')}${S.offline?'Guardado en la tablet · pendiente de conexión con la base de datos':'Guardado automático'}</span>
+  ${S.user==='operador'&&S.quickDrafts?.[p.id]?'<div class="operator-legacy">Hay un borrador anterior pendiente. <button class="btn" data-a="quick-open">Recuperar borrador anterior</button></div>':''}<nav class="steps" aria-label="Secciones del parte">${STEPS.map((s,i)=>`<button class="stp${stepOk(p,i)&&i!==st?' ok':''}" data-a="o-step" data-i="${i}"${i===st?' aria-current="step"':''}><i>${stepOk(p,i)&&i!==st?ic('check'):i+1}</i>${s}</button>`).join('')}</nav>
+  <div class="edbody" data-keep="e">${ban}${S.user==='operador'?operatorContext(p,st):''}${body}</div>
+  <div class="edfoot"><span class="saved${S.offline?' off':''}">${ic(S.offline?'nowifi':'cloud')}${S.offline?'Guardado local · sin señal':'Guardado local automático'}</span>
     ${st>0?`<button class="btn lg" data-a="o-step" data-i="${st-1}">${ic('left')}${STEPS[st-1]}</button>`:''}
     ${st<4?`<button class="btn pri lg" data-a="o-step" data-i="${st+1}">${STEPS[st+1]} ${ic('right')}</button>`:last}
   </div>`;
 }
+function operatorContext(p,step){
+  const modules=[['materials','documents'],[],[],['capture','evidence','issues','changes','live'],['handover','logbook']][step]||[];
+  const tools=features.contextLinks(p.pl,modules);
+  let summary='';
+  if(step===0){
+    const reservations=S.extensions?.enabled?.materials!==false?(S.extensions?.records.materials||[]).filter(r=>r.workId===p.pl):[];
+    summary=reservations.length?`<section class="pnl operator-reservation"><h3>${ic('doc')}Reserva de materiales</h3>${reservations.map(r=>`<div><b class="mono">${esc(r.reservation||'Código pendiente')}</b><span class="sm"> · ${esc(r.status||'Sin estado')} · ${esc(r.pickup||'Retiro por confirmar')}</span><p>${(r.items||[]).map(x=>`${esc(x.description)} · ${esc(x.requested)} ${esc(x.unit)}`).join('<br>')}</p></div>`).join('')}<p class="sm">Datos del planner · reserva emitida por la operadora. Consulta; los cambios se gestionan con planificación.</p></section>`:'';
+    summary+=controls.summary(trab(p.pl));
+  }
+  return summary+tools;
+}
+function previousPersonal(p){return S.partes.filter(x=>x.id!==p.id&&x.rec===p.rec&&x.fecha<p.fecha&&x.ejec).sort((a,b)=>b.fecha.localeCompare(a.fecha))[0]||null}
+
 function stInicio(p,e){
   const tg=(k,t,s)=>`<button class="tog" data-a="o-check" data-k="${k}" aria-pressed="${e.check[k]}"><span class="bx">${ic('check')}</span><span>${t}<small>${s}</small></span></button>`;
   const cl=e.clima||{t:'',v:'',r:'',dir:'O',cond:'Despejado',src:''};
@@ -769,7 +786,7 @@ function stPersonal(p,e){
   const s=sums(p);
   return `<div class="pnl"><h3>Personal<span class="sp"></span><span class="sm">${s.pers} presentes · ${fmtH(s.hh)} hombre · ${fmtH(s.hz)} en zona</span></h3>
   <div class="scrollx"><table class="tbl"><thead><tr><th>Presente</th><th>Persona y habilitación ${OPS[p.op]}</th><th>Ingreso a base</th><th>Llegada a zona</th><th>Salida</th><th class="num">Horas</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
-  <div class="regadd"><button class="btn sm2" data-a="o-allz">${ic('clock')}Copiar horarios del primero a todos</button></div></div>
+  <div class="operator-origin">Personal precargado del plan · revisá presencia, reemplazos y horarios de hoy.</div><div class="regadd">${previousPersonal(p)?`<button class="btn sm2" data-a="o-previous-hours">${ic('clock')}Sugerir horarios de ${esc(previousPersonal(p).id)} · ${fDay(previousPersonal(p).fecha)}</button>`:''}<button class="btn sm2" data-a="o-allz">${ic('clock')}Copiar horarios del primero a todos</button></div></div>
   <div class="pnl"><h3>Sumar reemplazo</h3><div class="chips">${ALLP.filter(n=>!used.has(n)).map(n=>{const h=hab(n,p.op,p.fecha);return `<button class="chip add" data-a="o-addp" data-n="${esc(n)}">${ic('plus')}${esc(n)} ${habChip(h)}</button>`}).join('')}</div>
   <p class="sm" style="margin:10px 0 0">Las horas se cuentan desde el ingreso a base. Si alguien no está habilitado para ${OPS[p.op]}, marcalo ausente y sumá un reemplazo.</p></div>`;
 }
@@ -1048,7 +1065,7 @@ function initSigs(){
     const get=()=>kind==='op'?cur().ejec.firma:UI.csig;
     const set=v=>{if(kind==='op')cur().ejec.firma=v;else{UI.csig=v;if(UI.verr&&UI.verr.startsWith('Firm'))UI.verr=''}};
     const ctx=cv.getContext('2d');
-    const ink=getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()||'#14202A';
+    const ink=kind==='op'&&S.user==='operador'?'#0F172A':getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()||'#14202A';
     ctx.lineWidth=kind==='op'?5:4;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=ink;
     const f=get();
     if(f==='seed'){ctx.beginPath();const sx=cv.width/300,sy=cv.height/90;ctx.moveTo(SEEDSIG[0][0]*sx,SEEDSIG[0][1]*sy);SEEDSIG.slice(1).forEach(q=>ctx.bezierCurveTo(q[0]*sx,q[1]*sy,q[2]*sx,q[3]*sy,q[4]*sx,q[5]*sy));ctx.stroke()}
@@ -1143,13 +1160,14 @@ const A={
   'c-delimp':d=>{const c=CT(d.ct);const x=c.imps[Number(d.i)];if(S.trabajos.some(t=>t.imp===x[0])){toast(`${x[0]} está en uso por trabajos: no se puede quitar`);render();return}if(c.imps.length<=1){toast('El contrato necesita al menos una imputación');render();return}c.imps.splice(Number(d.i),1);toast(`Quitada: ${x[0]}`);render()},
   'sent-ok':()=>{UI.modal=null;S.route='o-day';render()},
   'o-start':d=>{const t=trab(d.pl);const existing=parteOf(t.id,TODAY);if(existing){if(['curso','obs'].includes(existing.estado))A['o-open']({id:existing.id});else{toast('El parte de ese trabajo y fecha ya fue enviado.');render()}return}if(!covers(t,TODAY)||t.cierre){toast('El trabajo no está disponible para iniciar hoy.');render();return}const p=Object.assign(snap(t,TODAY),{id:nextPD(),estado:'curso',dec:null,cert:null,ext:null,cierreObs:'',hist:[{t:'25 sep 16:10',who:'Laura Méndez',a:'Planificado',c:''},{t:nowT(),who:meN(),a:'Parte iniciado',c:''}]});
-    p.dataOrigin=t.dataOrigin==='recorded'?'recorded':'example';p.createdAt=new Date().toISOString();p.fin=p.dia>=t.dias-1?'fin':'sigue';p.ejec=newEjec(p);S.fastMode=true;S.partes.push(p);S.sel=p.id;S.step=0;S.back='o-day';go('o-edit')},
-  'o-open':d=>{S.fastMode=true;S.sel=d.id;S.back='o-day';const p=byId(d.id);S.step=0;if(p.estado==='obs'){const c=errs(p)[0];if(c)S.step=STEP_OF[c[2]]}go('o-edit')},
+    p.dataOrigin=t.dataOrigin==='recorded'?'recorded':'example';p.createdAt=new Date().toISOString();p.fin=p.dia>=t.dias-1?'fin':'sigue';p.ejec=newEjec(p);S.fastMode=false;S.partes.push(p);S.sel=p.id;S.step=0;S.back='o-day';go('o-edit')},
+  'o-open':d=>{S.fastMode=false;S.sel=d.id;S.back='o-day';const p=byId(d.id);S.step=0;if(p.estado==='obs'){const c=errs(p)[0];if(c)S.step=STEP_OF[c[2]]}go('o-edit')},
   'o-step':d=>{S.fastMode=false;S.step=Number(d.i);render()},
   'o-check':d=>{const e=cur().ejec;e.check[d.k]=!e.check[d.k];render()},
   'o-ptnow':()=>{const p=cur(),e=p.ejec;e.permiso=e.permiso||{num:'',firmo:'',hora:''};e.permiso.hora=hm();if(!e.permiso.firmo)e.permiso.firmo=OPSUP[p.op];render()},
   'o-clima':()=>{toast('Fuente de clima pendiente. Registrá la observación real en campo.');render()},
   'o-pres':d=>{const x=cur().ejec.personal[d.i];x.pres=!x.pres;render()},
+  'o-previous-hours':()=>{const p=cur(),prev=previousPersonal(p);if(!prev)return;let n=0;for(const x of p.ejec.personal){if(!x.pres)continue;const old=prev.ejec.personal.find(y=>y.n===x.n&&y.pres);if(!old)continue;for(const k of ['base','zona','out'])if(!x[k]&&old[k]){x[k]=old[k];n++}}toast(n?'Horarios anteriores sugeridos: revisá que correspondan a hoy.':'Sin horarios anteriores para completar.');render()},
   'o-allz':()=>{const ps=cur().ejec.personal,j=ps[0];ps.forEach(x=>{if(x!==j&&x.pres){x.base=j.base;x.zona=j.zona;x.out=j.out}});render()},
   'o-addp':d=>{cur().ejec.personal.push({n:d.n,rol:ROLEP[d.n]||'Operario',base:'',zona:'',out:'',pres:true,add:true});render()},
   'o-delp':d=>{cur().ejec.personal.splice(Number(d.i),1);render()},
@@ -1265,7 +1283,7 @@ scr.addEventListener('submit',async ev=>{ev.preventDefault();
   if(features.handleSubmit(ev))return;
   if(ev.target.id==='loginf'){
     const L=UI.login,username=ev.target.querySelector('#lu').value,password=ev.target.querySelector('#lp').value;L.u=username;L.p=password;const button=ev.target.querySelector('button[type="submit"]');button.disabled=true;button.setAttribute('aria-busy','true');button.innerHTML='<span class="login-spinner" aria-hidden="true"></span><span>Ingresando…</span>';
-    try{const account=await identity.signIn(username,password);S.accountId=account.id;refreshIdentity();S.route=HOME[account.role];S.back=null;S.sel=null;S.vsel=null;S.csel=null;S.extWork='all';S.dct='all';S.dimp='all';UI.drawer=null;UI.modal=null;UI.login={u:'',p:'',err:''};}
+    try{const account=await identity.signIn(username,password);S.accountId=account.id;refreshIdentity();S.route=HOME[account.role];S.back=null;S.sel=null;S.vsel=null;S.csel=null;S.extWork='all';S.dct='all';S.dimp='all';UI.drawer=null;UI.modal=null;UI.login={u:'',p:'',err:''};if(account.role==='operador'){const active=S.partes.find(p=>p.fecha===TODAY&&['curso','obs'].includes(p.estado)&&p.ejec);if(active){S.sel=active.id;S.route='o-edit';S.back='o-day';S.step=0;S.fastMode=false}}}
     catch(error){UI.login.err=error.message}
     render();return;
   }

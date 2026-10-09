@@ -50,7 +50,7 @@ test('login reads autofilled values, shows busy state, and leaves role screens o
   app.doc.querySelector('#loginf').dispatchEvent(new app.w.Event('submit',{bubbles:true,cancelable:true}));
   const button=app.doc.querySelector('#loginf button[type="submit"]');assert.equal(button.disabled,true);assert.equal(button.getAttribute('aria-busy'),'true');
   for(let i=0;i<200&&app.doc.querySelector('#loginf button[type="submit"]')?.disabled;i++)await new Promise(resolve=>setTimeout(resolve,5));
-  assert.equal(app.w.qa.state().route,'o-day');assert.equal(app.doc.querySelector('.login-scene'),null);app.dispose();
+  assert.equal(app.w.qa.state().route,'o-edit');assert.equal(app.doc.querySelector('.login-scene'),null);app.dispose();
 });
 
 test('invalid login keeps accessible feedback and permits correction',async()=>{
@@ -114,11 +114,11 @@ async function adminSubmit(app,id){const form=app.doc.querySelector(id);assert.o
 test('all four roles keep their baseline menus and reject administrative routes and mutations',async()=>{
   const app=boot();
   for(const [username,role,home,allowed,denied] of [
-    ['sherrera','admin','p-plan','a-users',null],['lmendez','planner','p-plan','v-inbox','a-users'],['darce','operador','o-day','o-day','p-plan'],['grivas','cliente','c-dash','c-inbox','v-inbox']
+    ['sherrera','admin','p-plan','a-users',null],['lmendez','planner','p-plan','v-inbox','a-users'],['darce','operador','o-edit','o-day','p-plan'],['grivas','cliente','c-dash','c-inbox','v-inbox']
   ]){
     await app.login(username);const s=app.w.qa.state();assert.equal(s.user,role);assert.equal(s.route,home);assert.ok(app.doc.querySelector(`[data-r="${allowed}"]`));
     if(denied){assert.equal(app.doc.querySelector(`nav [data-r="${denied}"]`),null);app.w.qa.action.nav({r:denied});assert.equal(s.route,home);const previous=s.contratos['CT-AUP-017'].tareas.length;app.w.qa.action['c-deltask']({ct:'CT-AUP-017',i:'0'});assert.equal(s.contratos['CT-AUP-017'].tareas.length,previous);}
-    if(role==='operador'){assert.ok(s.trabajos.every(t=>t.rec==='C-03'));assert.ok(s.partes.every(p=>p.rec==='C-03'));app.w.qa.action['o-start']({pl:'PL-093'});assert.equal(s.route,'o-day');}
+    if(role==='operador'){assert.ok(s.trabajos.every(t=>t.rec==='C-03'));assert.ok(s.partes.every(p=>p.rec==='C-03'));app.w.qa.action['o-start']({pl:'PL-093'});assert.equal(s.route,home);}
     if(role==='cliente'){assert.ok(s.partes.every(p=>p.op==='AUP'));assert.ok(Object.values(s.contratos).every(c=>c.op==='AUP'));app.w.qa.action.sum({id:'not-in-scope'});assert.equal(app.doc.querySelector('.modal'),null);}
     app.w.qa.action.logout();
   }
@@ -129,7 +129,7 @@ test('admin creates individual operator, changes resource and password, deactiva
   const app=boot();await app.login('sherrera');const total=app.w.qa.state().partes.length;app.w.qa.action.nav({r:'a-users'});
   for(const [name,value] of Object.entries({username:'hruiz',name:'Hugo Ruiz',job:'Jefe de cuadrilla',role:'operador',resource:'C-01',password:'campo2026'}))app.fill(`[name="${name}"]`,value);
   await adminSubmit(app,'#admin-user-form');const account=app.w.qa.state().accounts.find(a=>a.username==='hruiz');assert.ok(account);assert.ok(account.credential.digest);assert.equal(JSON.stringify(account).includes('campo2026'),false);
-  app.w.qa.action.logout();await app.login('hruiz','campo2026');let s=app.w.qa.state();assert.equal(s.user,'operador');assert.ok(s.trabajos.every(t=>t.rec==='C-01'));assert.ok(s.partes.every(p=>p.rec==='C-01'));assert.match(app.doc.body.textContent,/Buen día, Hugo/);assert.match(app.doc.body.textContent,/Cuadrilla 01/);
+  app.w.qa.action.logout();await app.login('hruiz','campo2026');let s=app.w.qa.state();assert.equal(s.user,'operador');assert.ok(s.trabajos.every(t=>t.rec==='C-01'));assert.ok(s.partes.every(p=>p.rec==='C-01'));assert.match(app.doc.body.textContent,/Hugo Ruiz/);assert.match(app.doc.body.textContent,/Cuadrilla 01/);
   app.w.qa.action.logout();await app.login('sherrera');assert.equal(app.w.qa.state().partes.length,total);app.w.qa.action.nav({r:'a-users'});app.w.qa.action['admin-user-edit']({id:account.id});app.fill('[name="resource"]','C-05');app.fill('[name="password"]','nuevo2026');await adminSubmit(app,'#admin-user-form');
   app.w.qa.action.logout();await app.login('hruiz','campo2026');assert.equal(app.w.qa.state().user,null);await app.login('hruiz','nuevo2026');assert.ok(app.w.qa.state().trabajos.every(t=>t.rec==='C-05'));
   const work=app.w.qa.state().trabajos.find(t=>t.id==='PL-095');assert.ok(work);app.w.qa.action['o-start']({pl:work.id});assert.equal(app.w.qa.state().partes.filter(p=>p.pl===work.id).length,1);
@@ -152,7 +152,7 @@ test('planner approves and assigned client certifies with individual identity; o
   app.w.qa.action.logout();await app.login('sherrera');app.w.qa.action.nav({r:'a-users'});
   for(const [name,value] of Object.entries({username:'certificador',name:'Supervisor Nuevo',role:'cliente',operator:p.op,password:'firma2026'}))app.fill(`[name="${name}"]`,value);await adminSubmit(app,'#admin-user-form');
   app.w.qa.action.logout();await app.login('certificador','firma2026');app.w.qa.action.nav({r:'c-inbox'});app.w.qa.action['c-sel']({id:p.id});app.w.qa.ui().csig='seed';app.w.qa.action['c-ok']();assert.equal(p.estado,'cert');assert.match(p.cert.who,/Supervisor Nuevo/);
-  app.w.qa.action.logout();await app.login('darce');const sent=app.w.qa.state().partes.find(p=>p.estado==='cert');assert.ok(sent);app.w.qa.action['o-open']({id:sent.id});assert.equal(app.w.qa.state().route,'o-day');app.dispose();
+  app.w.qa.action.logout();await app.login('darce');const sent=app.w.qa.state().partes.find(p=>p.estado==='cert');assert.ok(sent);const selected=app.w.qa.state().sel;app.w.qa.action['o-open']({id:sent.id});assert.equal(app.w.qa.state().route,'o-edit');assert.equal(app.w.qa.state().sel,selected);app.dispose();
 });
 
 test('control centers are distinct by role, stay empty without genuine measurements, and support product improvement tracking',async()=>{
@@ -171,7 +171,7 @@ test('document matrix is manageable by admin, approved evidence is required, pla
 });
 
 test('quick part never confirms automatically, retains unsaved draft through signature rendering, and preserves original exceptions',async()=>{
-  const app=boot();await app.login('darce');const p=app.w.qa.state().partes.find(p=>p.estado==='curso');app.w.qa.action['o-open']({id:p.id});assert.ok(app.doc.querySelector('#quick-part'));assert.equal(app.doc.querySelector('[name="confirmed"]').checked,false);const qty=p.ejec.reg.find(r=>r.c==='op').q;
+  const app=boot();await app.login('darce');const p=app.w.qa.state().partes.find(p=>p.estado==='curso');app.w.qa.action['o-open']({id:p.id});app.w.qa.action['quick-open']();assert.ok(app.doc.querySelector('#quick-part'));assert.equal(app.doc.querySelector('[name="confirmed"]').checked,false);const qty=p.ejec.reg.find(r=>r.c==='op').q;
   app.doc.querySelector('#quick-part').dispatchEvent(new app.w.Event('submit',{bubbles:true,cancelable:true}));assert.match(app.doc.body.textContent,/Confirmá personal/);assert.equal(p.ejec.reg.find(r=>r.c==='op').q,qty);
   app.fill('[name="notes"]','Pendiente para próxima jornada');app.w.qa.render();assert.equal(app.doc.querySelector('[name="notes"]').value,'Pendiente para próxima jornada');app.doc.querySelector('[name="confirmed"]').checked=true;app.doc.querySelector('[name="confirmed"]').dispatchEvent(new app.w.Event('change',{bubbles:true}));app.doc.querySelector('#quick-part').dispatchEvent(new app.w.Event('submit',{bubbles:true,cancelable:true}));assert.equal(p.ejec.obs,'Pendiente para próxima jornada');assert.equal(p.ejec.reg.find(r=>r.c==='op').q,qty);
   app.w.qa.action['quick-detail']({step:'3'});assert.ok(app.doc.querySelector('.steps'));assert.equal(app.doc.querySelector('#quick-part'),null);app.w.qa.action['quick-open']();assert.ok(app.doc.querySelector('#quick-part'));assert.ok(app.w.qa.state().telemetry.sessions.some(x=>x.partId===p.id));app.dispose();
@@ -188,8 +188,8 @@ test('company identity is configurable and planner can reuse planning without ch
   app.w.qa.action.logout();await app.login('lmendez');const t=app.w.qa.state().trabajos.find(t=>t.id==='PL-092'),before=t.inicio;app.w.qa.action['t-open']({id:t.id});app.w.qa.action['t-copy']();assert.ok(app.doc.querySelector('#trabf'));assert.equal(app.w.qa.ui().modal.edit,null);assert.equal(t.inicio,before);assert.equal(app.w.qa.ui().modal.f.ct,t.ct);app.dispose();
 });
 
-test('quick part can save and send an explicitly confirmed daily report while preserving safety checks and telemetry',async()=>{
-  const app=boot();await app.login('darce');const p=app.w.qa.state().partes.find(p=>p.pl==='PL-092'&&p.estado==='curso');app.w.qa.action['o-open']({id:p.id});
+test('legacy quick draft can save and send an explicitly confirmed daily report while preserving safety checks and telemetry',async()=>{
+  const app=boot();await app.login('darce');const p=app.w.qa.state().partes.find(p=>p.pl==='PL-092'&&p.estado==='curso');app.w.qa.action['o-open']({id:p.id});app.w.qa.action['quick-open']();
   for(const name of ['confirmed','common','talk','ppe']){const input=app.doc.querySelector(`[name="${name}"]`);input.checked=true;input.dispatchEvent(new app.w.Event('change',{bubbles:true}));}
   for(const [name,value]of Object.entries({base:'06:30',zone:'07:35',out:'18:30',arrival:'07:35',temperature:'11',gust:'45',permit:'PT-REAL-REVISADO',signer:'Supervisor',permitTime:'07:30',km0:'200000',km1:'200000',quantity1:'20',from1:'11:00',to1:'12:00',quantity2:'10',from2:'12:00',to2:'13:00',notes:'Trabajo continúa mañana'}))app.fill(`[name="${name}"]`,value);
   p.ejec.firma='seed';const send=()=>{const form=app.doc.querySelector('#quick-part');form.dispatchEvent(new app.w.SubmitEvent('submit',{bubbles:true,cancelable:true,submitter:form.querySelector('[value="send"]')}));};send();assert.equal(p.estado,'curso');assert.ok(app.w.qa.checks(p).some(x=>x[0]==='err'&&x[1].includes('MB-08')));assert.equal(app.w.qa.state().telemetry.sessions.filter(s=>s.completedAt).length,0);
@@ -198,4 +198,27 @@ test('quick part can save and send an explicitly confirmed daily report while pr
 
 test('admin can explicitly grant document management to planner without granting admin access',async()=>{
   const app=boot();await app.login('sherrera');app.w.qa.action.nav({r:'a-users'});app.w.qa.action['admin-user-edit']({id:'lmendez'});app.fill('[name="documentPermission"]','yes');await adminSubmit(app,'#admin-user-form');app.w.qa.action.logout();await app.login('lmendez');app.w.qa.action['module-open']({module:'documents',work:'PL-092'});assert.ok(app.doc.querySelector('#document-requirement'));assert.equal(app.doc.querySelector('nav [data-r="a-users"]'),null);app.dispose();
+});
+
+
+test('operator enters original daily report directly and tools follow section context',async()=>{
+  const app=boot();await app.login('darce');const s=app.w.qa.state(),p=s.partes.find(p=>p.id===s.sel);assert.equal(s.route,'o-edit');assert.equal(s.fastMode,false);assert.equal(app.doc.querySelector('#quick-part'),null);
+  assert.equal(app.doc.querySelectorAll('.steps [data-a="o-step"]').length,5);
+  assert.ok(app.doc.querySelector('.edbody [data-module="materials"]'));assert.equal(app.doc.querySelector('.edbody [data-module="capture"]'),null);
+  const count=p.ejec.reg.length;app.w.qa.action['o-step']({i:'3'});assert.ok(app.doc.querySelector('.edbody [data-module="capture"]'));assert.ok(app.doc.querySelector('.edbody [data-module="evidence"]'));
+  app.w.qa.action['module-open']({module:'capture',work:p.pl});app.w.qa.action['module-home']();assert.equal(s.route,'o-edit');assert.equal(s.sel,p.id);assert.equal(s.step,3);assert.equal(p.ejec.reg.length,count);
+  app.w.qa.action['o-step']({i:'4'});assert.ok(app.doc.querySelector('.edbody [data-module="handover"]'));assert.ok(app.doc.querySelector('.edbody [data-module="logbook"]'));assert.ok(app.doc.querySelector('canvas[data-sig="op"]'));app.dispose();
+});
+
+test('operator hour suggestions are explicit and preserve current edits and absent people',async()=>{
+  const app=boot();await app.login('darce');const s=app.w.qa.state(),p=s.partes.find(p=>p.id===s.sel);
+  const previous=structuredClone(p);previous.id='PD-PREVIOUS-TEST';previous.fecha='2026-10-08';previous.ejec.personal=p.ejec.personal.map(x=>({...x,base:'06:30',zona:'07:30',out:'18:30'}));s.partes.push(previous);
+  p.ejec.personal[0].base='07:00';p.ejec.personal[0].zona='';p.ejec.personal[0].out='';p.ejec.personal[1].pres=false;p.ejec.personal[1].base='';
+  app.w.qa.action['o-step']({i:'1'});assert.equal(p.ejec.personal[0].zona,'');app.w.qa.action['o-previous-hours']();assert.equal(p.ejec.personal[0].base,'07:00');assert.equal(p.ejec.personal[0].zona,'07:30');assert.equal(p.ejec.personal[1].base,'');app.dispose();
+});
+
+test('original operator editor blocks unsafe send and offers recovery of existing legacy draft',async()=>{
+  const app=boot();await app.login('darce');const s=app.w.qa.state(),p=s.partes.find(p=>p.id===s.sel);p.ejec.check.epp=false;const count=s.partes.length;
+  app.w.qa.action['o-step']({i:'4'});assert.equal(app.doc.querySelector('[data-a="o-send"]').disabled,true);app.w.qa.action['o-send']();assert.equal(p.estado,'curso');assert.equal(s.partes.length,count);
+  s.quickDrafts={[p.id]:{notes:'Borrador anterior pendiente',_baseVersion:p.updatedAt||''}};app.w.qa.render();assert.ok(app.doc.querySelector('.operator-legacy [data-a="quick-open"]'));app.w.qa.action['quick-open']();assert.equal(app.doc.querySelector('[name="notes"]').value,'Borrador anterior pendiente');app.dispose();
 });
