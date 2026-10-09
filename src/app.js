@@ -2,6 +2,8 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { createLocalRepository } from './core/storage.js';
 import { createFeatureHost } from './features/registry.js';
+import { initializeAccounts, currentAccount, scopedState, routeAllowed, actionAllowed, createLocalIdentityProvider } from './core/access.js';
+import { createAdminConsole } from './admin/console.js';
 import './styles/baseline.css';
 import './styles/app.css';
 window.jspdf = { jsPDF };
@@ -11,7 +13,7 @@ const repository=createLocalRepository(localStorage, KEY);
 let storageError='';
 let features;
 const TODAY=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Argentina/Buenos_Aires'}).format(new Date());
-const PW='vds2026';
+let rawState=null, identity, adminConsole;
 const DW=1366,DH=1024;
 const SH0='06:00',SHW=840;
 
@@ -21,6 +23,7 @@ const USERS={
   operador:{id:'darce',n:'Diego Arce',ini:'DA',cargo:'Jefe · Cuadrilla 03',rec:'C-03'},
   cliente:{id:'grivas',n:'Gustavo Rivas',ini:'GR',cargo:'Supervisor de contrato · Austral Petróleo',op:'AUP'}
 };
+const BASE_USERS=structuredClone(USERS);
 const ROLE_N={admin:'Administrador',planner:'Planner',operador:'Operador',cliente:'Cliente'};
 const ROLE_D={admin:'Puede ver y cambiar todo: trabajos, partes, habilitaciones y catálogos',planner:'Planifica los trabajos y revisa y aprueba los partes',operador:'Completa el parte diario y cierra el trabajo',cliente:'Dashboard y certificación con firma'};
 const HOME={admin:'p-plan',planner:'p-plan',operador:'o-day',cliente:'c-dash'};
@@ -255,7 +258,7 @@ let S=null;
 function fresh(){const s=seed();return {v:5,trabajos:s.T,partes:s.P,contratos:JSON.parse(JSON.stringify(CONTRATOS0)),hab:seedHab(),user:null,route:'login',back:null,sel:null,step:0,
   vf:'env',vsel:null,vop:'all',cf:'apr',csel:null,pf:'all',lop:'all',lct:'all',lrec:'all',lq:'',hf:'p',hq:'',hbad:false,pv:'gantt',fop:'all',fct:'all',gs:'2026-09-28',ws:mondayOf(TODAY),ms:TODAY.slice(0,7),dop:'AUP',dct:'all',dimp:'all',rmin:false,offline:false}}
 function load(){const x=repository.load();return x&&x.v===5&&Array.isArray(x.partes)&&Array.isArray(x.trabajos)?x:null}
-function save(){try{repository.save(S);storageError=''}catch(error){storageError='No se pudo guardar. Exportá una copia de los datos antes de cerrar la app.';let box=document.getElementById('storage-error');if(!box){box=document.createElement('div');box.id='storage-error';box.className='storage-error';box.setAttribute('role','alert');document.getElementById('screen').append(box)}box.hidden=false;box.textContent=storageError}}
+function save(){try{repository.save(rawState||S);storageError=''}catch(error){storageError='No se pudo guardar. Exportá una copia de los datos antes de cerrar la app.';let box=document.getElementById('storage-error');if(!box){box=document.createElement('div');box.id='storage-error';box.className='storage-error';box.setAttribute('role','alert');document.getElementById('screen').append(box)}box.hidden=false;box.textContent=storageError}}
 try { S=load()||fresh(); } catch(error) { storageError='No se pudo leer el almacenamiento local. Exportá los datos y revisá el espacio disponible.'; S=fresh(); }
 // Shift evaluation fixtures to the current date; existing saved records are never shifted.
 if (!localStorage.getItem(KEY)) {
@@ -265,6 +268,18 @@ if (!localStorage.getItem(KEY)) {
   Object.values(S.hab).forEach(h=>h.vence=addDays(h.vence,delta));
   S.gs=addDays(mondayOf(TODAY),-7);
 }
+
+rawState=S;
+initializeAccounts(rawState,BASE_USERS);
+S=scopedState(rawState);
+identity=createLocalIdentityProvider(()=>rawState);
+function refreshIdentity(){
+  const account=currentAccount(rawState);
+  if(!account){S.user=null;S.accountId=null;S.route='login';return}
+  S.user=account.role;
+  USERS[account.role]={id:account.username,n:account.name,cargo:account.job,ini:account.name.split(/\s+/).slice(0,2).map(x=>x[0]).join(''),rec:account.resource,op:account.operator};
+}
+refreshIdentity();
 
 const UI={modal:null,drawer:null,toast:null,login:{u:'',p:'',err:''},vcom:'',verr:'',csig:null,hot:false,sig:'',resetArm:false,delArm:null,admEst:'',newT:{},newI:{}};
 let toastT=null;
@@ -294,7 +309,7 @@ const occRec=(rec,days,L)=>Math.round(days.filter(f=>busy(rec,f,L)).length/days.
 const occDay=(f,L)=>Math.round(RECURSOS.filter(r=>busy(r.id,f,L)).length/RECURSOS.length*100);
 const occAll=(days,L)=>Math.round(RECURSOS.reduce((s,r)=>s+days.filter(f=>busy(r.id,f,L)).length,0)/(RECURSOS.length*days.length)*100);
 const occC=p=>p>=90?'var(--accent)':p>=50?'var(--st-ok)':p>0?'var(--st-curso)':'var(--faint)';
-const nextPD=()=>'PD-'+String(Math.max(...S.partes.map(p=>Number(p.id.slice(3))))+1).padStart(4,'0');
+const nextPD=()=>'PD-'+String(Math.max(379,...rawState.partes.map(p=>Number(p.id.slice(3))))+1).padStart(4,'0');
 function hab(s,op,f){const h=S.hab[s+'|'+op];if(!h)return{st:'sin'};if(h.vence<f)return{st:'venc',vence:h.vence};if(diffD(f,h.vence)<=7)return{st:'pronto',vence:h.vence};return{st:'ok',vence:h.vence}}
 const habSpan=(s,op,a,b)=>{const x=hab(s,op,a);if(habBad(x))return x;return hab(s,op,b)};
 const habTxt=(h,long)=>h.st==='ok'?(long?'Hasta '+fS(h.vence):'Habilitado'):h.st==='pronto'?'Vence '+fS(h.vence):h.st==='venc'?'Vencida '+fS(h.vence):'Sin habilitación';
@@ -369,6 +384,9 @@ function newEjec(p){
 
 /* ---------- render ---------- */
 function render(){
+  refreshIdentity();
+  if(S.user&&!allowedRoute(S.route))S.route=HOME[S.user];
+  if(S.route==='o-edit'&&(!cur()||(S.user==='operador'&&!['curso','obs'].includes(cur().estado))))S.route=HOME[S.user];
   const scr=$('#screen');
   const sig=[S.route,S.step,S.sel,S.vsel,S.csel,S.vf,S.cf,S.pv,UI.modal?UI.modal.kind:'',UI.drawer].join('|');
   const keep={};
@@ -383,7 +401,8 @@ function render(){
   initSigs();save();features?.afterRender();
 }
 function toast(m){UI.toast=m;clearTimeout(toastT);toastT=setTimeout(()=>{UI.toast=null;const t=$('#screen .toast');if(t)t.remove()},3600)}
-function go(route){S.route=route;UI.drawer=null;render()}
+function allowedRoute(route){return routeAllowed(S.user,route)||!!features?.find(route)}
+function go(route){if(!allowedRoute(route)){toast('Tu perfil no tiene acceso a esta vista.');render();return}S.route=route;UI.drawer=null;render()}
 function brand(){return `<div class="brand"><svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true" style="flex:none"><rect width="32" height="32" rx="7" fill="var(--accent)"/><path d="M8 8h4.2L16 19.2 19.8 8H24l-6 16h-4z" fill="#FFFFFF"/></svg><div><b>VIENTOS DEL SUR</b><small>Partes de campo</small></div></div>`}
 const selF=(id,bind,opts,cur,attrs)=>`<select class="inp" id="${id}" data-bind="${bind}" data-rr${attrs||''}>${opts.map(([v,l])=>`<option value="${esc(v)}"${String(v)===String(cur)?' selected':''}>${esc(l)}</option>`).join('')}</select>`;
 
@@ -413,7 +432,7 @@ function login(){
 function shell(){
   const u=USERS[S.user],r=S.user;
   const navs={
-    admin:[['p-plan','Planificación','gantt'],['v-inbox','Aprobación de partes','shield'],['p-list','Partes','list'],['p-hab','Habilitaciones','badge'],['c-inbox','Certificación','stamp'],['c-dash','Dashboard cliente','chart'],['a-conf','Configuración','cog']],
+    admin:[['p-plan','Planificación','gantt'],['v-inbox','Aprobación de partes','shield'],['p-list','Partes','list'],['p-hab','Habilitaciones','badge'],['c-inbox','Certificación','stamp'],['c-dash','Dashboard cliente','chart'],['a-conf','Configuración','cog'],['a-users','Usuarios y accesos','badge'],['a-system','Administración del sistema','cog']],
     planner:[['p-plan','Planificación','gantt'],['v-inbox','Aprobación de partes','shield'],['p-list','Partes','list'],['p-hab','Habilitaciones','badge']],
     operador:[['o-day','Mi jornada','day']],
     cliente:[['c-dash','Dashboard','chart'],['c-inbox','Certificación','stamp']]}[r];
@@ -428,11 +447,12 @@ function shell(){
   const curR=S.route==='o-edit'?(S.back||'o-day'):S.route;
   return `<aside class="rail${S.rmin?' min':''}"><div class="rtop">${brand()}<button class="rtog" data-a="rail" aria-label="${S.rmin?'Expandir menú':'Contraer menú'}" title="${S.rmin?'Expandir menú':'Contraer menú'}">${ic(S.rmin?'dbr':'dbl')}</button></div><div class="rrole">${ROLE_N[r]}</div>
     <nav>${navs.map(([k,l,i])=>`<button class="nav" data-a="nav" data-r="${k}"${curR===k?' aria-current="page"':''} title="${l}">${ic(i)}<span>${l}</span>${badge(k)}</button>`).join('')}</nav>
-    <div class="who"><span class="av" title="${u.n}">${u.ini}</span><div class="wn"><b>${u.n}</b><small>${u.cargo}</small></div><button class="ibtn rl" data-a="logout" aria-label="Cerrar sesión" title="Cerrar sesión">${ic('out')}</button></div>
+    <div class="who"><span class="av" title="${esc(u.n)}">${esc(u.ini)}</span><div class="wn"><b>${esc(u.n)}</b><small>${esc(u.cargo)}</small></div><button class="ibtn rl" data-a="logout" aria-label="Cerrar sesión" title="Cerrar sesión">${ic('out')}</button></div>
   </aside><section class="main">${topbar()}${view()}${UI.drawer?drawer():''}</section>`;
 }
 function topbar(){
   const R=S.route;let t='',s='',right='';
+  if(adminConsole?.handles(R))return `<header class="top"><div class="ttl"><h1>${R==='a-users'?'Usuarios y accesos':'Administración del sistema'}</h1><div class="sub">Administración · ${esc(meN())}</div></div></header>`;
   const feature=features?.find(R);
   if(feature)return `<header class="top"><div class="ttl"><h1>${esc(feature.title)}</h1><div class="sub">${esc(feature.description)}</div></div><span class="sp"></span><button class="btn" data-a="module-home">Volver</button></header>`;
   const date=`<span class="datechip">${ic('cal')} ${fDayL(TODAY)}</span>`;
@@ -441,15 +461,16 @@ function topbar(){
   if(R==='p-plan'){t='Planificación';s='Trabajos por contrato, recurso y día';right=date+nb}
   else if(R==='p-list'){t='Partes diarios';s='Todos los partes de la base';right=date+nb}
   else if(R==='p-hab'){t='Habilitaciones de ingreso';s=isAdm()?'Tocá una habilitación para editarla':'Personal y vehículos habilitados por operadora';right=date}
-  else if(R==='o-day'){t='Mi jornada';s='Cuadrilla 03 · '+fDayL(TODAY);right=sync}
+  else if(R==='o-day'){t='Mi jornada';s=recOf(USERS.operador.rec).n+' · '+fDayL(TODAY);right=sync}
   else if(R==='o-edit'){const p=cur(),tt=trab(p.pl);return `<header class="top"><button class="btn ghost" data-a="nav" data-r="${S.back||'o-day'}">${ic('left')}${S.back&&S.back!=='o-day'?'Volver':'Mi jornada'}</button><div class="ttl"><h1>Parte diario</h1><div class="sub"><span class="mono">${p.id}</span> · ${fDay(p.fecha)} · ${p.pl} día ${p.dia+1} de ${tt?tt.dias:'—'}</div></div><span class="sp"></span><div class="tr">${ptTag(p.ptw)}${prioB(p.prio)}${pill(p.estado)}${S.user==='operador'?sync:''}</div></header>`}
   else if(R==='v-inbox'){t='Aprobación de partes';s='El planner revisa y aprueba lo que cargan las cuadrillas';right=date}
   else if(R==='c-inbox'){t='Certificación de partes';s=isAdm()?'Todas las operadoras':OPS[USERS.cliente.op]+' · contratos con Vientos del Sur';right=date}
   else if(R==='c-dash'){t='Dashboard del servicio';s=(isAdm()?OPS[S.dop]:OPS[USERS.cliente.op])+' · datos de partes aprobados';right=date}
-  else if(R==='a-conf'){t='Configuración';s='Contratos, imputaciones, catálogo de tareas y usuarios';right=date}
+  else if(R==='a-conf'){t='Configuración';s='Contratos, centros de costo, imputaciones y catálogo de tareas';right=date}
   return `<header class="top"><div class="ttl"><h1>${t}</h1><div class="sub">${s}</div></div><span class="sp"></span><div class="tr">${right}</div></header>`;
 }
 function view(){
+  if(adminConsole?.handles(S.route))return `<div class="view" data-keep="admin">${adminConsole.view(S.route)}</div>`;
   if(features?.find(S.route))return `<div class="view" data-keep="module">${features.view(S.route)}</div>`;
   switch(S.route){
     case 'p-plan':return `<div class="view" data-keep="v">${vPlan()}</div>`;
@@ -677,7 +698,7 @@ function baselineDay(){
   const prox=S.trabajos.filter(t=>t.rec===R&&t.inicio>TODAY).sort((a,b)=>a.inicio.localeCompare(b.inicio));
   const env=S.partes.filter(p=>p.rec===R&&['env','apr','cert'].includes(p.estado)).sort((a,b)=>b.fecha.localeCompare(a.fecha)).slice(0,4);
   const meta=(x)=>`<div class="meta"><span>${ic('pin')}${esc(x.yac)} · ${esc(x.pozo)}</span><span>${OPS[CT(x.ct).op]} · <span class="mono">${x.ct}</span></span><span>${ic('users')}${(x.pers||[]).length} personas · ${(x.eqs||[]).join(', ')}</span></div>`;
-  let h=`<div class="hello"><div><h2>Buen día, Diego</h2><p>Cuadrilla 03 · base Comodoro Rivadavia</p></div></div>`;
+  let h=`<div class="hello"><div><h2>Buen día, ${esc(meN().split(' ')[0])}</h2><p>${esc(recOf(R).n)} · base Comodoro Rivadavia</p></div></div>`;
   if(obs.length)h+=`<section class="sect"><h3 style="color:var(--st-obs)">${ic('alert')}Para corregir</h3><div class="cards">${obs.map(p=>`<div class="tcard obs"><div><div class="t1"><span class="mono">${p.id}</span>${pill(p.estado)}<span class="sm">${fDay(p.fecha)}</span></div><h4>${p.prev.map(esc).join(' · ')}</h4>${meta(p)}</div><div><button class="btn pri lg" data-a="o-open" data-id="${p.id}">Corregir parte</button></div>${p.dec?`<div class="vnote">${ic('back')}<div><b>Observado por ${esc(p.dec.who)} · ${esc(p.dec.t)}</b>${esc(p.dec.com)}</div></div>`:''}</div>`).join('')}</div></section>`;
   h+=`<section class="sect"><h3>Hoy · ${fDayL(TODAY)}</h3><div class="cards">${hoy.map(({t,p})=>{const i=diffD(t.inicio,TODAY);const last=i===t.dias-1;
     const act=p?`<button class="btn pri lg" data-a="o-open" data-id="${p.id}">Continuar ${ic('right')}</button>`:`<button class="btn pri lg" data-a="o-start" data-pl="${t.id}">Iniciar parte</button>`;
@@ -935,11 +956,12 @@ function vConf(){
   return features.settings()+`<div class="stack">${Object.entries(S.contratos).map(([k,c])=>{UI.newT[k]=UI.newT[k]||{d:'',u:'m³'};UI.newI[k]=UI.newI[k]||{c:'',n:''};const n=UI.newT[k],ni=UI.newI[k];
     return `<div class="pnl"><h3><span class="mono">${k}</span> ${esc(c.n)}<span class="sp"></span><span class="sm">${OPS[c.op]} · CC ${c.cc}</span></h3>
     <dl class="kv" style="margin-bottom:12px"><dt>Centro de costo</dt><dd>${c.cc} · ${esc(c.ccn)}</dd><dt>Yacimientos</dt><dd>${c.yacs.join(', ')}</dd><dt>Recursos</dt><dd>${c.recs.map(r=>recOf(r).n).join(', ')}</dd></dl>
+    ${adminConsole.contractForm(k,c)}
     <div class="lab" style="margin-bottom:8px">Imputaciones de cuenta del cliente</div><div class="rlist">${c.imps.map(([cd,nm],i)=>`<div><span class="nm"><b class="mono">${esc(cd)}</b><small>${esc(nm)}</small></span><span class="sm">${S.trabajos.filter(t=>t.imp===cd).length} trabajos</span><button class="ibtn xs del" data-a="c-delimp" data-ct="${k}" data-i="${i}" aria-label="Quitar ${esc(cd)}">${ic('x')}</button></div>`).join('')}</div>
     <div style="display:flex;gap:8px;margin:10px 0 16px;align-items:center;flex-wrap:wrap"><input class="inp" style="max-width:220px" id="ni-${k}" data-bind="i:${k}.c" value="${esc(ni.c)}" placeholder="Código, ej. AUP-4110-OPEX-03"><input class="inp" style="max-width:320px" id="nn-${k}" data-bind="i:${k}.n" value="${esc(ni.n)}" placeholder="Descripción"><button class="btn sm2" data-a="c-addimp" data-ct="${k}">${ic('plus')}Agregar imputación</button></div>
     <div class="lab" style="margin-bottom:8px">Catálogo de tareas</div><div class="chips">${c.tareas.map(([d,u],i)=>`<span class="chip">${esc(d)} <span class="n">${u}</span><button class="ibtn xs" data-a="c-deltask" data-ct="${k}" data-i="${i}" aria-label="Quitar ${esc(d)}">${ic('x')}</button></span>`).join('')}</div>
     <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap"><input class="inp" style="max-width:340px" id="nt-${k}" data-bind="n:${k}.d" value="${esc(n.d)}" placeholder="Nueva tarea, ej. Tendido de cable"><select class="inp" style="width:120px" id="nu-${k}" data-bind="n:${k}.u">${UNITS.map(u=>`<option${n.u===u?' selected':''}>${u}</option>`).join('')}</select><button class="btn sm2" data-a="c-addtask" data-ct="${k}">${ic('plus')}Agregar tarea</button></div></div>`}).join('')}
-  <div class="pnl"><h3>Usuarios y roles</h3><table class="tbl"><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Alcance</th></tr></thead><tbody>${Object.entries(USERS).map(([r,u])=>`<tr><td>${u.n}</td><td class="mono">${u.id}</td><td>${ROLE_N[r]}</td><td class="sm">${esc(u.cargo)}</td></tr>`).join('')}</tbody></table><p class="sm" style="margin:10px 0 0">En la app real los usuarios se gestionan desde el directorio de la empresa. Acá se muestran los de la demo.</p></div></div>`;
+  <div class="pnl"><h3>Usuarios y accesos</h3><p>Gestioná usuarios, roles y asignaciones desde la pantalla de administración.</p><button class="btn" data-a="nav" data-r="a-users">Gestionar usuarios</button></div></div>`;
 }
 
 /* ---------- PDF ---------- */
@@ -1034,6 +1056,10 @@ function initSigs(){
 /* ---------- acciones ---------- */
 function setBind(path,val){
   const i=path.indexOf(':'),root=path.slice(0,i),keys=path.slice(i+1).split('.');
+  if(['n','i'].includes(root)&&!isAdm())return;
+  if(root==='m'&&!canPlan()&&!isAdm())return;
+  if(['e','p'].includes(root)&&!(isAdm()||(S.user==='operador'&&cur()&&['curso','obs'].includes(cur().estado))))return;
+  if(root==='s'&&['user','accountId','accounts','partes','trabajos','contratos','extensions'].includes(keys[0]))return;
   let o=root==='m'?UI.modal.f:root==='e'?cur().ejec:root==='p'?cur():root==='l'?UI.login:root==='v'||root==='u'?UI:root==='n'?UI.newT:root==='i'?UI.newI:root==='s'?S:null;
   if(!o)return;
   if(root==='e'&&keys[0]==='clima'){if(!o.clima)o.clima={t:'',v:'',r:'',dir:'O',cond:'Despejado',src:'manual'};o.clima.src='manual'}
@@ -1059,7 +1085,7 @@ function moveT(t,inicio,dias,why){
 }
 const whoCli=p=>S.user==='cliente'?USERS.cliente.n+' · '+OPS[p.op]:meN()+' (admin)';
 const A={
-  logout:()=>{S.user=null;S.route='login';UI.drawer=null;UI.modal=null;render()},
+  logout:()=>{S.accountId=null;S.user=null;S.route='login';UI.drawer=null;UI.modal=null;render()},
   nav:d=>{if(d.r!=='o-edit')S.back=null;go(d.r)},
   rail:()=>{S.rmin=!S.rmin;render()},
   sync:()=>{toast('Los datos se guardan en este dispositivo. La conexión multiusuario está pendiente.');render()},
@@ -1105,7 +1131,7 @@ const A={
   'c-addimp':d=>{const n=UI.newI[d.ct];if(!n||!n.c.trim()||!n.n.trim()){toast('Completá el código y la descripción de la imputación');render();return}const c=CT(d.ct);if(c.imps.some(x=>x[0].toLowerCase()===n.c.trim().toLowerCase())){toast('Esa imputación ya existe');render();return}c.imps.push([n.c.trim(),n.n.trim()]);UI.newI[d.ct]={c:'',n:''};toast(`Imputación agregada a ${d.ct}`);render()},
   'c-delimp':d=>{const c=CT(d.ct);const x=c.imps[Number(d.i)];if(S.trabajos.some(t=>t.imp===x[0])){toast(`${x[0]} está en uso por trabajos: no se puede quitar`);render();return}if(c.imps.length<=1){toast('El contrato necesita al menos una imputación');render();return}c.imps.splice(Number(d.i),1);toast(`Quitada: ${x[0]}`);render()},
   'sent-ok':()=>{UI.modal=null;S.route='o-day';render()},
-  'o-start':d=>{const t=trab(d.pl);const p=Object.assign(snap(t,TODAY),{id:nextPD(),estado:'curso',dec:null,cert:null,ext:null,cierreObs:'',hist:[{t:'25 sep 16:10',who:'Laura Méndez',a:'Planificado',c:''},{t:nowT(),who:USERS.operador.n,a:'Parte iniciado',c:''}]});
+  'o-start':d=>{const t=trab(d.pl);const existing=parteOf(t.id,TODAY);if(existing){if(['curso','obs'].includes(existing.estado))A['o-open']({id:existing.id});else{toast('El parte de ese trabajo y fecha ya fue enviado.');render()}return}if(!covers(t,TODAY)||t.cierre){toast('El trabajo no está disponible para iniciar hoy.');render();return}const p=Object.assign(snap(t,TODAY),{id:nextPD(),estado:'curso',dec:null,cert:null,ext:null,cierreObs:'',hist:[{t:'25 sep 16:10',who:'Laura Méndez',a:'Planificado',c:''},{t:nowT(),who:meN(),a:'Parte iniciado',c:''}]});
     p.fin=p.dia>=t.dias-1?'fin':'sigue';p.ejec=newEjec(p);S.partes.push(p);S.sel=p.id;S.step=0;S.back='o-day';go('o-edit')},
   'o-open':d=>{S.sel=d.id;S.back='o-day';const p=byId(d.id);S.step=0;if(p.estado==='obs'){const c=errs(p)[0];if(c)S.step=STEP_OF[c[2]]}go('o-edit')},
   'o-step':d=>{S.step=Number(d.i);render()},
@@ -1127,10 +1153,10 @@ const A={
   'o-fin':d=>{const p=cur();p.fin=d.v;if(d.v==='ext'&&!p.ext)p.ext={dias:1,motivo:''};render()},
   'o-extd':d=>{const p=cur();p.ext.dias=Math.max(1,Math.min(10,p.ext.dias+Number(d.d)));render()},
   'o-send':()=>{const p=cur();if(errs(p).length)return;const re=p.estado==='obs';const t=trab(p.pl);p.estado='env';p.dec=null;delete p.cola;
-    p.hist.push({t:nowT(),who:USERS.operador.n,a:re?'Reenviado con correcciones':'Enviado para aprobación',c:''});
-    if(p.fin==='fin'&&!t.cierre){const ant=p.dia<t.dias-1;t.cierre={fecha:p.fecha,parte:p.id,who:USERS.operador.n,t:nowT(),obs:p.cierreObs,anticipado:ant};
-      if(ant){const old=t.dias;t.dias=p.dia+1;t.hist.push({t:nowT(),who:USERS.operador.n,a:`Trabajo cerrado antes de lo planificado: ${old} → ${t.dias} días`,c:p.cierreObs})}else t.hist.push({t:nowT(),who:USERS.operador.n,a:'Trabajo cerrado por el jefe de cuadrilla',c:p.cierreObs})}
-    if(p.fin==='ext'&&!t.ext){t.ext={dias:p.ext.dias,motivo:p.ext.motivo,who:USERS.operador.n,t:nowT(),parte:p.id};t.hist.push({t:nowT(),who:USERS.operador.n,a:`Pidió ${p.ext.dias} día(s) más`,c:p.ext.motivo})}
+    p.hist.push({t:nowT(),who:meN(),a:re?'Reenviado con correcciones':'Enviado para aprobación',c:''});
+    if(p.fin==='fin'&&!t.cierre){const ant=p.dia<t.dias-1;t.cierre={fecha:p.fecha,parte:p.id,who:meN(),t:nowT(),obs:p.cierreObs,anticipado:ant};
+      if(ant){const old=t.dias;t.dias=p.dia+1;t.hist.push({t:nowT(),who:meN(),a:`Trabajo cerrado antes de lo planificado: ${old} → ${t.dias} días`,c:p.cierreObs})}else t.hist.push({t:nowT(),who:meN(),a:'Trabajo cerrado por el jefe de cuadrilla',c:p.cierreObs})}
+    if(p.fin==='ext'&&!t.ext){t.ext={dias:p.ext.dias,motivo:p.ext.motivo,who:meN(),t:nowT(),parte:p.id};t.hist.push({t:nowT(),who:meN(),a:`Pidió ${p.ext.dias} día(s) más`,c:p.ext.motivo})}
     UI.modal={kind:'sent',id:p.id};render()},
   'v-filter':d=>{S.vf=d.f;S.vsel=null;UI.vcom='';UI.verr='';render()},
   'v-sel':d=>{S.vsel=d.id;UI.vcom='';UI.verr='';render()},
@@ -1177,9 +1203,23 @@ features=createFeatureHost({
   save, render, toast, go, home:()=>HOME[S.user],
   contract:CT, operators:OPS, equipment:EQ,
   download:(name,content,type='application/json')=>{const blob=new Blob([content],{type});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),5000)},
-  exportState:()=>repository.export(S)
+  operatorResource:()=>USERS.operador.rec,
+  exportState:()=>repository.export(rawState)
 });
-Object.assign(A, features.actions);
+adminConsole=createAdminConsole({state:()=>rawState,esc,roles:ROLE_N,resources:RECURSOS,operators:OPS,render,toast,person:meN,refreshIdentity});
+Object.assign(A, features.actions,adminConsole.actions);
+for(const [name,handler] of Object.entries(A))A[name]=(data={})=>{
+  if(!actionAllowed(S.user,name)){toast('Tu perfil no tiene permiso para esta acción.');render();return}
+  if(data.id&&['sum','pdf','o-open','v-sel','c-sel','a-edit','a-est'].includes(name)&&!byId(data.id)){toast('Parte fuera de tu alcance.');render();return}
+  if(data.pl&&name==='o-start'&&!trab(data.pl)){toast('Trabajo fuera de tu alcance.');render();return}
+  if(data.id&&['t-open','t-edit'].includes(name)&&!trab(data.id)){toast('Trabajo fuera de tu alcance.');render();return}
+  if(['v-ok','v-obs'].includes(name)&&byId(S.vsel)?.estado!=='env')return;
+  if(['c-ok','c-obs'].includes(name)&&byId(S.csel)?.estado!=='apr')return;
+  if(name==='o-open'&&S.user==='operador'&&!['curso','obs'].includes(byId(data.id)?.estado))return;
+  if(name.startsWith('o-')&&!['o-start','o-open'].includes(name)&&!cur())return;
+  if(name.startsWith('o-')&&!['o-start','o-open','o-step'].includes(name)&&S.user==='operador'&&cur()&&!['curso','obs'].includes(cur().estado))return;
+  return handler(data);
+};
 function drawer(){return baselineDrawer().replace('<div class="db" data-keep="d">','<div class="db" data-keep="d">'+features.contextLinks(UI.drawer))}
 function vDay(){return baselineDay()+features.journeyLinks()}
 
@@ -1197,13 +1237,17 @@ scr.addEventListener('change',ev=>{
   setBind(b,ev.target.value);
   if('rr' in ev.target.dataset)render();else save();
 });
-scr.addEventListener('submit',ev=>{ev.preventDefault();
+scr.addEventListener('submit',async ev=>{ev.preventDefault();
+  if(ev.target.id.startsWith('admin-')){await adminConsole.submit(ev.target);return}
   if(features.handleSubmit(ev))return;
-  if(ev.target.id==='loginf'){const L=UI.login;const r=Object.keys(USERS).find(k=>USERS[k].id===L.u.trim().toLowerCase());
-    if(!r||L.p!==PW){L.err='Usuario o contraseña incorrectos.';render();return}
-    S.user=r;S.route=HOME[r];S.back=null;UI.login={u:'',p:'',err:''};render()}
-  if(ev.target.id==='trabf')submitTrab();
-  if(ev.target.id==='habf')submitHab();
+  if(ev.target.id==='loginf'){
+    const L=UI.login,username=L.u,password=L.p;const button=ev.target.querySelector('button[type="submit"]');button.disabled=true;
+    try{const account=await identity.signIn(username,password);S.accountId=account.id;refreshIdentity();S.route=HOME[account.role];S.back=null;S.sel=null;S.vsel=null;S.csel=null;S.extWork='all';S.dct='all';S.dimp='all';UI.drawer=null;UI.modal=null;UI.login={u:'',p:'',err:''};}
+    catch(error){UI.login.err=error.message}
+    render();return;
+  }
+  if(ev.target.id==='trabf'&&canPlan())submitTrab();
+  if(ev.target.id==='habf'&&isAdm())submitHab();
 });
 /* Gantt: arrastrar para mover, borde derecho para estirar o acortar */
 scr.addEventListener('pointerdown',ev=>{

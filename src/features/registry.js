@@ -19,7 +19,7 @@ export function createFeatureHost(ctx) {
   const allowed=m=>m?.roles.includes(ctx.state().user);
   const enabled=m=>store().enabled[m.id]&&allowed(m);
   const get=id=>featureModules.find(m=>m.id===id||'x-'+m.id===id);
-  const works=()=>visibleWorks(ctx.state(),'C-03');
+  const works=()=>visibleWorks(ctx.state(),ctx.operatorResource?.()||'C-03');
   const canEdit=m=>enabled(m)&&(m.editRoles||m.roles).includes(ctx.state().user);
   const visibleRecord=r=>works().some(t=>t.id===r.workId);
   const records=(id,filter=true)=>store().records[id].filter(r=>visibleRecord(r)&&(!filter||!ctx.state().extWork||ctx.state().extWork==='all'||r.workId===ctx.state().extWork));

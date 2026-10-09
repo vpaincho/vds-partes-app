@@ -19,7 +19,7 @@ Vercel compila con Vite y sirve `dist/`. El manifest y el service worker permite
 
 Es una base frontend modular para evaluación, todavía **no un sistema multiusuario de producción**. Los datos y las fotos se guardan en localStorage por navegador; no hay sincronización entre tablets, autenticación de servidor ni copias centralizadas. No usar datos operativos reales hasta conectar y verificar esos servicios. El espacio local es limitado: hay avisos de error y exportación JSON para respaldo. La interfaz muestra que el guardado es local.
 
-Mantiene datos de ejemplo; sus fechas se desplazan al día actual únicamente en la primera carga. Mantiene los accesos de evaluación originales con contraseña `vds2026`: `sherrera` (administración), `lmendez` (planner), `darce` (operador), `grivas` (cliente). Los permisos de interfaz son para evaluación, no constituyen autorización segura de backend.
+Mantiene datos de ejemplo; sus fechas se desplazan al día actual únicamente en la primera carga. Mantiene los accesos de evaluación originales con contraseña `vds2026`: `sherrera` (administración), `lmendez` (planner), `darce` (operador), `grivas` (cliente). Los permisos locales son para evaluación, no constituyen autorización segura de backend. Administración puede crear cuentas, asignar rol/recurso/operadora, cambiar contraseñas y desactivar usuarios; estos cambios todavía son locales.
 
 ## Estructura y módulos
 
@@ -51,4 +51,8 @@ Los estados y campos son provisionales y fácilmente modificables. Antes de inte
 
 ## Validación
 
-`npm test` verifica login y vistas originales, los cinco pasos del parte y generación PDF; creación, modificación, consulta y persistencia de reservas; validaciones; relevo, novedades, adicionales, captura, avance y bitácora; desactivación sin pérdida de registros y fotografía contextual. Son pruebas DOM con JSDOM; no reemplazan pruebas visuales, servicio offline, micrófono o dispositivos reales.
+`npm test` ejecuta 11 pruebas de integración. Verifica login y vistas originales, los cinco pasos del parte y generación PDF; creación, modificación, consulta y persistencia de reservas; validaciones; relevo, novedades, adicionales, captura, avance y bitácora; desactivación sin pérdida de registros y fotografía contextual. Son pruebas DOM con JSDOM; no reemplazan pruebas visuales, servicio offline, micrófono o dispositivos reales.
+
+## Vistas por rol y administración
+
+La identidad de cada usuario se separó del rol. Se conservan las vistas originales de planner, operario y cliente, y se agregaron Usuarios y accesos y Administración del sistema para admin. El operario consulta su recurso y el cliente su operadora; administración accede a todos los registros. Se pueden editar los datos de contratos y centros de costo además de los catálogos originales. Ver [accesos y conexión de datos](docs/access-and-data.md) para la matriz completa, implementación y conexión pendiente al backend.
